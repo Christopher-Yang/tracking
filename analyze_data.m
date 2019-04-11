@@ -57,15 +57,6 @@ function data = analyze_data(d, subj_name, block_name, rotate, uw)
             for k = 1:size(output,3)
                 MSE(k) = mean((c_all(:,1,k)-t_all(:,1,k)).^2 + (c_all(:,2,k)-t_all(:,2,k)).^2);
             end
-
-%             if rotate == true
-%                 c = R*c;
-%                 t = R*t;
-%                 for k = 1:size(c_all,3)
-%                     c_all(:,:,k) = c_all(:,:,k)*R';
-%                     t_all(:,:,k) = t_all(:,:,k)*R';
-%                 end
-%             end
             
 %             create data structures to store all data
             cursor = struct('x_pos',c(1,:)','y_pos',c(2,:)'); %no time shift

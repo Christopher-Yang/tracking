@@ -193,16 +193,4 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
         ylabel('|Post - Baseline| (%)')
         pbaspect([1 1 1])
     end
-    
-% %     comp.x_on = [x_on(:,:,1); x_on(:,:,2)];
-% %     comp.x_off = [x_off(:,:,1); x_off(:,:,2)];
-%     comp = [x_on(:,:,1); x_on(:,:,2)];
-%     comp = cat(3, comp, [x_off(:,:,1); x_off(:,:,2)]);
-% %     comp.y_on = [y_on(:,:,1); y_on(:,:,2)];
-% %     comp.y_off = [y_off(:,:,1); y_off(:,:,2)];
-%     comp2 = [repelem(0,10)'; repelem(1,10)'];
-%     within = {'frequency','axis'};
-%     between = {'perturbation'};
-%     [tbl,rm] = simple_mixed_anova(comp, comp2, within, between)
-    
 end

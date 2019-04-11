@@ -1,18 +1,17 @@
+% VMR90 with no cursor feedback during tracking but with feedback during 150 P2P
+
 clear all;
 
-experiment = 1;
-% 1: VMR vs MR with 150 P2P
-% 2: VMR vs MR with 10 P2P
-% 3: control2- testing why x- and y-hand responses are asymmetrical
-% 4: control3 - my data for pure X, pure Y, and new rotated sum of sines
-% 5: VMR vs MR w/ no P2P training
-% 6: VMR15 with no P2P training
-% 7: MR with 15 deg VMR added after 1 day of training
-% 8: VMR90 with no cursor feedback during tracking but with feedback during 150 P2P
-% 9: dual task pilot
-% 10: VMR15 with 30 P2P training
-
-[data,d,groups,block_name,graph_name,theta] = loadSubj(experiment);
+folder = 'Data/dark/';
+time = 40; %in seconds
+theta = 90;
+groups = {'rot'};
+block_name = {'baseline','dark_baseline','rot1','rot2','rot3','rot4','after'};
+graph_name = {'Baseline','Dark Baseline','Early','rot2','rot3','Late','Post'};
+subj_name = {'subj1','subj2','subj3','subj4','subj5'};
+subj_rot = subj_name;
+d = load_data(subj_name,block_name,folder,time);
+data.rot = analyze_data(d,subj_rot,block_name,false,0);
 
 % save dat data;
 disp('Done')
