@@ -1,18 +1,17 @@
 clear all;
 
-experiment = 1;
-% 1: VMR vs MR with 150 P2P
-% 2: VMR vs MR with 10 P2P
-% 3: control2- testing why x- and y-hand responses are asymmetrical
-% 4: control3 - my data for pure X, pure Y, and new rotated sum of sines
-% 5: VMR vs MR w/ no P2P training
-% 6: VMR15 with no P2P training
-% 7: MR with 15 deg VMR added after 1 day of training
-% 8: VMR90 with no cursor feedback during tracking but with feedback during 150 P2P
-% 9: dual task pilot
-% 10: VMR15 with 30 P2P training
-
-[data,d,groups,block_name,graph_name,theta] = loadSubj(experiment);
+folder = 'Data/VMR90_vs_MR/';
+time = 40; %in seconds
+theta = 90;
+groups = {'rot','rot_i'};
+block_name = {'no_rot1','rot1','rot2','rot3','rot4','no_rot2'};
+graph_name = {'Baseline','Early','Train2','Train3','Late','Post'};
+subj_name = {'subj14','subj15','subj16','subj17','subj18','subj19','subj21','subj22','subj23','subj24','subj25','subj26','subj27','subj28','subj29','subj30','subj31','subj32','subj33','subj34'};
+subj_rot = {'subj17','subj18','subj21','subj22','subj24','subj25','subj28','subj31','subj32','subj33'};
+subj_rot_i = {'subj14','subj15','subj16','subj19','subj23','subj26','subj27','subj29','subj30','subj34'};
+d = load_data(subj_name,block_name,folder,time);
+data.rot = analyze_data(d,subj_rot,block_name,false,1);
+data.rot_i = analyze_data(d,subj_rot_i,block_name,false,2);
 
 % save dat data;
 disp('Done')
@@ -43,11 +42,11 @@ graph_bode_simple(data, graph_name, groups, gblocks);
 % graph_bode2(data, graph_name, groups);
 
 %% graph performance
-gblocks = [1:2 5];
+gblocks = [1:2 5:6];
 
 graph_amp_avg(data,groups,block_name,gblocks,graph_name); % amplitude spectrums
 % graph_MSE(data, groups, block_name, graph_name); % mean squared error
-% graph_rotatedMSE(data, groups, block_name, gblocks, graph_name);
+% graph_rotatedMSE(data, groups, block_name, gblocks, graph_name); % rotating MSE
 % graph_angle(data, groups, gblocks,theta); % angle of movement error
 % graph_lag(data, groups, gblocks, graph_name); % response lag
 % graph_complexError(data, groups, graph_name, gblocks); % complex tracking error

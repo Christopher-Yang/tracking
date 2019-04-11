@@ -1,4 +1,4 @@
-function rotatedMSE(data,groups,block_name,gblocks,graph_name)
+function graph_rotatedMSE(data,groups,block_name,gblocks,graph_name)
 
 rng(1)
 col = lines;
@@ -57,38 +57,64 @@ for p = 1:length(groups)
     idx = squeeze(idx);
     minMSE = squeeze(minMSE);
     minMSE_avg = mean(minMSE,2); % minimium MSE averaged across participants
-    minMSE_vec = reshape(minMSE,[numel(minMSE) 1]); % vectorize minMSE
     minAng = ang(idx); % rotation angle at which MSE is minimized
     minAng_avg = mean(minAng,2); % rotation angle averaged across participants
-    minAng_vec = reshape(minAng,[numel(minAng) 1]); % vectorize minAng
     
     % calculate covariance matrix of minimum MSE vs rotation angle for confidence ellipse
     for i = 1:length(gblocks)
         covar(:,:,i) = cov(minAng(i,:),minMSE(i,:));
     end
-
+    
+    bl = [1 4];
+    if p == 1
+        minMSE_vec = reshape(minMSE,[numel(minMSE) 1]); % vectorize minMSE
+        minAng_vec = reshape(minAng,[numel(minAng) 1]); % vectorize minAng
+    else
+        minMSE_vec = reshape(minMSE(bl,:),[numel(minMSE(bl,:)) 1]); % vectorize minMSE
+        minAng_vec = reshape(minAng(bl,:),[numel(minAng(bl,:)) 1]); % vectorize minAng
+        minMSE_avg = minMSE_avg(bl);
+        minAng_avg = minAng_avg(bl);
+        covar = covar(:,:,bl);
+    end
+    
     % plot distributions of minimum MSE vs rotation angle
     figure; hold on
-%     colors = [1 5 2 3];
-    for i = 1:length(gblocks)
-        a = error_ellipse(covar(:,:,i),[minAng_avg(i),minMSE_avg(i)],'conf',0.5); % confidence ellipse
-        a.Color = col(i,:);
+    if p == 1
+        for i = 1:length(gblocks)
+            if i == 1
+                plot(-1*ones(2,4),'.','MarkerSize',20)
+            end
+            hold on
+            a = error_ellipse(covar(:,:,i),[minAng_avg(i),minMSE_avg(i)],'conf',0.5); % confidence ellipse
+            a.Color = col(i,:);
+            scatter(minAng_avg,minMSE_avg,60,col(1:length(gblocks),:),'filled') % average minimum MSE
+            scatter(minAng_vec,minMSE_vec,25,repmat(col(1:length(gblocks),:),[Nsubj 1]),'filled','MarkerFaceAlpha',0.5); % minimum MSE for each participant
+            title('Rotation')
+            legend(graph_name{gblocks},'Location','Northwest')
+        end
+    else
+        for i = 1:2
+            if i == 1
+                plot([-1 -1],'.','MarkerSize',20,'MarkerEdgeColor',col(1,:))
+                hold on
+                plot([-1 -1],'.','MarkerSize',20,'MarkerEdgeColor',col(4,:))
+            end
+            a = error_ellipse(covar(:,:,i),[minAng_avg(i),minMSE_avg(i)],'conf',0.5); % confidence ellipse
+            a.Color = col(bl(i),:);
+            scatter(minAng_avg,minMSE_avg,60,col(bl,:),'filled') % average minimum MSE
+            scatter(minAng_vec,minMSE_vec,25,repmat(col(bl,:),[Nsubj 1]),'filled','MarkerFaceAlpha',0.5); % minimum MSE for each participant
+            title('Mirror Reversal')
+            legend(graph_name{gblocks(bl)},'Location','Northwest')
+        end
     end
-    scatter(minAng_avg,minMSE_avg,60,col(1:length(gblocks),:),'filled') % average minimum MSE
-    scatter(minAng_vec,minMSE_vec,25,repmat(col(1:length(gblocks),:),[Nsubj 1]),'filled','MarkerFaceAlpha',0.5); % minimum MSE for each participant
-%     scatter(minAng_avg,minMSE_avg,60,col(colors,:),'filled') % average minimum MSE
-%     scatter(minAng_vec,minMSE_vec,25,repmat(col(colors,:),[Nsubj 1]),'filled','MarkerFaceAlpha',0.5); % minimum MSE for each participant
 %     plot([-90 180],[nothing nothing],'--k','LineWidth',1) % MSE of doing nothing
     xticks(-60:30:180)
     yticks(0.002:0.0005:0.004)
     xlabel(['Rotation Angle (',char(176),')'])
     ylabel('Mean-Squared Error (m^2)')
-%     xlim([min(ang(idx2))-5 max(ang(idx2)+5)])
     axis([-45 110 .0017 .0035])
-%     xlim([-45 180])
     set(gca,'TickDir','out')
     box off
-    legend(graph_name{gblocks},'Location','Northwest')
     set(gcf,'Renderer','painters')
 
     se = std(minAng')/sqrt(Nsubj);
@@ -111,11 +137,9 @@ for p = 1:length(groups)
     end
     xticks([1:2 3.5:4.5])
     axis([0.5 5 -50 30])
-%     xticklabels([graph_name(gblocks),'Baseline','Post'])
     xticklabels({'Baseline','Post','Baseline','Post'})
     yticks(-60:10:180)
     ylabel(['Rotation Angle (',char(176),')'])
-%     axis([0.5 7.5 -30 30])
     set(gca,'TickDir','out')
     box off
     

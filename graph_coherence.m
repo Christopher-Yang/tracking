@@ -61,7 +61,7 @@ function graph_coherence(data, groups, gblocks, graph_name)
         if i == 1
             ylabel('SR_X Coherence')
         end
-        axis([0.09 2.3 0.25 1])
+        axis([0.09 2.3 0 1])
         title(names{i})
         yticks(0:0.25:1)
         
@@ -75,7 +75,7 @@ function graph_coherence(data, groups, gblocks, graph_name)
         if i == 1
             ylabel('SR_Y Coherence')
         end
-        axis([0.09 2.3 0.25 1])
+        axis([0.09 2.3 0 1])
         yticks(0:0.25:1)
     end
     legend(graph_name{gblocks},'Location','southeast')
@@ -121,7 +121,8 @@ function graph_coherence(data, groups, gblocks, graph_name)
         end
         set(gca,'Xscale','log','box','off','TickDir','out')
         if i == 1
-            ylabel('\surd{RR_X} - SR_X Coherence')
+%             ylabel('\surd{RR_X} - SR_X Coherence')
+            ylabel('$\sqrt{RR_X} - SR_X\: Coherence$','Interpreter','latex')
         end
         axis([0.09 2.3 0 1])
         title(names{i})
@@ -133,7 +134,8 @@ function graph_coherence(data, groups, gblocks, graph_name)
         end
         set(gca,'Xscale','log','box','off','TickDir','out')
         if i == 1
-            ylabel(['\surd{RR_Y} ' char(8211) ' SR_Y Coherence'])
+%             ylabel(['\surd{RR_Y} ' char(8211) ' SR_Y Coherence'])
+            ylabel('$\sqrt{RR_Y} - SR_Y\: Coherence$','Interpreter','latex')
         end
         xlabel('Frequency (Hz)')
         axis([0.09 2.3 0 1])

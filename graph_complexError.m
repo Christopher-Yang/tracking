@@ -44,7 +44,7 @@ function graph_complexError(data, groups, graph_name, gblocks)
         xlabel('Frequency (Hz)'); 
         ylabel('Y Tracking Error');
         axis([0.09 2.3 0 1.8]);
-        legend(graph_name,'Position',[0.87 0.4 0.1 0.2],'FontSize',font_size);
+        legend(graph_name(gblocks),'Position',[0.87 0.4 0.1 0.2],'FontSize',font_size);
         
         figure(b)
         subplot(2,2,i)
@@ -69,6 +69,6 @@ function graph_complexError(data, groups, graph_name, gblocks)
         xlabel('Frequency (Hz)')
         ylabel('||Y data - Y optimal||','FontSize',font_size)
         axis([0.09 2.3 0 1.8])
-        legend(graph_name,'Position',[0.87 0.4 0.1 0.2],'FontSize',font_size)
+        legend(graph_name(gblocks),'Position',[0.87 0.4 0.1 0.2],'FontSize',font_size)
     end
 end

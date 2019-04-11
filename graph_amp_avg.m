@@ -113,7 +113,7 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
                 plot(xAxis,a.x(:,i),'Color',col(3,:),'LineWidth',lw)
                 plot(xAxis,a.x_all(:,:,i),'Color',[col(3,:) 0.15],'LineWidth',0.25)
                 if i == length(gblocks)
-%                     plot(xAxis,a.x(:,1),'--','Color',col(5,:),'LineWidth',lw)
+                    plot(xAxis,a.x(:,1),'--','Color',col(5,:),'LineWidth',lw)
                 end
                 plot(freqsX,a.x(ix,i),'o','Color',col(1,:),'LineWidth',lw,'MarkerFaceColor',col(1,:),'MarkerEdgeColor','none')
             else
@@ -121,7 +121,7 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
 %                 editErrorBar(s,col(3,:),0.25);
                 plot(xAxis,a.y(:,i),'Color',col(3,:),'LineWidth',lw)
                 plot(xAxis,a.y_all(:,:,i),'Color',[col(3,:) 0.15],'LineWidth',0.25)
-%                 plot(xAxis,a.x(:,1),'--','Color',col(5,:),'LineWidth',lw)
+                plot(xAxis,a.x(:,1),'--','Color',col(5,:),'LineWidth',lw)
                 plot(freqsY,a.y(iy,i),'o','Color',col(2,:),'LineWidth',lw,'MarkerFaceColor',col(2,:),'MarkerEdgeColor','none')
             end
             set(gca,'Xtick',0:1:2,'Ytick',0:0.01:0.03,'box','off','LineWidth',1,'TickDir','out','FontSize',fontSize,'XMinorTick','on')
@@ -163,7 +163,6 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
             axis([0 2.3 0 ampY(1)+.01])
             ylabel('Y Amplitude (m)')
             xlabel('Frequency (Hz)')
-%             pbaspect([1 1 1])
         end
         
 %         a.dx = abs(a.dx);
@@ -176,11 +175,6 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
         hold on
         s = shadedErrorBar(sort([freqsX freqsY]),100*a.dy,100*a.errdy);
         editErrorBar(s,col(4,:),0.25);
-%         s = shadedErrorBar(freqsX,100*abs(a.dx_on),100*a.errdx_on);
-%         editErrorBar(s,col(3,:),0.25);
-%         hold on
-%         s = shadedErrorBar(freqsY,100*abs(a.dx_off),100*a.errdx_off);
-%         editErrorBar(s,col(4,:),0.25);
         if k == 1
             title('Rotation')
         else
