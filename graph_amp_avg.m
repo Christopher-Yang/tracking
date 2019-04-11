@@ -107,13 +107,14 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
             plot([50 51], [50 51],'Color',col(3,:),'LineWidth',lw)
             plot([50 51], [50 51],'--','Color',col(5,:),'LineWidth',lw)
             if i == 1 || i == length(gblocks)
-                % plot mean with error bars
+                % plot mean with error bars; doesn't work if amplitude
+                % spectra are averaged in the complex domain
 %                 s = shadedErrorBar(xAxis, a.x(:,i),a.errx(:,:,i));
 %                 editErrorBar(s,col(3,:),0.25);
                 plot(xAxis,a.x(:,i),'Color',col(3,:),'LineWidth',lw)
                 plot(xAxis,a.x_all(:,:,i),'Color',[col(3,:) 0.15],'LineWidth',0.25)
-                if i == length(gblocks)
-%                     plot(xAxis,a.x(:,1),'--','Color',col(5,:),'LineWidth',lw)
+                if i ~= 1
+                    plot(xAxis,a.x(:,1),'--','Color',col(5,:),'LineWidth',lw)
                 end
                 plot(freqsX,a.x(ix,i),'o','Color',col(1,:),'LineWidth',lw,'MarkerFaceColor',col(1,:),'MarkerEdgeColor','none')
             else
@@ -121,7 +122,7 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
 %                 editErrorBar(s,col(3,:),0.25);
                 plot(xAxis,a.y(:,i),'Color',col(3,:),'LineWidth',lw)
                 plot(xAxis,a.y_all(:,:,i),'Color',[col(3,:) 0.15],'LineWidth',0.25)
-%                 plot(xAxis,a.x(:,1),'--','Color',col(5,:),'LineWidth',lw)
+                plot(xAxis,a.x(:,1),'--','Color',col(5,:),'LineWidth',lw)
                 plot(freqsY,a.y(iy,i),'o','Color',col(2,:),'LineWidth',lw,'MarkerFaceColor',col(2,:),'MarkerEdgeColor','none')
             end
             set(gca,'Xtick',0:1:2,'Ytick',0:0.01:0.03,'box','off','LineWidth',1,'TickDir','out','FontSize',fontSize,'XMinorTick','on')
@@ -145,7 +146,7 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
 %                 editErrorBar(s,col(3,:),0.25);
                 plot(xAxis,a.y(:,i),'LineWidth',lw,'Color',col(3,:),'MarkerFaceColor',col(3,:))
                 plot(xAxis,a.y_all(:,:,i),'Color',[col(3,:) 0.15],'LineWidth',0.25)
-                if i == length(gblocks)
+                if i ~= 1
                     plot(xAxis,a.y(:,1),'--','Color',col(5,:),'LineWidth',lw)
                 end
                 plot(freqsY,a.y(iy,i),'o','LineWidth',1.5,'Color',col(2,:),'MarkerFaceColor',col(2,:),'MarkerEdgeColor','none')
@@ -191,71 +192,6 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
         xlabel('Frequency(Hz)')
         ylabel('|Post - Baseline| (%)')
         pbaspect([1 1 1])
-        
-%         subplot(1,2,k+1)
-%         s = shadedErrorBar(sort([freqsX freqsY]),100*a.dy,100*a.errdy);
-%         editErrorBar(s,col(3,:),0.25);
-%         hold on
-% %         s = shadedErrorBar(freqsY,100*abs(a.dy_on),100*a.errdy_on);
-% %         editErrorBar(s,col(3,:),0.25);
-% %         hold on
-% %         s = shadedErrorBar(freqsX,100*abs(a.dy_off),100*a.errdy_off);
-% %         editErrorBar(s,col(4,:),0.25);
-%         plot([0.09 3],[0 0],'--k')
-%         set(gca,'Xscale','log','TickDir','out')
-%         axis([0.1 2.3 0 40])
-%         xlabel('Frequency(Hz)')
-%         ylabel('Y aftereffect (%)')
-%         pbaspect([1 1 1])
-        
-%         plot amplitude spectrum comparison for each person
-%         figure
-%         for i = 1:Nsubj
-%             clf
-%             subplot(2,1,1)
-%             plot(xAxis,a.x_all(:,i,1),'Color',col(3,:))
-%             hold on
-%             plot(xAxis,a.x_all(:,i,4),'Color',col(5,:))
-%             plot(freqsX,ampX,'o','Color',col(1,:),'LineWidth',lw,'MarkerFaceColor',col(1,:),'MarkerEdgeColor','none')
-%             plot(freqsY,ampY,'o','Color',col(2,:),'LineWidth',lw,'MarkerFaceColor',col(2,:),'MarkerEdgeColor','none')
-%             xlim([0 2.5])
-%             
-%             subplot(2,1,2)
-%             plot(xAxis,a.y_all(:,i,1),'Color',col(3,:))
-%             hold on
-%             plot(xAxis,a.y_all(:,i,4),'Color',col(5,:))
-%             plot(freqsX,ampX,'o','Color',col(1,:),'LineWidth',lw,'MarkerFaceColor',col(1,:),'MarkerEdgeColor','none')
-%             plot(freqsY,ampY,'o','Color',col(2,:),'LineWidth',lw,'MarkerFaceColor',col(2,:),'MarkerEdgeColor','none')
-%             xlim([0 2.5])
-%         end
-
-%         plot normalized change in amplitude
-%         figure(H(5))
-%         subplot(2,2,k)
-%         plot(freqsX,100*a.dx_on,'Color',col(3,:))
-%         hold on
-%         plot(freqsX,100*a.dx_on_all,'Color',[col(3,:) 0.15])
-%         plot(freqsY,100*a.dy_on,'Color',col(5,:))
-%         plot(freqsY,100*a.dy_on_all,'Color',[col(5,:) 0.15])
-%         plot([0.09 3],[0 0],'--k')
-%         title('On axis')
-%         set(gca,'Xscale','log')
-%         axis([0.1 2.3 -40 20])
-%         xlabel('Frequency(Hz)')
-%         ylabel('Post - Baseline Amplitude (%)')
-%         
-%         subplot(2,2,k+2)
-%         plot(freqsY,100*a.dx_off,'Color',col(3,:))
-%         hold on
-%         plot(freqsY,100*a.dx_off_all,'Color',[col(3,:) 0.15])
-%         plot(freqsX,100*a.dy_off,'Color',col(5,:))
-%         plot(freqsX,100*a.dy_off_all,'Color',[col(5,:) 0.15])
-%         plot([0.09 3],[0 0],'--k')
-%         title('Off axis')
-%         set(gca,'Xscale','log')
-%         axis([0.1 2.3 -10 60])
-%         xlabel('Frequency(Hz)')
-%         ylabel('Post - Baseline Amplitude (%)')
     end
     
 % %     comp.x_on = [x_on(:,:,1); x_on(:,:,2)];

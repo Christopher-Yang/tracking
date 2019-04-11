@@ -43,7 +43,7 @@ graph_bode_simple(data, graph_name, groups, gblocks);
 % graph_bode2(data, graph_name, groups);
 
 %% graph performance
-gblocks = [1:2 5];
+gblocks = [1:2 5:6];
 
 graph_amp_avg(data,groups,block_name,gblocks,graph_name); % amplitude spectrums
 % graph_MSE(data, groups, block_name, graph_name); % mean squared error
