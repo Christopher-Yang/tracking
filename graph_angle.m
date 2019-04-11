@@ -99,7 +99,7 @@ function graph_angle(data, groups, gblocks, theta)
 %         legend boxoff;
 %% Compensation angle not flipped
         figure(b)
-        subplot(2,2,i)
+        subplot(1,2,1)
         for j = 1:length(gblocks)
             s = shadedErrorBar(f_x,angX(gblocks(j),:)*2/pi,errX(:,:,gblocks(j)),'lineProps','-o'); hold on; % using 2/pi because 2/pi = 180/pi * 1/90
             editErrorBar(s,col(j,:),line_width);
@@ -115,7 +115,7 @@ function graph_angle(data, groups, gblocks, theta)
         axis([0.09 2.3 0 1.05])
         pbaspect([1 1 1])
         
-        subplot(2,2,i+2)
+        subplot(1,2,2)
         for j = 1:length(gblocks)
             s = shadedErrorBar(f_y,angY(gblocks(j),:)*2/pi,errY(:,:,gblocks(j)),'lineProps','-o'); hold on;
             editErrorBar(s,col(j,:),line_width);

@@ -8,7 +8,9 @@ block_name = {'baseline','rot1','rot2','rot3','rot4','after'};
 graph_name = {'Baseline','Early','rot2','rot3','Late','Post'};
 % block_name = {'a'}; % I used different sinusoids here with less spectral density
 % block_name = {'test'};
+% these participants trained on the VMR15 using the tracking task
 % subj_name = {'subj1','subj2','subj3','subj4','subj5','subj6','subj7','subj8','subj9','subj10'};
+% these participants trained on the VMR15 using the P2P task
 subj_name = {'subj11','subj12','subj13','subj14','subj15','subj17','subj18','subj20','subj21','subj22'};
 theta = 15;
 subj_rot = subj_name;
@@ -46,10 +48,10 @@ graph_bode_simple(data, graph_name, groups, gblocks);
 %% graph performance
 gblocks = [1:2 5];
 
-graph_amp_avg(data,groups,block_name,gblocks,graph_name); % amplitude spectrums
+% graph_amp_avg(data,groups,block_name,gblocks,graph_name); % amplitude spectrums
 % graph_MSE(data, groups, block_name, graph_name); % mean squared error
 % graph_rotatedMSE(data, groups, block_name, gblocks, graph_name);
 % graph_angle(data, groups, gblocks,theta); % angle of movement error
 % graph_lag(data, groups, gblocks, graph_name); % response lag
 % graph_complexError(data, groups, graph_name, gblocks); % complex tracking error
-% graph_coherence(data, groups, gblocks, graph_name) % coherence
+graph_coherence(data, groups, gblocks, graph_name) % coherence

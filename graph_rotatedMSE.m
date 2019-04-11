@@ -8,6 +8,7 @@ t = 0:delt:10-delt;
 nstep = length(t);
 ang = -90:1:180; % angles to rotate the cursor trajectory
 Nsubj = length(fieldnames(data.(groups{1})))-1;
+Nblocks = length(gblocks);
 % bpFreqs = [1.5 2]; % frequencies to bandpass trajectories; optional
 % lag = 0; % lag cursor trajectories; optional
 % Nlag = round(lag/(1/130.004)); 
@@ -16,7 +17,7 @@ for p = 1:length(groups)
     for k = 1:Nsubj
         subj = fieldnames(data.(groups{p}));
         subj(end) = [];
-        for j = 1:length(gblocks)
+        for j = 1:Nblocks
             % add all trajectories into target
             clear target cursor
             target(:,1) = data.(groups{p}).(subj{k}).(block_name{gblocks(j)}).target.x_pos;
@@ -63,69 +64,48 @@ for p = 1:length(groups)
     minAng_vec = reshape(minAng,[numel(minAng) 1]); % vectorize minAng
     
     % calculate covariance matrix of minimum MSE vs rotation angle for confidence ellipse
-    for i = 1:length(gblocks)
+    for i = 1:Nblocks
         covar(:,:,i) = cov(minAng(i,:),minMSE(i,:));
     end
 
     % plot distributions of minimum MSE vs rotation angle
     figure; hold on
-%     colors = [1 5 2 3];
-    for i = 1:length(gblocks)
+    for i = 1:Nblocks
         a = error_ellipse(covar(:,:,i),[minAng_avg(i),minMSE_avg(i)],'conf',0.5); % confidence ellipse
         a.Color = col(i,:);
     end
-    scatter(minAng_avg,minMSE_avg,60,col(1:length(gblocks),:),'filled') % average minimum MSE
-    scatter(minAng_vec,minMSE_vec,25,repmat(col(1:length(gblocks),:),[Nsubj 1]),'filled','MarkerFaceAlpha',0.5); % minimum MSE for each participant
-%     scatter(minAng_avg,minMSE_avg,60,col(colors,:),'filled') % average minimum MSE
-%     scatter(minAng_vec,minMSE_vec,25,repmat(col(colors,:),[Nsubj 1]),'filled','MarkerFaceAlpha',0.5); % minimum MSE for each participant
+    scatter(minAng_avg,minMSE_avg,60,col(1:Nblocks,:),'filled') % average minimum MSE
+    scatter(minAng_vec,minMSE_vec,25,repmat(col(1:Nblocks,:),[Nsubj 1]),'filled','MarkerFaceAlpha',0.5); % minimum MSE for each participant
 %     plot([-90 180],[nothing nothing],'--k','LineWidth',1) % MSE of doing nothing
-    xticks(-60:30:180)
+    xticks(-60:5:180)
     yticks(0.002:0.0005:0.004)
     xlabel(['Rotation Angle (',char(176),')'])
     ylabel('Mean-Squared Error (m^2)')
-%     xlim([min(ang(idx2))-5 max(ang(idx2)+5)])
-    axis([-45 110 .0017 .0035])
-%     xlim([-45 180])
+    axis([-15 25 .0017 .0035])
     set(gca,'TickDir','out')
     box off
     legend(graph_name{gblocks},'Location','Northwest')
     set(gcf,'Renderer','painters')
 
     se = std(minAng')/sqrt(Nsubj);
-    minAng_after = minAng([1 end],:); % rotation angle from baseline and post-learning
     
     % plot rotation angle distributions at different timepoints
     figure(2)
-    if p == 1 % plot VMR data
-        scatter(repmat((1:2)',[Nsubj 1]),reshape(minAng_after,[20 1]),25,repmat(col([1 4],:),[Nsubj 1]),'filled','MarkerFaceAlpha',0.5)
-        hold on
-        plot(repmat((1:2)',[1 10]),minAng_after,'Color',[0 0 0 0.5])
-        errorbar(1,minAng_avg(1),2*se(1),'.','Color',col(1,:),'MarkerSize',30,'LineWidth',1)
-        errorbar(2,minAng_avg(end),2*se(end),'.','Color',col(length(gblocks),:),'MarkerSize',30,'LineWidth',1)
-        plot([0 9],[0 0],'--k','LineWidth',1)
-    else % plot MR data
-        scatter(repmat([3.5 4.5]',[Nsubj 1]),reshape(minAng_after,[numel(minAng_after) 1]),25,repmat(col([1 length(gblocks)],:),[Nsubj 1]),'filled','MarkerFaceAlpha',0.5)
-        plot(repmat((3.5:4.5)',[1 Nsubj]),minAng_after,'Color',[0 0 0 0.5])
-        errorbar(3.5,minAng_avg(1),2*se(1),'.','Color',col(1,:),'MarkerSize',30,'LineWidth',1)
-        errorbar(4.5,minAng_avg(end),2*se(end),'.','Color',col(length(gblocks),:),'MarkerSize',30,'LineWidth',1)
+    scatter(repmat((1:Nblocks)',[Nsubj 1]),reshape(minAng,[Nblocks*10 1]),25,repmat(col(1:Nblocks,:),[Nsubj 1]),'filled','MarkerFaceAlpha',0.5)
+    hold on
+    plot(repmat((1:Nblocks)',[1 10]),minAng,'Color',[0 0 0 0.5])
+    for i = 1:Nblocks
+        errorbar(i,minAng_avg(i),2*se(i),'.','Color',col(i,:),'MarkerSize',30,'LineWidth',1)
     end
-    xticks([1:2 3.5:4.5])
-    axis([0.5 5 -50 30])
-%     xticklabels([graph_name(gblocks),'Baseline','Post'])
-    xticklabels({'Baseline','Post','Baseline','Post'})
+    plot([0 9],[0 0],'--k','LineWidth',1)
+    xticks(1:3)
+    axis([0.5 3.5 -20 30])
+    xticklabels(graph_name(gblocks))
     yticks(-60:10:180)
     ylabel(['Rotation Angle (',char(176),')'])
-%     axis([0.5 7.5 -30 30])
     set(gca,'TickDir','out')
     box off
     
     minima(:,:,p) = minAng'; % save rotation angles in a new matrix for statistical analysis
 end
-
-% comp = [minima(:,[1 4],1); minima(:,[1 4],2)];
-% comp2 = [repelem(0,10)'; repelem(1,10)'];
-% within = {'time'};
-% between = {'group'};
-% [tbl,rm] = simple_mixed_anova(comp, comp2, within, between)
-
 end
