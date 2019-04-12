@@ -9,9 +9,8 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
     fontSize = 12;
     titleSize = 14;
     lw = 1;
-    names = {' (Rotation)',' (Mirror Reversal)'};
     
-    H = gobjects(length(gblocks)+1,1);
+    H = gobjects(length(gblocks),1);
     for i = 1:length(H)
         H(i) = figure;
     end
@@ -100,7 +99,7 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
         
         for i = 1:length(gblocks)
             figure(H(i))
-            subplot(2,2,k)
+            subplot(1,2,1)
             plot(freqsX,ampX,'o','Color',col(1,:),'LineWidth',lw,'MarkerFaceColor',col(1,:),'MarkerEdgeColor','none')
             hold on
             plot(freqsY,ampY,'o','Color',col(2,:),'LineWidth',lw,'MarkerFaceColor',col(2,:),'MarkerEdgeColor','none')
@@ -130,14 +129,14 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
             ax.XAxis.MinorTickValues = 0:0.25:2.25;
             axis([0 2.3 0 ampX(1)+.01])
             ylabel('X Amplitude (m)')
-            title([graph_name{gblocks(i)}, names{k}],'FontSize',titleSize)
+            title(graph_name{gblocks(i)},'FontSize',titleSize)
             if k == 2
                 legend({'X target','Y target','Hand','Baseline'})
                 legend boxoff
             end
 %             pbaspect([1 1 1])
             
-            subplot(2,2,k+2)
+            subplot(1,2,2)
             plot(freqsX, ampX,'o','LineWidth',lw,'Color',col(1,:),'MarkerFaceColor',col(1,:),'MarkerEdgeColor','none')
             hold on
             plot(freqsY, ampY,'o','LineWidth',lw,'Color',col(2,:),'MarkerFaceColor',col(2,:),'MarkerEdgeColor','none')
@@ -166,43 +165,5 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
             xlabel('Frequency (Hz)')
 %             pbaspect([1 1 1])
         end
-        
-%         a.dx = abs(a.dx);
-%         a.dy = abs(a.dy);
-        
-        figure(H(end))
-        subplot(1,2,k)
-        s = shadedErrorBar(sort([freqsX freqsY]),100*a.dx,100*a.errdx);
-        editErrorBar(s,col(3,:),0.25);
-        hold on
-        s = shadedErrorBar(sort([freqsX freqsY]),100*a.dy,100*a.errdy);
-        editErrorBar(s,col(4,:),0.25);
-%         s = shadedErrorBar(freqsX,100*abs(a.dx_on),100*a.errdx_on);
-%         editErrorBar(s,col(3,:),0.25);
-%         hold on
-%         s = shadedErrorBar(freqsY,100*abs(a.dx_off),100*a.errdx_off);
-%         editErrorBar(s,col(4,:),0.25);
-        if k == 1
-            title('Rotation')
-        else
-            title('Mirror Reversal')
-        end
-        set(gca,'Xscale','log','TickDir','out')
-        axis([0.1 2.3 0 60])
-        xlabel('Frequency(Hz)')
-        ylabel('|Post - Baseline| (%)')
-        pbaspect([1 1 1])
     end
-    
-% %     comp.x_on = [x_on(:,:,1); x_on(:,:,2)];
-% %     comp.x_off = [x_off(:,:,1); x_off(:,:,2)];
-%     comp = [x_on(:,:,1); x_on(:,:,2)];
-%     comp = cat(3, comp, [x_off(:,:,1); x_off(:,:,2)]);
-% %     comp.y_on = [y_on(:,:,1); y_on(:,:,2)];
-% %     comp.y_off = [y_off(:,:,1); y_off(:,:,2)];
-%     comp2 = [repelem(0,10)'; repelem(1,10)'];
-%     within = {'frequency','axis'};
-%     between = {'perturbation'};
-%     [tbl,rm] = simple_mixed_anova(comp, comp2, within, between)
-    
 end
