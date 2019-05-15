@@ -5,7 +5,7 @@ function graph_lag(data,groups,gblocks,graph_name)
     f_y = data.(groups{1}).avg.y_y.freqs;
     col = lines;
     col = col(1:7,:);
-    Nblock = size(data.(groups{1}).avg.x_x.fft,1);
+    Nblock = size(data.rot.avg.x_x.fft,1);
     
     for i = 1:length(groups)
         delay{i}.x_x = -1000*data.(groups{i}).avg.x_x.phase./(repmat(f_x,[Nblock,1])*2*pi);

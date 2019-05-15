@@ -37,24 +37,36 @@ function graph_MSE(data,groups,block_name,graph_name)
 %     grid on;
     
     figure(1)
-    errorbar(mean(MSE.bim.subjects,2), 2*MSE.(groups{i}).se2,'r','LineWidth',1); hold on; 
-    plot(MSE.bim.subjects(:,1),'Color',[1 0 0 0.25],'LineWidth',0.5) 
-    plot(MSE.bim.subjects(:,2:end),'Color',[1 0 0 0.25],'LineWidth',0.5)
+    errorbar(mean(MSE.rot.subjects,2), 2*MSE.(groups{i}).se2,'r','LineWidth',1); hold on; 
+    errorbar(mean(MSE.rot_i.subjects,2), 2*MSE.rot_i.se2, 'b','LineWidth',1);
+    plot(MSE.rot.subjects(:,1),'Color',[1 0 0 0.25],'LineWidth',0.5) 
+    plot(MSE.rot_i.subjects(:,1),'Color',[0 0 1 0.25],'LineWidth',0.5)
+    plot(MSE.rot.subjects(:,2:end),'Color',[1 0 0 0.25],'LineWidth',0.5)
+    plot(MSE.rot_i.subjects(:,2:end),'Color',[0 0 1 0.25],'LineWidth',0.5)
     set(gca,'xtick',1:6,'ytick',0:5:10,'TickDir','out')
     ylabel('Mean Squared Error (m^2)') 
+    legend('90 deg','mirror reversal')
     box off
     legend boxoff
 
     figure(2)
-    for i = 1:length(block_name)
-        s = shadedErrorBar(6*(i-1)+1:6*(i-1)+6,mean(MSE.bim.full(6*(i-1)+1:6*(i-1)+6,:),2),2*MSE.bim.full_se(6*(i-1)+1:6*(i-1)+6)); hold on;
+    for i = 1:6
+        s = shadedErrorBar(8*(i-1)+1:8*(i-1)+8,mean(MSE.rot.full(8*(i-1)+1:8*(i-1)+8,:),2),2*MSE.rot.full_se(8*(i-1)+1:8*(i-1)+8)); hold on;
         editErrorBar(s,col2(1,:),1);
+        s = shadedErrorBar(8*(i-1)+1:8*(i-1)+8,mean(MSE.rot_i.full(8*(i-1)+1:8*(i-1)+8,:),2),2*MSE.rot_i.full_se(8*(i-1)+1:8*(i-1)+8));
+        editErrorBar(s,col2(2,:),1);
     end
 %     plot(MSE.rot.full,'Color',[col2(3,:) 0.25],'LineWidth',0.5)
+%     plot(MSE.rot_i.full,'Color',[col2(2,:) 0.25],'LineWidth',0.5)
+    rectangle('Position',[1 0 Ntrials 20],'FaceColor',col(1,:),'EdgeColor','none')
+    rectangle('Position',[Ntrials+1 0 Ntrials 20],'FaceColor',col(2,:),'EdgeColor','none')
+    rectangle('Position',[Ntrials*4+1 0 Ntrials 20],'FaceColor',col(3,:),'EdgeColor','none')
+    rectangle('Position',[Ntrials*5+1 0 Ntrials 20],'FaceColor',col(4,:),'EdgeColor','none')
     set(gca,'xtick',1:Ntrials:length(MSE.(groups{1}).full),'ytick',0:0.003:0.012,'TickDir','out')
-%     axis([1 Ntrials*Nblocks 0 0.012])
+    axis([1 Ntrials*Nblocks 0 0.012])
     xlabel('Tracking Cycle Number')
     ylabel('Mean Squared Error (m^2)'); 
+    legend('Rotation','Mirror Reversal');
     box off
     legend boxoff
 end
