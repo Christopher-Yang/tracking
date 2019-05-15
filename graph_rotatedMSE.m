@@ -1,4 +1,4 @@
-function rotatedMSE(data,groups,block_name,gblocks,graph_name)
+function graph_rotatedMSE(data,groups,block_name,gblocks,graph_name)
 
 rng(1)
 col = lines;
@@ -83,9 +83,7 @@ for p = 1:length(groups)
     yticks(0.002:0.0005:0.004)
     xlabel(['Rotation Angle (',char(176),')'])
     ylabel('Mean-Squared Error (m^2)')
-%     xlim([min(ang(idx2))-5 max(ang(idx2)+5)])
-    axis([-45 110 .0017 .0035])
-%     xlim([-45 180])
+%     axis([-45 110 .0017 .0035])
     set(gca,'TickDir','out')
     box off
     legend(graph_name{gblocks},'Location','Northwest')
@@ -93,39 +91,5 @@ for p = 1:length(groups)
 
     se = std(minAng')/sqrt(Nsubj);
     minAng_after = minAng([1 end],:); % rotation angle from baseline and post-learning
-    
-    % plot rotation angle distributions at different timepoints
-    figure(2)
-    if p == 1 % plot VMR data
-        scatter(repmat((1:2)',[Nsubj 1]),reshape(minAng_after,[20 1]),25,repmat(col([1 4],:),[Nsubj 1]),'filled','MarkerFaceAlpha',0.5)
-        hold on
-        plot(repmat((1:2)',[1 10]),minAng_after,'Color',[0 0 0 0.5])
-        errorbar(1,minAng_avg(1),2*se(1),'.','Color',col(1,:),'MarkerSize',30,'LineWidth',1)
-        errorbar(2,minAng_avg(end),2*se(end),'.','Color',col(length(gblocks),:),'MarkerSize',30,'LineWidth',1)
-        plot([0 9],[0 0],'--k','LineWidth',1)
-    else % plot MR data
-        scatter(repmat([3.5 4.5]',[Nsubj 1]),reshape(minAng_after,[numel(minAng_after) 1]),25,repmat(col([1 length(gblocks)],:),[Nsubj 1]),'filled','MarkerFaceAlpha',0.5)
-        plot(repmat((3.5:4.5)',[1 Nsubj]),minAng_after,'Color',[0 0 0 0.5])
-        errorbar(3.5,minAng_avg(1),2*se(1),'.','Color',col(1,:),'MarkerSize',30,'LineWidth',1)
-        errorbar(4.5,minAng_avg(end),2*se(end),'.','Color',col(length(gblocks),:),'MarkerSize',30,'LineWidth',1)
-    end
-    xticks([1:2 3.5:4.5])
-    axis([0.5 5 -50 30])
-%     xticklabels([graph_name(gblocks),'Baseline','Post'])
-    xticklabels({'Baseline','Post','Baseline','Post'})
-    yticks(-60:10:180)
-    ylabel(['Rotation Angle (',char(176),')'])
-%     axis([0.5 7.5 -30 30])
-    set(gca,'TickDir','out')
-    box off
-    
-    minima(:,:,p) = minAng'; % save rotation angles in a new matrix for statistical analysis
 end
-
-% comp = [minima(:,[1 4],1); minima(:,[1 4],2)];
-% comp2 = [repelem(0,10)'; repelem(1,10)'];
-% within = {'time'};
-% between = {'group'};
-% [tbl,rm] = simple_mixed_anova(comp, comp2, within, between)
-
 end
