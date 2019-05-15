@@ -145,11 +145,4 @@ for p = 1:length(groups)
     
     minima(:,:,p) = minAng'; % save rotation angles in a new matrix for statistical analysis
 end
-
-% comp = [minima(:,[1 4],1); minima(:,[1 4],2)];
-% comp2 = [repelem(0,10)'; repelem(1,10)'];
-% within = {'time'};
-% between = {'group'};
-% [tbl,rm] = simple_mixed_anova(comp, comp2, within, between)
-
 end
