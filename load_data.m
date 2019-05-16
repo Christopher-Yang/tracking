@@ -9,9 +9,10 @@ function output = load_data(subj_name, block_name, folder,time)
             path = [folder,subj_name{i},'/',block_name{j}];
             tFile = dlmread([path,'/tFile.tgt']);
             Tb = 1/(tFile(1)/2);
-            Ncycles = floor(time/Tb);
-            trial_time = Tb*Ncycles;
-            Nsamples = round(trial_time*130.004)+13;
+%             Ncycles = floor(time/Tb);
+%             trial_time = Tb*Ncycles;
+%             Nsamples = round(trial_time*130.004)+13;
+            Nsamples = round(time*130.004)+13;
             fnames = dir(path);
             full = [];
             

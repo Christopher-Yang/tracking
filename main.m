@@ -1,14 +1,18 @@
 clear all;
 
-folder = 'Data/bimanual_pilot/';
-time = 40; %in seconds
+time = 30; %in seconds
 theta = 90;
-groups = {'bim'};
-block_name = {'B1','B2','B8','B21','B22_habit'};
-graph_name = {'Baseline','Early','Middle','Late','Habit'};
-subj_name = {'subj1','subj2','subj3'};
-d = load_data(subj_name,block_name,folder,time);
-data.bim = analyze_data(d,subj_name,block_name,false,0);
+groups = {'R','L'};
+block_name = {'B1'};
+% graph_name = {'Baseline','Early','Middle','Late','Habit'};
+subj_name = {'subj1','subj2','subj3','subj4'};
+folder = 'Data/stroke/left/';
+d.L = load_data(subj_name,block_name,folder,time);
+folder = 'Data/stroke/right/';
+d.R = load_data(subj_name,block_name,folder,time);
+
+data.L = analyze_data(d.L,subj_name,block_name,false,0);
+data.R = analyze_data(d.R,subj_name,block_name,false,0);
 
 % save dat data;
 disp('Done')
@@ -24,12 +28,6 @@ graph_phasor(data, block_name, groups, graph_name2, subj_rot, subj_rot_i);
 %% simplified experimental data
 gblocks = [2:5];
 graph_bode_simple(data, graph_name, groups, gblocks);
-% graph_bode_hilo(data, groups, graph_name,1:6);
-
-% simplified control1 
-% graph_name2 = {'Baseline', 'No training', 'Max training', 'Aftereffects', 'No training (opp)', 'Opp train 1'};
-% gblocks = [1:2 5:7];
-% graph_bode_hilo2(data,groups,graph_name,gblocks);
 
 % each subject individually
 % subj_name2 = {'subj35'};

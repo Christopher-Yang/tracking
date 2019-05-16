@@ -18,11 +18,19 @@ function output = fourier(output_traj,input_traj,Nfreq)
             if isvector(output_traj) == 1 && isvector(input_traj) == 1
                 output_fft = fft(output_traj-mean(output_traj));  %subtract the mean to normalize baseline
                 input_fft = fft(input_traj-mean(input_traj));
-                idx = find(abs(input_fft)>5);
-                if length(idx) ~= Nfreq*2
-                    error(['Number of frequencies found (',num2str(length(idx)/2),') does not match the number of input frequencies (',num2str(Nfreq),')'])
+                idx = find(abs(input_fft)>10);
+                
+                % added for noisy data
+                if idx(1) < 5
+                    idx = [3 8 14 20 30 38 44];
+                else
+                    idx = [6 12 18 24 32 42 48];
                 end
-                idx = idx(1:Nfreq);
+                
+%                 if length(idx) ~= Nfreq*2
+%                     error(['Number of frequencies found (',num2str(length(idx)/2),') does not match the number of input frequencies (',num2str(Nfreq),')'])
+%                 end
+%                 idx = idx(1:Nfreq);
                 output.ratio = output_fft(idx)./input_fft(idx);
                 output.amplitude = abs(output.ratio);
                 output.phase = angle(output.ratio);
@@ -34,7 +42,7 @@ function output = fourier(output_traj,input_traj,Nfreq)
                     output_fft(:,i) = fft(output_traj(:,i)-mean(output_traj(:,i)));
                     input_fft(:,i) = fft(input_traj(:,i)-mean(input_traj(:,i)));
                 end
-                idx = find(abs(input_fft(:,1))>1.5);
+                idx = find(abs(input_fft(:,1))>10);
                 if length(idx) ~= Nfreq*2
                     error(['Number of frequencies found (',num2str(length(idx)/2),') does not match the number of input frequencies (',num2str(Nfreq),')'])
                 end
