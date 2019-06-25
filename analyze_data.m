@@ -78,7 +78,11 @@ function data = analyze_data(d, subj_name, block_name, rotate, uw)
             
             data.(subj_name{i}).(block_name{j}).x_x = fourier(cursor.x_pos,target.x_pos,length(freqs_x));
             data.(subj_name{i}).(block_name{j}).y_y = fourier(cursor.y_pos,target.y_pos,length(freqs_y));
-            data.(subj_name{i}).(block_name{j}).x_y = fourier(cursor.y_pos,target.x_pos,length(freqs_x));
+            if uw == 1 % if VMR, compute complex ratio with negative of y cursor position
+                data.(subj_name{i}).(block_name{j}).x_y = fourier(-cursor.y_pos,target.x_pos,length(freqs_x));
+            else
+                data.(subj_name{i}).(block_name{j}).x_y = fourier(cursor.y_pos,target.x_pos,length(freqs_x));
+            end
             data.(subj_name{i}).(block_name{j}).y_x = fourier(cursor.x_pos,target.y_pos,length(freqs_y));
             
             for k = 1:length(names)
@@ -87,7 +91,11 @@ function data = analyze_data(d, subj_name, block_name, rotate, uw)
             
             data.(subj_name{i}).(block_name{j}).x_x_all = fourier(cursor_all.x_pos, target_all.x_pos, length(freqs_x));
             data.(subj_name{i}).(block_name{j}).y_y_all = fourier(cursor_all.y_pos, target_all.y_pos, length(freqs_y));
-            data.(subj_name{i}).(block_name{j}).x_y_all = fourier(cursor_all.y_pos, target_all.x_pos, length(freqs_x));
+            if uw == 1 % if VMR, compute complex ratio with negative of y cursor position
+                data.(subj_name{i}).(block_name{j}).x_y_all = fourier(-cursor_all.y_pos, target_all.x_pos, length(freqs_x));
+            else
+                data.(subj_name{i}).(block_name{j}).x_y_all = fourier(cursor_all.y_pos, target_all.x_pos, length(freqs_x));
+            end
             data.(subj_name{i}).(block_name{j}).y_x_all = fourier(cursor_all.x_pos, target_all.y_pos, length(freqs_y));
             
             N = size(target.x_pos,1);
@@ -190,7 +198,7 @@ function data = analyze_data(d, subj_name, block_name, rotate, uw)
         boot.(names{i}).amplitude = abs(boot.(names{i}).fft);
         y1 = 20*log10(sort(boot.(names{i}).amplitude,3));
         boot.(names{i}).phase = angle(boot.(names{i}).fft);
-        boot.(names{i}).phase = sort(unwrap(sort(unwrap(sort(unwrap(unwrap(sort(boot.(names{i}).phase,3),[],3),[],2),3),[],3),3),[],3),3);
+        boot.(names{i}).phase = sort(unwrap(sort(boot.(names{i}).phase,3),[],2),3);
         
         if uw ~= 0
             switch names{i}
