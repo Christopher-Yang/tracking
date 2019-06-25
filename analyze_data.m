@@ -190,7 +190,7 @@ function data = analyze_data(d, subj_name, block_name, rotate, uw)
         boot.(names{i}).amplitude = abs(boot.(names{i}).fft);
         y1 = 20*log10(sort(boot.(names{i}).amplitude,3));
         boot.(names{i}).phase = angle(boot.(names{i}).fft);
-        boot.(names{i}).phase = sort(unwrap(sort(unwrap(sort(unwrap(unwrap(sort(boot.(names{i}).phase,3),[],3),[],2),3),[],3),3),[],3),3);
+        boot.(names{i}).phase = sort(unwrap(sort(boot.(names{i}).phase,3),[],2),3);
         
         if uw ~= 0
             switch names{i}
