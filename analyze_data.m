@@ -78,18 +78,18 @@ function data = analyze_data(d, subj_name, block_name, rotate, uw)
             
             data.(subj_name{i}).(block_name{j}).x_x = fourier(cursor.x_pos,target.x_pos,length(freqs_x));
             data.(subj_name{i}).(block_name{j}).y_y = fourier(cursor.y_pos,target.y_pos,length(freqs_y));
-            if uw == 1 && j ~= 1 % if VMR, compute complex ratio with negative of y cursor position
-                if j == 6
-                    data.(subj_name{i}).(block_name{j}).x_y = fourier(cursor.y_pos,target.x_pos,length(freqs_x));
-                    data.(subj_name{i}).(block_name{j}).y_x = fourier(cursor.x_pos,-target.y_pos,length(freqs_y));
-                elseif j > 1
-                    data.(subj_name{i}).(block_name{j}).x_y = fourier(-cursor.y_pos,target.x_pos,length(freqs_x));
-                    data.(subj_name{i}).(block_name{j}).y_x = fourier(cursor.x_pos,target.y_pos,length(freqs_y));
-                end
-            else
+%             if uw == 1 && j ~= 1 % if VMR, compute complex ratio with negative of y cursor position
+%                 if j == 6
+%                     data.(subj_name{i}).(block_name{j}).x_y = fourier(cursor.y_pos,target.x_pos,length(freqs_x));
+%                     data.(subj_name{i}).(block_name{j}).y_x = fourier(cursor.x_pos,-target.y_pos,length(freqs_y));
+%                 elseif j > 1
+%                     data.(subj_name{i}).(block_name{j}).x_y = fourier(-cursor.y_pos,target.x_pos,length(freqs_x));
+%                     data.(subj_name{i}).(block_name{j}).y_x = fourier(cursor.x_pos,target.y_pos,length(freqs_y));
+%                 end
+%             else
                 data.(subj_name{i}).(block_name{j}).x_y = fourier(cursor.y_pos,target.x_pos,length(freqs_x));
                 data.(subj_name{i}).(block_name{j}).y_x = fourier(cursor.x_pos,target.y_pos,length(freqs_y));
-            end
+%             end
             
             for k = 1:length(names)
                 data.(subj_name{i}).(block_name{j}).(names{k}).phase = unwrap(data.(subj_name{i}).(block_name{j}).(names{k}).phase)*(180/pi);
@@ -97,18 +97,18 @@ function data = analyze_data(d, subj_name, block_name, rotate, uw)
             
             data.(subj_name{i}).(block_name{j}).x_x_all = fourier(cursor_all.x_pos, target_all.x_pos, length(freqs_x));
             data.(subj_name{i}).(block_name{j}).y_y_all = fourier(cursor_all.y_pos, target_all.y_pos, length(freqs_y));
-            if uw == 1 && j ~= 1 % if VMR, compute complex ratio with negative of y cursor position
-                if j == 6
-                    data.(subj_name{i}).(block_name{j}).x_y_all = fourier(cursor_all.y_pos, target_all.x_pos, length(freqs_x));
-                    data.(subj_name{i}).(block_name{j}).y_x_all = fourier(cursor_all.x_pos, -target_all.y_pos, length(freqs_y));
-                elseif j > 1
-                    data.(subj_name{i}).(block_name{j}).x_y_all = fourier(-cursor_all.y_pos, target_all.x_pos, length(freqs_x));
-                    data.(subj_name{i}).(block_name{j}).y_x_all = fourier(cursor_all.x_pos, target_all.y_pos, length(freqs_y));
-                end
-            else
+%             if uw == 1 && j ~= 1 % if VMR, compute complex ratio with negative of y cursor position
+%                 if j == 6
+%                     data.(subj_name{i}).(block_name{j}).x_y_all = fourier(cursor_all.y_pos, target_all.x_pos, length(freqs_x));
+%                     data.(subj_name{i}).(block_name{j}).y_x_all = fourier(cursor_all.x_pos, -target_all.y_pos, length(freqs_y));
+%                 elseif j > 1
+%                     data.(subj_name{i}).(block_name{j}).x_y_all = fourier(-cursor_all.y_pos, target_all.x_pos, length(freqs_x));
+%                     data.(subj_name{i}).(block_name{j}).y_x_all = fourier(cursor_all.x_pos, target_all.y_pos, length(freqs_y));
+%                 end
+%             else
                 data.(subj_name{i}).(block_name{j}).x_y_all = fourier(cursor_all.y_pos, target_all.x_pos, length(freqs_x));
                 data.(subj_name{i}).(block_name{j}).y_x_all = fourier(cursor_all.x_pos, target_all.y_pos, length(freqs_y));
-            end
+%             end
             
             N = size(target.x_pos,1);
             cohxx = NaN(size(target_all.x_pos,2),length(freqs));
