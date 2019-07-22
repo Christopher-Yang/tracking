@@ -50,10 +50,10 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
             
         for i = 1:Nsubj
             for j = 1:length(gblocks)
-                a.x_all(:,j,i) = d.(subj{i}).(block_name{gblocks(j)}).cursor.x_fft.amplitude; % puts each subject's amplitude spectrums into data structure
-                a.y_all(:,j,i) = d.(subj{i}).(block_name{gblocks(j)}).cursor.y_fft.amplitude;
-                r.x(:,j,i) = d.(subj{i}).(block_name{gblocks(j)}).cursor.x_fft.fft(1:length(xAxis)); % for averaging together each subject's ffts
-                r.y(:,j,i) = d.(subj{i}).(block_name{gblocks(j)}).cursor.y_fft.fft(1:length(xAxis));
+                a.x_all(:,j,i) = d.(subj{i}).(block_name{gblocks(j)}).Rhand.x_fft.amplitude; % puts each subject's amplitude spectrums into data structure
+                a.y_all(:,j,i) = d.(subj{i}).(block_name{gblocks(j)}).Rhand.y_fft.amplitude;
+                r.x(:,j,i) = d.(subj{i}).(block_name{gblocks(j)}).Rhand.x_fft.fft(1:length(xAxis)); % for averaging together each subject's ffts
+                r.y(:,j,i) = d.(subj{i}).(block_name{gblocks(j)}).Rhand.y_fft.fft(1:length(xAxis));
             end
         end
         
@@ -106,26 +106,17 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
             plot(freqsY,ampY,'o','Color',col(2,:),'LineWidth',lw,'MarkerFaceColor',col(2,:),'MarkerEdgeColor','none')
             plot([50 51], [50 51],'Color',col(3,:),'LineWidth',lw)
             plot([50 51], [50 51],'--','Color',col(5,:),'LineWidth',lw)
-            if i == 1 || i == length(gblocks)
-                % plot mean with error bars; this doesn't work if averaging
-                % is done in complex domain, only if individual amplitude
-                % spectrums are averaged together
-%                 s = shadedErrorBar(xAxis, a.x(:,i),a.errx(:,:,i));
-%                 editErrorBar(s,col(3,:),0.25);
-                plot(xAxis,a.x(:,i),'Color',col(3,:),'LineWidth',lw)
-                plot(xAxis,a.x_all(:,:,i),'Color',[col(3,:) 0.15],'LineWidth',0.25)
-                if i == length(gblocks)
-                    plot(xAxis,a.x(:,1),'--','Color',col(5,:),'LineWidth',lw)
-                end
-                plot(freqsX,a.x(ix,i),'o','Color',col(1,:),'LineWidth',lw,'MarkerFaceColor',col(1,:),'MarkerEdgeColor','none')
-            else
-%                 s = shadedErrorBar(xAxis, a.y(:,i),a.erry(:,:,i));
-%                 editErrorBar(s,col(3,:),0.25);
-                plot(xAxis,a.y(:,i),'Color',col(3,:),'LineWidth',lw)
-                plot(xAxis,a.y_all(:,:,i),'Color',[col(3,:) 0.15],'LineWidth',0.25)
+            % plot mean with error bars; this doesn't work if averaging
+            % is done in complex domain, only if individual amplitude
+            % spectrums are averaged together
+%             s = shadedErrorBar(xAxis, a.x(:,i),a.errx(:,:,i));
+%             editErrorBar(s,col(3,:),0.25);
+            plot(xAxis,a.x(:,i),'Color',col(3,:),'LineWidth',lw)
+            plot(xAxis,a.x_all(:,:,i),'Color',[col(3,:) 0.15],'LineWidth',0.25)
+            if i > 1
                 plot(xAxis,a.x(:,1),'--','Color',col(5,:),'LineWidth',lw)
-                plot(freqsY,a.y(iy,i),'o','Color',col(2,:),'LineWidth',lw,'MarkerFaceColor',col(2,:),'MarkerEdgeColor','none')
             end
+            plot(freqsX,a.x(ix,i),'o','Color',col(1,:),'LineWidth',lw,'MarkerFaceColor',col(1,:),'MarkerEdgeColor','none')
             set(gca,'Xtick',0:1:2,'Ytick',0:0.01:0.03,'box','off','LineWidth',1,'TickDir','out','FontSize',fontSize,'XMinorTick','on')
             ax = gca;
             ax.XAxis.MinorTickValues = 0:0.25:2.25;
@@ -142,23 +133,14 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
             plot(freqsX, ampX,'o','LineWidth',lw,'Color',col(1,:),'MarkerFaceColor',col(1,:),'MarkerEdgeColor','none')
             hold on
             plot(freqsY, ampY,'o','LineWidth',lw,'Color',col(2,:),'MarkerFaceColor',col(2,:),'MarkerEdgeColor','none')
-            if i == 1 || i == length(gblocks)
-%                 s = shadedErrorBar(xAxis, a.y(:,i),a.erry(:,:,i),'lineProps','-b');
-%                 editErrorBar(s,col(3,:),0.25);
-                plot(xAxis,a.y(:,i),'LineWidth',lw,'Color',col(3,:),'MarkerFaceColor',col(3,:))
-                plot(xAxis,a.y_all(:,:,i),'Color',[col(3,:) 0.15],'LineWidth',0.25)
-                if i == length(gblocks)
-                    plot(xAxis,a.y(:,1),'--','Color',col(5,:),'LineWidth',lw)
-                end
-                plot(freqsY,a.y(iy,i),'o','LineWidth',1.5,'Color',col(2,:),'MarkerFaceColor',col(2,:),'MarkerEdgeColor','none')
-            else
-%                 s = shadedErrorBar(xAxis, a.x(:,i),a.errx(:,:,i),'lineProps','-b');
-%                 editErrorBar(s,col(3,:),0.25);
-                plot(xAxis,a.x(:,i),'LineWidth',lw,'Color',col(3,:),'MarkerFaceColor',col(3,:))
-                plot(xAxis,a.x_all(:,:,i),'Color',[col(3,:) 0.15],'LineWidth',0.25)
+%             s = shadedErrorBar(xAxis, a.y(:,i),a.erry(:,:,i),'lineProps','-b');
+%             editErrorBar(s,col(3,:),0.25);
+            plot(xAxis,a.y(:,i),'LineWidth',lw,'Color',col(3,:),'MarkerFaceColor',col(3,:))
+            plot(xAxis,a.y_all(:,:,i),'Color',[col(3,:) 0.15],'LineWidth',0.25)
+            if i > 1
                 plot(xAxis,a.y(:,1),'--','Color',col(5,:),'LineWidth',lw)
-                plot(freqsX,a.x(ix,i),'o','LineWidth',lw,'Color',col(1,:),'MarkerFaceColor',col(1,:),'MarkerEdgeColor','none')
             end
+            plot(freqsY,a.y(iy,i),'o','LineWidth',1.5,'Color',col(2,:),'MarkerFaceColor',col(2,:),'MarkerEdgeColor','none')
             set(gca,'Xtick',0:1:2,'Ytick',0:0.01:0.03,'box','off','LineWidth',1,'TickDir','out','FontSize',fontSize,'XMinorTick','on')
             ax = gca;
             ax.XAxis.MinorTickValues = 0:0.25:2.25;
@@ -190,7 +172,7 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
 % %     comp.x_off = [x_off(:,:,1); x_off(:,:,2)];
 %     comp = [x_on(:,:,1); x_on(:,:,2)];
 %     comp = cat(3, comp, [x_off(:,:,1); x_off(:,:,2)]);
-% %     comp.y_on = [y_on(:,:,1); y_on(:,:,2)];
+% %     comp.y_on = [y_on(:,:,1); y_on(:,:,2)];s
 % %     comp.y_off = [y_off(:,:,1); y_off(:,:,2)];
 %     comp2 = [repelem(0,10)'; repelem(1,10)'];
 %     within = {'frequency','axis'};

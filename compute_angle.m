@@ -3,7 +3,7 @@ load dat
 subj_rot = {'subj17','subj18','subj21','subj22','subj24','subj25','subj28','subj31','subj32','subj33'};
 subj_rot_i = {'subj14','subj15','subj16','subj19','subj23','subj26','subj27','subj29','subj30','subj34'};
 blocks = {'no_rot1','rot1','rot4','no_rot2'};
-names = {'x_x_all','y_x_all','x_y_all','y_y_all'};
+names = {'x_x_all','x_y_all','y_x_all','y_y_all'};
 for q = 1:2
     for p = 1:length(subj_rot)
         for k = 1:length(blocks)
@@ -19,7 +19,7 @@ for q = 1:2
         theta = zeros([15 1]);
         paramsInit = [cplx(:,1,1); theta];
         
-        error = @(params) scale(params,cplx); % change template value to whatever desired
+        error = @(params) scale(params,cplx); 
         paramsOpt = fmincon(error,paramsInit);
         phasor(:,p,q) = paramsOpt(1:7);
         thetaOpt = [1; paramsOpt(8:end)];
@@ -46,12 +46,6 @@ for q = 1:2
     end
 end
 
-% reorganize complex numbers so they're in hand representation instead of cursor
-vmrEarly = [-vmrEarly(1,2,:) vmrEarly(1,1,:); -vmrEarly(2,2,:) vmrEarly(2,1,:)];
-vmrLate = [-vmrLate(1,2,:) vmrLate(1,1,:); -vmrLate(2,2,:) vmrLate(2,1,:)];
-mrEarly = [mrEarly(1,2,:) mrEarly(1,1,:); mrEarly(2,2,:) mrEarly(2,1,:)];
-mrLate = [mrLate(1,2,:) mrLate(1,1,:); mrLate(2,2,:) mrLate(2,1,:)];
-
 %%
 col = lines;
 col = col(1:7,:);
@@ -62,7 +56,7 @@ mrXY = [squeeze(mrBase(1,2,:)) squeeze(mrAfter(1,2,:))];
 mrYX = [squeeze(mrBase(2,1,:)) squeeze(mrAfter(2,1,:))];
 
 figure(1); clf
-% subplot(2,3,2); 
+subplot(2,3,2); 
 hold on
 plot([-1 10],[0 0],'--k','LineWidth',1)
 plot(1:2,vmrXY','k','Color',[0 0 0 0.5],'MarkerSize',20)
@@ -115,57 +109,73 @@ mrAfterMu = mean(mrAfter,3);
 
 figure(1); clf
 subplot(2,4,1); hold on
-plot([0 vmrBaseMu(1,1)],[0 vmrBaseMu(1,2)])
-plot([0 vmrBaseMu(2,1)],[0 vmrBaseMu(2,2)])
+plot([0 vmrBaseMu(1,1)],[0 vmrBaseMu(2,1)],'LineWidth',1.5)
+plot([0 vmrBaseMu(1,2)],[0 vmrBaseMu(2,2)],'LineWidth',1.5)
+plot([0 1],[0 0],'k')
+plot([0 0],[0 1],'k')
 title('Baseline')
 ylabel('Rotation')
-axis([-0.4 0.8 -0.7 0.5])
+axis([-0.45 1 -0.45 1])
 axis square
 
 subplot(2,4,2); hold on
-plot([0 vmrEarlyMu(1,1)],[0 vmrEarlyMu(1,2)])
-plot([0 vmrEarlyMu(2,1)],[0 vmrEarlyMu(2,2)])
+plot([0 vmrEarlyMu(1,1)],[0 vmrEarlyMu(2,1)],'LineWidth',1.5)
+plot([0 vmrEarlyMu(1,2)],[0 vmrEarlyMu(2,2)],'LineWidth',1.5)
+plot([0 1],[0 0],'k')
+plot([0 0],[0 1],'k')
 title('Early')
-axis([-0.4 0.8 -0.7 0.5])
+axis([-0.45 1 -0.45 1])
 axis square
 
 subplot(2,4,3); hold on
-plot([0 vmrLateMu(1,1)],[0 vmrLateMu(1,2)])
-plot([0 vmrLateMu(2,1)],[0 vmrLateMu(2,2)])
+plot([0 vmrLateMu(1,1)],[0 vmrLateMu(2,1)],'LineWidth',1.5)
+plot([0 vmrLateMu(1,2)],[0 vmrLateMu(2,2)],'LineWidth',1.5)
+plot([0 1],[0 0],'k')
+plot([0 0],[0 1],'k')
 title('Late')
-axis([-0.4 0.8 -0.7 0.5])
+axis([-0.45 1 -0.45 1])
 axis square
 
 subplot(2,4,4); hold on
-plot([0 vmrAfterMu(1,1)],[0 vmrAfterMu(1,2)])
-plot([0 vmrAfterMu(2,1)],[0 vmrAfterMu(2,2)])
+plot([0 vmrAfterMu(1,1)],[0 vmrAfterMu(2,1)],'LineWidth',1.5)
+plot([0 vmrAfterMu(1,2)],[0 vmrAfterMu(2,2)],'LineWidth',1.5)
+plot([0 1],[0 0],'k')
+plot([0 0],[0 1],'k')
 title('Post')
-axis([-0.4 0.8 -0.7 0.5])
+axis([-0.45 1 -0.45 1])
 axis square
 
 subplot(2,4,5); hold on
-plot([0 mrBaseMu(1,1)],[0 mrBaseMu(1,2)])
-plot([0 mrBaseMu(2,1)],[0 mrBaseMu(2,2)])
+plot([0 mrBaseMu(1,1)],[0 mrBaseMu(2,1)],'LineWidth',1.5)
+plot([0 mrBaseMu(1,2)],[0 mrBaseMu(2,2)],'LineWidth',1.5)
+plot([0 1],[0 0],'k')
+plot([0 0],[0 1],'k')
 ylabel('Mirror Reversal')
-axis([-0.4 0.8 -0.7 0.5])
+axis([-0.45 1 -0.45 1])
 axis square
 
 subplot(2,4,6); hold on
-plot([0 mrEarlyMu(1,1)],[0 mrEarlyMu(1,2)])
-plot([0 mrEarlyMu(2,1)],[0 mrEarlyMu(2,2)])
-axis([-0.4 0.8 -0.7 0.5])
+plot([0 mrEarlyMu(1,1)],[0 mrEarlyMu(2,1)],'LineWidth',1.5)
+plot([0 mrEarlyMu(1,2)],[0 mrEarlyMu(2,2)],'LineWidth',1.5)
+plot([0 1],[0 0],'k')
+plot([0 0],[0 1],'k')
+axis([-0.45 1 -0.45 1])
 axis square
 
 subplot(2,4,7); hold on
-plot([0 mrLateMu(1,1)],[0 mrLateMu(1,2)])
-plot([0 mrLateMu(2,1)],[0 mrLateMu(2,2)])
-axis([-0.4 0.8 -0.7 0.5])
+plot([0 mrLateMu(1,1)],[0 mrLateMu(2,1)],'LineWidth',1.5)
+plot([0 mrLateMu(1,2)],[0 mrLateMu(2,2)],'LineWidth',1.5)
+plot([0 1],[0 0],'k')
+plot([0 0],[0 1],'k')
+axis([-0.45 1 -0.45 1])
 axis square
 
 subplot(2,4,8); hold on
-plot([0 mrAfterMu(1,1)],[0 mrAfterMu(1,2)])
-plot([0 mrAfterMu(2,1)],[0 mrAfterMu(2,2)])
-axis([-0.4 0.8 -0.7 0.5])
+plot([0 mrAfterMu(1,1)],[0 mrAfterMu(2,1)],'LineWidth',1.5)
+plot([0 mrAfterMu(1,2)],[0 mrAfterMu(2,2)],'LineWidth',1.5)
+plot([0 1],[0 0],'k')
+plot([0 0],[0 1],'k')
+axis([-0.45 1 -0.45 1])
 axis square
 
 %%
@@ -196,41 +206,42 @@ map2 = [linspace(col1(1),col2(1),Nstep)', linspace(col1(2),col2(2),Nstep)', lins
 map = [map1; map2];
 clims = [-1 1];
 
-figure(1)
+figure(1); clf
 subplot(2,4,1)
 imagesc(mean(vmrBase,3),clims)
 colormap(map)
 set(gca,'TickDir','out','Xtick',[],'Ytick',[])
 axis square
-title('VMR Baseline')
+title('Baseline')
+ylabel('Rotation')
 
 subplot(2,4,2)
 imagesc(mean(vmrEarly,3),clims)
 colormap(map)
 set(gca,'TickDir','out','Xtick',[],'Ytick',[])
 axis square
-title('VMR Early')
+title('Early')
 
 subplot(2,4,3)
 imagesc(mean(vmrLate,3),clims)
 colormap(map)
 set(gca,'TickDir','out','Xtick',[],'Ytick',[])
 axis square
-title('VMR Late')
+title('Late')
 
 subplot(2,4,4)
 imagesc(mean(vmrAfter,3),clims)
 colormap(map)
 set(gca,'TickDir','out','Xtick',[],'Ytick',[])
 axis square
-title('VMR After')
+title('After')
 
 subplot(2,4,5)
 imagesc(mean(mrBase,3),clims)
 colormap(map)
 set(gca,'TickDir','out','Xtick',[],'Ytick',[])
 axis square
-title('MR Baseline')
+ylabel('Mirror Reversal')
 
 subplot(2,4,6)
 imagesc(mean(mrEarly,3),clims)
@@ -238,7 +249,6 @@ imagesc(mean(mrEarly,3),clims)
 colormap(map)
 set(gca,'TickDir','out','Xtick',[],'Ytick',[])
 axis square
-title('MR Early')
 
 subplot(2,4,7)
 imagesc(mean(mrLate,3),clims)
@@ -246,7 +256,6 @@ imagesc(mean(mrLate,3),clims)
 colormap(map)
 set(gca,'Xtick',[],'Ytick',[])
 axis square
-title('MR Late')
 
 subplot(2,4,8)
 imagesc(mean(mrAfter,3),clims)
@@ -254,7 +263,6 @@ imagesc(mean(mrAfter,3),clims)
 colormap(map)
 set(gca,'Xtick',[],'Ytick',[])
 axis square
-title('MR After')
 
 %%
 function e = scale(params,cplx_data)

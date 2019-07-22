@@ -18,19 +18,19 @@ for p = 1:length(groups)
         subj(end) = [];
         for j = 1:length(gblocks)
             % add all trajectories into target
-            clear target cursor
+            clear target hand
             target(:,1) = data.(groups{p}).(subj{k}).(block_name{gblocks(j)}).target.x_pos;
             target(:,2) = data.(groups{p}).(subj{k}).(block_name{gblocks(j)}).target.y_pos;
-            cursor(:,1) = data.(groups{p}).(subj{k}).(block_name{gblocks(j)}).cursor.x_pos;
-            cursor(:,2) = data.(groups{p}).(subj{k}).(block_name{gblocks(j)}).cursor.y_pos;
+            hand(:,1) = data.(groups{p}).(subj{k}).(block_name{gblocks(j)}).Rhand.x_pos;
+            hand(:,2) = data.(groups{p}).(subj{k}).(block_name{gblocks(j)}).Rhand.y_pos;
             
             % bandpass signals if desired
 %             target2 = bandpass(target2,bpFreqs,130.004)';
 %             cursor = bandpass(cursor,bpFreqs,130.004)';
             
             % ensure that rows are x vs y and columns are points in trajectory
-            if size(cursor,1) > size(cursor,2)
-                cursor = cursor';
+            if size(hand,1) > size(hand,2)
+                hand = hand';
                 target = target';
             end
 
@@ -38,7 +38,7 @@ for p = 1:length(groups)
             for i = 1:length(ang)
                 R = rotz(ang(i));
                 R = R(1:2,1:2);
-                Rcursor = R*cursor;
+                Rcursor = R*hand;
                 
                 % lag the target and cursor trajectories if desired; uncomment lag in line 10/11 
 %                 if lag ~= 0
@@ -108,11 +108,11 @@ for p = 1:length(groups)
         end
     end
 %     plot([-90 180],[nothing nothing],'--k','LineWidth',1) % MSE of doing nothing
-    xticks(-60:30:180)
+    xticks(-90:30:90)
     yticks(0.002:0.0005:0.004)
     xlabel(['Rotation Angle (',char(176),')'])
     ylabel('Mean-Squared Error (m^2)')
-    axis([-45 110 .0017 .0035])
+    axis([-90 30 .0017 .0035])
     set(gca,'TickDir','out')
     box off
     set(gcf,'Renderer','painters')

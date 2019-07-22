@@ -13,7 +13,7 @@ d = load_data(subj_name,block_name,folder,time);
 data.rot = analyze_data(d,subj_rot,block_name,false,1);
 data.rot_i = analyze_data(d,subj_rot_i,block_name,false,2);
 
-% save dat data;
+save dat data;
 disp('Done')
 
 %% graph phasor plots
@@ -36,8 +36,8 @@ graph_bode_simple(data, graph_name, groups, gblocks);
 %% graph performance
 gblocks = [1:2 5:6];
 
-% graph_amp_avg(data,groups,block_name,gblocks,graph_name); % amplitude spectrums
-graph_MSE(data, groups, block_name, graph_name); % mean squared error
+graph_amp_avg(data,groups,block_name,gblocks,graph_name); % amplitude spectrums
+% graph_MSE(data, groups, block_name, graph_name); % mean squared error
 % graph_rotatedMSE(data, groups, block_name, gblocks, graph_name); % rotating MSE
 % graph_angle(data, groups, gblocks,theta); % angle of movement error
 % graph_lag(data, groups, gblocks, graph_name); % response lag
