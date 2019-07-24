@@ -42,44 +42,35 @@ function data = analyze_data(d, subj_name, block_name, rotate, uw)
                 amplitudes_y = input(num*3+1:num*4);
             end
             
-            c = [mean(output(1:end-13,7,:),3) mean(output(1:end-13,8,:),3)]';
+            h = [mean(output(1:end-13,5,:),3) mean(output(1:end-13,6,:),3)]';
             t = [mean(output(1:end-13,1,:),3) mean(output(1:end-13,2,:),3)]';
-%             c = c - repmat([0.8 0.3]', [1 size(c,2)]);
+%             h = h - repmat([0.8 0.3]', [1 size(c,2)]);
             t = t - repmat([0.8 0.3]', [1 size(t,2)]);
-            c = c - repmat([mean(c(1,:)) mean(c(2,:))]', [1 size(c,2)]); % baseline correction for dark trials
-            c_all = [output(1:end-13,7,:) output(1:end-13,8,:)];
+            h = h - repmat([mean(h(1,:)) mean(h(2,:))]', [1 size(h,2)]); % baseline correction for dark trials
+            h_all = [output(1:end-13,5,:) output(1:end-13,6,:)];
             t_all = [output(1:end-13,1,:) output(1:end-13,2,:)];
 %             c_all = c_all - repmat([0.8 0.3], [size(c_all,1) 1 size(c_all,3)]);
             t_all = t_all - repmat([0.8 0.3], [size(t_all,1) 1 size(t_all,3)]);
-            c_all = c_all - repmat(mean(c_all), [size(c_all,1) 1 1]);  % baseline correction for dark trials
+            h_all = h_all - repmat(mean(h_all), [size(h_all,1) 1 1]);  % baseline correction for dark trials
             
             MSE = NaN(1,size(output,3));
             for k = 1:size(output,3)
-                MSE(k) = mean((c_all(:,1,k)-t_all(:,1,k)).^2 + (c_all(:,2,k)-t_all(:,2,k)).^2);
+                MSE(k) = mean((h_all(:,1,k)-t_all(:,1,k)).^2 + (h_all(:,2,k)-t_all(:,2,k)).^2);
             end
-
-%             if rotate == true
-%                 c = R*c;
-%                 t = R*t;
-%                 for k = 1:size(c_all,3)
-%                     c_all(:,:,k) = c_all(:,:,k)*R';
-%                     t_all(:,:,k) = t_all(:,:,k)*R';
-%                 end
-%             end
             
 %             create data structures to store all data
-            cursor = struct('x_pos',c(1,:)','y_pos',c(2,:)'); %no time shift
+            Rhand = struct('x_pos',h(1,:)','y_pos',h(2,:)'); %no time shift
             target = struct('x_pos',t(1,:)','y_pos',t(2,:)');
-            cursor_all = struct('x_pos',squeeze(c_all(:,1,:)),'y_pos',squeeze(c_all(:,2,:)));
+            cursor_all = struct('x_pos',squeeze(h_all(:,1,:)),'y_pos',squeeze(h_all(:,2,:)));
             target_all = struct('x_pos',squeeze(t_all(:,1,:)),'y_pos',squeeze(t_all(:,2,:)));
             fs = 130.004;
-            x_axis = fs*(0:length(cursor.x_pos)/2)/length(cursor.x_pos);
+            x_axis = fs*(0:length(Rhand.x_pos)/2)/length(Rhand.x_pos);
             time = output(:,11,1)-output(1,11,1);
             
-            data.(subj_name{i}).(block_name{j}).x_x = fourier(cursor.x_pos,target.x_pos,length(freqs_x));
-            data.(subj_name{i}).(block_name{j}).y_y = fourier(cursor.y_pos,target.y_pos,length(freqs_y));
-            data.(subj_name{i}).(block_name{j}).x_y = fourier(cursor.y_pos,target.x_pos,length(freqs_x));
-            data.(subj_name{i}).(block_name{j}).y_x = fourier(cursor.x_pos,target.y_pos,length(freqs_y));
+            data.(subj_name{i}).(block_name{j}).x_x = fourier(Rhand.x_pos,target.x_pos,length(freqs_x));
+            data.(subj_name{i}).(block_name{j}).y_y = fourier(Rhand.y_pos,target.y_pos,length(freqs_y));
+            data.(subj_name{i}).(block_name{j}).x_y = fourier(Rhand.y_pos,target.x_pos,length(freqs_x));
+            data.(subj_name{i}).(block_name{j}).y_x = fourier(Rhand.x_pos,target.y_pos,length(freqs_y));
             
             for k = 1:length(names)
                 data.(subj_name{i}).(block_name{j}).(names{k}).phase = unwrap(data.(subj_name{i}).(block_name{j}).(names{k}).phase)*(180/pi);
@@ -137,11 +128,11 @@ function data = analyze_data(d, subj_name, block_name, rotate, uw)
             data.(subj_name{i}).(block_name{j}).x_x.RRcohere = mean(cohx);
             data.(subj_name{i}).(block_name{j}).y_y.RRcohere = mean(cohy);
             
-            cursor.x_fft = fourier(cursor.x_pos);   %perform fft and get amplitude data
-            cursor.y_fft = fourier(cursor.y_pos);
+            Rhand.x_fft = fourier(Rhand.x_pos);   %perform fft and get amplitude data
+            Rhand.y_fft = fourier(Rhand.y_pos);
             target.x_fft = fourier(target.x_pos);
             target.y_fft = fourier(target.y_pos);
-            data.(subj_name{i}).(block_name{j}).cursor = cursor;
+            data.(subj_name{i}).(block_name{j}).Rhand = Rhand;
             data.(subj_name{i}).(block_name{j}).target = target;
             data.(subj_name{i}).(block_name{j}).time = time;
             data.(subj_name{i}).(block_name{j}).MSE = MSE;
