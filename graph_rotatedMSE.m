@@ -6,7 +6,7 @@ col = col(1:7,:);
 delt = 0.01;
 t = 0:delt:10-delt;
 nstep = length(t);
-ang = -90:1:180; % angles to rotate the cursor trajectory
+ang = -210:1:149; % angles to rotate the cursor trajectory
 Nsubj = length(fieldnames(data.(groups{1})))-1;
 % bpFreqs = [1.5 2]; % frequencies to bandpass trajectories; optional
 % lag = 0; % lag cursor trajectories; optional
@@ -64,55 +64,35 @@ for p = 1:length(groups)
     for i = 1:length(gblocks)
         covar(:,:,i) = cov(minAng(i,:),minMSE(i,:));
     end
-    
-    bl = [1 4];
-    if p == 1
-        minMSE_vec = reshape(minMSE,[numel(minMSE) 1]); % vectorize minMSE
-        minAng_vec = reshape(minAng,[numel(minAng) 1]); % vectorize minAng
-    else
-        minMSE_vec = reshape(minMSE(bl,:),[numel(minMSE(bl,:)) 1]); % vectorize minMSE
-        minAng_vec = reshape(minAng(bl,:),[numel(minAng(bl,:)) 1]); % vectorize minAng
-        minMSE_avg = minMSE_avg(bl);
-        minAng_avg = minAng_avg(bl);
-        covar = covar(:,:,bl);
-    end
+
+    minMSE_vec = reshape(minMSE,[numel(minMSE) 1]); % vectorize minMSE
+    minAng_vec = reshape(minAng,[numel(minAng) 1]); % vectorize minAng
     
     % plot distributions of minimum MSE vs rotation angle
     figure; hold on
-    if p == 1
-        for i = 1:length(gblocks)
-            if i == 1
-                plot(-1*ones(2,4),'.','MarkerSize',20)
-            end
-            hold on
-            a = error_ellipse(covar(:,:,i),[minAng_avg(i),minMSE_avg(i)],'conf',0.5); % confidence ellipse
-            a.Color = col(i,:);
-            scatter(minAng_avg,minMSE_avg,60,col(1:length(gblocks),:),'filled') % average minimum MSE
-            scatter(minAng_vec,minMSE_vec,25,repmat(col(1:length(gblocks),:),[Nsubj 1]),'filled','MarkerFaceAlpha',0.5); % minimum MSE for each participant
-            title('Rotation')
-            legend(graph_name{gblocks},'Location','Northwest')
+    for i = 1:length(gblocks)
+        if i == 1
+            plot(-1*ones(2,4),'.','MarkerSize',20)
         end
-    else
-        for i = 1:2
-            if i == 1
-                plot([-1 -1],'.','MarkerSize',20,'MarkerEdgeColor',col(1,:))
-                hold on
-                plot([-1 -1],'.','MarkerSize',20,'MarkerEdgeColor',col(4,:))
-            end
-            a = error_ellipse(covar(:,:,i),[minAng_avg(i),minMSE_avg(i)],'conf',0.5); % confidence ellipse
-            a.Color = col(bl(i),:);
-            scatter(minAng_avg,minMSE_avg,60,col(bl,:),'filled') % average minimum MSE
-            scatter(minAng_vec,minMSE_vec,25,repmat(col(bl,:),[Nsubj 1]),'filled','MarkerFaceAlpha',0.5); % minimum MSE for each participant
-            title('Mirror Reversal')
-            legend(graph_name{gblocks(bl)},'Location','Northwest')
-        end
+        hold on
+        a = error_ellipse(covar(:,:,i),[minAng_avg(i),minMSE_avg(i)],'conf',0.5); % confidence ellipse
+        a.Color = col(i,:);
+        scatter(minAng_avg,minMSE_avg,60,col(1:length(gblocks),:),'filled') % average minimum MSE
+        scatter(minAng_vec,minMSE_vec,25,repmat(col(1:length(gblocks),:),[Nsubj 1]),'filled','MarkerFaceAlpha',0.5); % minimum MSE for each participant
+        legend(graph_name{gblocks},'Location','Northwest')
     end
-%     plot([-90 180],[nothing nothing],'--k','LineWidth',1) % MSE of doing nothing
-    xticks(-90:30:90)
+    if p == 1
+        title('Rotation')
+        xticks(-90:30:30)
+        axis([-90 30 .0017 .0035])
+    else
+        title('Mirror-Reversal')
+        xticks(-210:30:150)
+        axis([-210 60 .0017 .0035])
+    end
     yticks(0.002:0.0005:0.004)
     xlabel(['Rotation Angle (',char(176),')'])
     ylabel('Mean-Squared Error (m^2)')
-    axis([-90 30 .0017 .0035])
     set(gca,'TickDir','out')
     box off
     set(gcf,'Renderer','painters')

@@ -181,7 +181,7 @@ axis square
 %%
 group = 1;
 subj = 4;
-blockIdx = 4;
+blockIdx = 1;
 
 plot_subj(data.rot.(subj_rot{subj}).(blocks{blockIdx}),0)
 subplot(2,2,1)
