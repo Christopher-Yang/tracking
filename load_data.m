@@ -4,7 +4,7 @@ function output = load_data(subj_name, block_name, folder,time)
     most_freq = 0;
 
     for i = 1:length(subj_name)
-        disp(['   ' subj_name{i}]);
+        disp(['   Subject ' num2str(i)]);
         for j = 1:length(block_name)
             path = [folder,subj_name{i},'/',block_name{j}];
             tFile = dlmread([path,'/tFile.tgt']);
@@ -27,9 +27,11 @@ function output = load_data(subj_name, block_name, folder,time)
                 most_freq = x;
             end
             
-            output.(subj_name{i}).(block_name{j}).traj = full;
-            output.(subj_name{i}).(block_name{j}).tFile = tFile;
+            bName = regexprep(block_name{j},'^...','');
+            
+            output{i}.(bName).traj = full;
+            output{i}.(bName).tFile = tFile;
         end
     end
-    output.most_freq = most_freq;
+%     output.most_freq = most_freq;
 end
