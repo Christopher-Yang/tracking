@@ -52,11 +52,16 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
             for j = 1:length(gblocks)
                 a.x_all(:,j,i) = d.(subj{i}).(block_name{gblocks(j)}).cursor.x_fft.amplitude; % puts each subject's amplitude spectrums into data structure
                 a.y_all(:,j,i) = d.(subj{i}).(block_name{gblocks(j)}).cursor.y_fft.amplitude;
+                r.x(:,j,i) = d.(subj{i}).(block_name{gblocks(j)}).cursor.x_fft.fft(1:length(xAxis)); % for averaging together each subject's ffts
+                r.y(:,j,i) = d.(subj{i}).(block_name{gblocks(j)}).cursor.y_fft.fft(1:length(xAxis));
             end
         end
         
-        a.x = mean(a.x_all,3);
-        a.y = mean(a.y_all,3);
+        for i = 1:2
+            r.(names1{i}) = mean(r.(names1{i}),3);
+            a.(names1{i}) = abs(r.(names1{i})/length(r.(names1{i})));
+            a.(names1{i})(2:end-1,:,:) = 2*a.(names1{i})(2:end-1,:,:);
+        end
         
         a.x_all = permute(a.x_all,[1 3 2]);
         a.y_all = permute(a.y_all,[1 3 2]);
