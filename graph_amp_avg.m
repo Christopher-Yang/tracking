@@ -31,17 +31,12 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
         
         g1 = NaN(length(xAxis),length(gblocks),Nsubj);
         g2 = NaN(length(xAxis),1000,length(gblocks));
-        g3 = NaN(length(freqsX),1000);
         amps.(groups{k}).x = g1;
         amps.(groups{k}).y = g1;
         a = amps.(groups{k});
         r = amps.(groups{k});
         a.bootx = g2;
         a.booty = g2;
-        a.bootdx_on = g3;
-        a.bootdx_off = g3;
-        a.bootdy_on = g3;
-        a.bootdy_off = g3;
 
         names1 = {'x','y','dx','dy'};
         names2 = {'bootx','booty','bootdx','bootdy'};
@@ -52,16 +47,11 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
             for j = 1:length(gblocks)
                 a.x_all(:,j,i) = d.(subj{i}).(block_name{gblocks(j)}).cursor.x_fft.amplitude; % puts each subject's amplitude spectrums into data structure
                 a.y_all(:,j,i) = d.(subj{i}).(block_name{gblocks(j)}).cursor.y_fft.amplitude;
-                r.x(:,j,i) = d.(subj{i}).(block_name{gblocks(j)}).cursor.x_fft.fft(1:length(xAxis)); % for averaging together each subject's ffts
-                r.y(:,j,i) = d.(subj{i}).(block_name{gblocks(j)}).cursor.y_fft.fft(1:length(xAxis));
             end
         end
         
-        for i = 1:2
-            r.(names1{i}) = mean(r.(names1{i}),3);
-            a.(names1{i}) = abs(r.(names1{i})/length(r.(names1{i})));
-            a.(names1{i})(2:end-1,:,:) = 2*a.(names1{i})(2:end-1,:,:);
-        end
+        a.x = mean(a.x_all,3);
+        a.y = mean(a.y_all,3);
         
         a.x_all = permute(a.x_all,[1 3 2]);
         a.y_all = permute(a.y_all,[1 3 2]);
