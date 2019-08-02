@@ -13,7 +13,7 @@ d = load_data(subj_name,block_name,folder,time);
 data.rot = analyze_data(d,subj_rot,block_name,false,1);
 data.rot_i = analyze_data(d,subj_rot_i,block_name,false,2);
 
-save dat data;
+% save dat data;
 disp('Done')
 
 %% graph phasor plots
