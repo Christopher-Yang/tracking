@@ -36,9 +36,9 @@ graph_bode_simple(data, graph_name, groups, gblocks);
 %% graph performance
 gblocks = [1:2 5:6];
 
-graph_amp_avg(data,groups,block_name,gblocks,graph_name); % amplitude spectrums
+% graph_amp_avg(data,groups,block_name,gblocks,graph_name); % amplitude spectrums
 % graph_MSE(data, groups, block_name, graph_name); % mean squared error
-% graph_rotatedMSE(data, groups, block_name, gblocks, graph_name); % rotating MSE
+graph_rotatedMSE(data, groups, block_name, gblocks, graph_name); % rotating MSE
 % graph_angle(data, groups, gblocks,theta); % angle of movement error
 % graph_lag(data, groups, gblocks, graph_name); % response lag
 % graph_complexError(data, groups, graph_name, gblocks); % complex tracking error
