@@ -11,14 +11,18 @@ function output = load_data(subj_name, block_name, folder,time)
             Tb = 1/(tFile(1)/2);
             Ncycles = floor(time/Tb);
             trial_time = Tb*Ncycles;
-            Nsamples = round(trial_time*130.004)+13;
+            Nsamples = round(trial_time*130.004);
             fnames = dir(path);
             full = [];
+            N = Nsamples/Ncycles;
             
             for k = 1:length(fnames(not([fnames.isdir])))-1
                 name = ['traj',num2str(k)];
-                data.(name) = dlmread([path,'/',fnames(3+(k-1)).name],' ',6,0);   
-                data.(name) = data.(name)(end-Nsamples:end,:);    %only trajectory after 5 sec warm up time is used
+                data.(name) = dlmread([path,'/',fnames(3+(k-1)).name],' ',6,0);
+                idx = data.(name)(:,9)==1;
+                data.(name) = data.(name)(idx,:);
+                data.(name) = data.(name)(end-Nsamples+1:end,:);    %only trajectory after 5 sec warm up time is used
+                data.(name) = cat(3,data.(name)(1:N,:),data.(name)(N+1:2*N,:),data.(name)(2*N+1:3*N,:)); % divide signal into trials with the length of base period
                 full = cat(3,full,data.(name));
             end
             
@@ -27,7 +31,8 @@ function output = load_data(subj_name, block_name, folder,time)
                 most_freq = x;
             end
             
-            bName = regexprep(block_name{j},'^...','');
+%             bName = regexprep(block_name{j},'^...','');
+            bName = block_name{j};
             
             output{i}.(bName).traj = full;
             output{i}.(bName).tFile = tFile;

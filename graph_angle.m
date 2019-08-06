@@ -1,4 +1,4 @@
-function graph_angle(data, groups, gblocks, theta)
+function graph_angle(data, gblocks, theta)
 
     col = lines;
     col = col(1:7,:);

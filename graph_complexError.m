@@ -1,4 +1,4 @@
-function graph_complexError(data, groups, graph_name, gblocks)
+function graph_complexError(data, graph_name, gblocks)
     
     group_names = {'Rotation','Mirror Reversal'};
     f_x = data.(groups{1}).avg.x_x.freqs;

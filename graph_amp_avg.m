@@ -1,4 +1,4 @@
-function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
+function graph_amp_avg(data,block_name,gblocks,graph_name)
     
     col = [255 69 0
            153 50 204
@@ -30,11 +30,9 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
     
     g1 = NaN(length(xAxis),length(gblocks),Nsubj);
     g2 = NaN(length(xAxis),1000,length(gblocks));
-    g3 = NaN(length(freqsX),1000);
     amps.x = g1;
     amps.y = g1;
     a = amps;
-    r = amps;
     
     names1 = {'x','y'};
     names2 = {'bootx','booty'};
@@ -45,16 +43,11 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
         for j = 1:length(gblocks)
             a.x_all(:,j,i) = data{i}.(block_name{gblocks(j)}).cursor.x_fft.amplitude; % puts each subject's amplitude spectrums into data structure
             a.y_all(:,j,i) = data{i}.(block_name{gblocks(j)}).cursor.y_fft.amplitude;
-            r.x(:,j,i) = data{i}.(block_name{gblocks(j)}).cursor.x_fft.fft(1:length(xAxis)); % for averaging together each subject's ffts
-            r.y(:,j,i) = data{i}.(block_name{gblocks(j)}).cursor.y_fft.fft(1:length(xAxis));
         end
     end
     
-    for i = 1:2
-        r.(names1{i}) = mean(r.(names1{i}),3);
-        a.(names1{i}) = abs(r.(names1{i})/Nsteps);
-        a.(names1{i})(2:end-1,:,:) = 2*a.(names1{i})(2:end-1,:,:);
-    end
+    a.x = mean(a.x_all,3);
+    a.y = mean(a.y_all,3);
     
     a.x_all = permute(a.x_all,[1 3 2]);
     a.y_all = permute(a.y_all,[1 3 2]);
@@ -72,7 +65,7 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
     
     for i = 1:length(gblocks)
         figure(H(i))
-        subplot(1,2,1)
+        subplot(2,1,1)
         plot(freqsX,ampX,'o','Color',col(1,:),'LineWidth',lw,'MarkerFaceColor',col(1,:),'MarkerEdgeColor','none')
         hold on
         plot(freqsY,ampY,'o','Color',col(2,:),'LineWidth',lw,'MarkerFaceColor',col(2,:),'MarkerEdgeColor','none')
@@ -103,7 +96,7 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
         legend({'X target','Y target','Hand','Baseline'})
         legend boxoff
         
-        subplot(1,2,2)
+        subplot(2,1,2)
         plot(freqsX, ampX,'o','LineWidth',lw,'Color',col(1,:),'MarkerFaceColor',col(1,:),'MarkerEdgeColor','none')
         hold on
         plot(freqsY, ampY,'o','LineWidth',lw,'Color',col(2,:),'MarkerFaceColor',col(2,:),'MarkerEdgeColor','none')

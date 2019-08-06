@@ -14,9 +14,7 @@ function data = analyze_data(d, block_name, uw)
     names = {'x_x','y_y','x_y','y_x'};
     freqs_x = NaN;
     freqs_y = NaN;
-    
-    output_names = {'Lhand','Rhand','cursor'};
-    
+
     for i = 1:Nsubj
         disp(['   Subject ' num2str(i)]);
         for j = 1:Nblocks
@@ -32,8 +30,8 @@ function data = analyze_data(d, block_name, uw)
             amplitudes_y = input(num*3+1:num*4);
             
             for k = 0:3
-                trajs(:,:,k+1) = [mean(output(1:end-13,k*2+1,:),3) mean(output(1:end-13,k*2+2,:),3)]';
-                trajs_all(:,:,:,k+1) = [output(1:end-13,k*2+1,:) output(1:end-13,k*2+2,:)];
+                trajs(:,:,k+1) = [mean(output(:,k*2+1,:),3) mean(output(:,k*2+2,:),3)]';
+                trajs_all(:,:,:,k+1) = [output(:,k*2+1,:) output(:,k*2+2,:)];
                 if k == 0
                     trajs(:,:,k+1) = trajs(:,:,k+1) - repmat([0.8 0.3]', [1 size(trajs,2)]);
                     trajs_all(:,:,:,k+1) = trajs_all(:,:,:,k+1) - repmat([0.8 0.3], [size(trajs_all,1) 1 size(trajs_all,3)]);
@@ -41,23 +39,6 @@ function data = analyze_data(d, block_name, uw)
                     trajs(:,:,k+1) = trajs(:,:,k+1) - repmat([mean(trajs(1,:,k+1)) mean(trajs(2,:,k+1))]', [1 size(trajs,2)]);
                     trajs_all(:,:,:,k+1) = trajs_all(:,:,:,k+1) - repmat(mean(trajs_all(:,:,:,k+1),1), [size(trajs_all,1) 1 1]);
                 end
-%             t = [mean(output(1:end-13,1,:),3) mean(output(1:end-13,2,:),3)]';
-%             l = [mean(output(1:end-13,3,:),3) mean(output(1:end-13,4,:),3)]';
-%             r = [mean(output(1:end-13,5,:),3) mean(output(1:end-13,6,:),3)]';
-%             c = [mean(output(1:end-13,7,:),3) mean(output(1:end-13,8,:),3)]';
-%             t = t - repmat([0.8 0.3]', [1 size(t,2)]);
-%             l = l - repmat([mean(l(1,:)) mean(l(2,:))]', [1 size(l,2)]); % baseline correction for dark trials
-%             r = r - repmat([mean(r(1,:)) mean(r(2,:))]', [1 size(r,2)]);
-%             c = c - repmat([mean(c(1,:)) mean(c(2,:))]', [1 size(c,2)]);
-%             
-%             t_all = [output(1:end-13,1,:) output(1:end-13,2,:)];
-%             l_all = [output(1:end-13,3,:) output(1:end-13,4,:)];
-%             r_all = [output(1:end-13,5,:) output(1:end-13,6,:)];
-%             c_all = [output(1:end-13,7,:) output(1:end-13,8,:)];
-%             t_all = t_all - repmat([0.8 0.3], [size(t_all,1) 1 size(t_all,3)]);
-%             l_all = l_all - repmat(mean(l_all), [size(l_all,1) 1 1]);
-%             r_all = r_all - repmat(mean(r_all), [size(r_all,1) 1 1]);
-%             c_all = c_all - repmat(mean(c_all), [size(c_all,1) 1 1]);  % baseline correction for dark trials
             end
             
 %             create data structures to store all data
@@ -80,20 +61,6 @@ function data = analyze_data(d, block_name, uw)
             data{i}.(block_name{j}).phasors.Lhand = fourier2(Lhand,target,Lhand_all,target_all,freqs_x,freqs_y);
             data{i}.(block_name{j}).phasors.Rhand = fourier2(Rhand,target,Rhand_all,target_all,freqs_x,freqs_y);
             data{i}.(block_name{j}).phasors.cursor = fourier2(cursor,target,cursor_all,target_all,freqs_x,freqs_y);
-            
-%             data.(subj_name{i}).(block_name{j}).x_x = fourier(cursor.x_pos,target.x_pos,length(freqs_x));
-%             data.(subj_name{i}).(block_name{j}).y_y = fourier(cursor.y_pos,target.y_pos,length(freqs_y));
-%             data.(subj_name{i}).(block_name{j}).x_y = fourier(cursor.y_pos,target.x_pos,length(freqs_x));
-%             data.(subj_name{i}).(block_name{j}).y_x = fourier(cursor.x_pos,target.y_pos,length(freqs_y));
-%             
-%             for k = 1:length(names)
-%                 data.(subj_name{i}).(block_name{j}).(names{k}).phase = unwrap(data.(subj_name{i}).(block_name{j}).(names{k}).phase)*(180/pi);
-%             end
-%             
-%             data.(subj_name{i}).(block_name{j}).x_x_all = fourier(cursor_all.x_pos, target_all.x_pos, length(freqs_x));
-%             data.(subj_name{i}).(block_name{j}).y_y_all = fourier(cursor_all.y_pos, target_all.y_pos, length(freqs_y));
-%             data.(subj_name{i}).(block_name{j}).x_y_all = fourier(cursor_all.y_pos, target_all.x_pos, length(freqs_x));
-%             data.(subj_name{i}).(block_name{j}).y_x_all = fourier(cursor_all.x_pos, target_all.y_pos, length(freqs_y));
             
             N = size(target.x_pos,1);
             cohxx = NaN(size(target_all.x_pos,2),length(freqs));
@@ -146,12 +113,20 @@ function data = analyze_data(d, block_name, uw)
             cursor.y_fft = fourier(cursor.y_pos);
             target.x_fft = fourier(target.x_pos);
             target.y_fft = fourier(target.y_pos);
+            Rhand.x_fft = fourier(Rhand.x_pos);
+            Rhand.y_fft = fourier(Rhand.y_pos);
+            Lhand.x_fft = fourier(Lhand.x_pos);
+            Lhand.y_fft = fourier(Lhand.y_pos);
             data{i}.(block_name{j}).cursor = cursor;
             data{i}.(block_name{j}).target = target;
+            data{i}.(block_name{j}).Rhand = Rhand;
+            data{i}.(block_name{j}).Lhand = Lhand;
             data{i}.(block_name{j}).time = time;
             data{i}.(block_name{j}).MSE = MSE;
             for k = 1:length(names)
-                all.(names{k})(j,:,i) = data{i}.(block_name{j}).phasors.cursor.(names{k}).ratio;
+                all.cursor.(names{k})(j,:,i) = data{i}.(block_name{j}).phasors.cursor.(names{k}).ratio;
+                all.Rhand.(names{k})(j,:,i) = data{i}.(block_name{j}).phasors.Rhand.(names{k}).ratio;
+                all.Lhand.(names{k})(j,:,i) = data{i}.(block_name{j}).phasors.Lhand.(names{k}).ratio;
             end
             SRcohere.x_x(j,:,i) = mean(cohxx);
             SRcohere.y_y(j,:,i) = mean(cohyy);
@@ -168,6 +143,7 @@ function data = analyze_data(d, block_name, uw)
     data{Nsubj+1}.y_y.amp = amplitudes_y;
     data{Nsubj+1}.x_x.x_axis = x_axis;
     
+    for
     for i = 1:length(names)
         data{Nsubj+1}.(names{i}).fft = mean(all.(names{i}),3); % take mean of complex ratios
 %         data{Nsubj+1}.(names{i}).d = fourier(data{Nsubj+1}.(names{i}).fft,0); % fft averaged complex ratios
@@ -184,12 +160,7 @@ function data = analyze_data(d, block_name, uw)
             boot.(names{i}).fft(:,:,j) = mean(y,3);
         end
         
-%         for j = 1:length(names)
-            data{Nsubj+1}.(names{i}).all_amp = abs(all.(names{i}));
-            if contains(names{i},'x_y') || contains(names{i},'y_y')
-                data{Nsubj+1}.(names{i}).all_amp_neg = -abs(all.(names{i}));
-            end
-%         end
+        data{Nsubj+1}.(names{i}).all_amp = abs(all.(names{i}));
         
 %         boot.(names{i}).d = fourier(boot.(names{i}).fft,0);
         boot.(names{i}).amplitude = abs(boot.(names{i}).fft);

@@ -1,4 +1,4 @@
-function graph_lag(data,groups,gblocks,graph_name)
+function graph_lag(data,gblocks,graph_name)
 
     group_names = {'Rotation','Mirror Reversal'};
     f_x = data.(groups{1}).avg.x_x.freqs;

@@ -1,11 +1,12 @@
 Nsubj = length(data)-1;
-Nfreq = 6;
+Nfreq = 7;
 names = {'x_x_all','x_y_all','y_x_all','y_y_all'};
+traj = 'cursor'; % cursor, Lhand, or Rhand
 
 for p = 1:Nsubj
     for k = 1:length(block_name)
         for i = 1:length(names)
-            cplx(:,i,k) = mean(data{p}.(block_name{k}).phasors.cursor.(names{i}).ratio,2);
+            cplx(:,i,k) = mean(data{p}.(block_name{k}).phasors.(traj).(names{i}).ratio,2);
         end
     end
     
@@ -46,22 +47,23 @@ axis([-0.45 1 -0.45 1])
 axis square
 
 %%
-subj = 4;
+subj = 3;
 blockIdx = 4;
 
-plot_subj(data{subj}.(block_name{blockIdx}),0)
+plot_subj(data{subj}.(block_name{blockIdx}).phasors.(traj),0)
 subplot(2,2,1)
-plot(rotMat(1,1,blockIdx,subj,group)*phasor(:,subj,group),'k','LineWidth',3)
+plot(rotMat.(block_name{blockIdx})(1,1,subj).*phasor(:,subj),'k','LineWidth',3)
 subplot(2,2,2)
-plot(rotMat(1,2,blockIdx,subj,group)*phasor(:,subj,group),'k','LineWidth',3)
+plot(rotMat.(block_name{blockIdx})(1,2,subj)*phasor(:,subj),'k','LineWidth',3)
 subplot(2,2,3)
-plot(rotMat(2,1,blockIdx,subj,group)*phasor(:,subj,group),'k','LineWidth',3)
+plot(rotMat.(block_name{blockIdx})(2,1,subj)*phasor(:,subj),'k','LineWidth',3)
 subplot(2,2,4)
-plot(rotMat(2,2,blockIdx,subj,group)*phasor(:,subj,group),'k','LineWidth',3)
+plot(rotMat.(block_name{blockIdx})(2,2,subj)*phasor(:,subj),'k','LineWidth',3)
 
 %%
-blockIdx = 1;
-mat = mean(rotMat.(block_name{blockIdx}),3);
+subj = 3;
+blockIdx = 3;
+mat = rotMat.(block_name{blockIdx})(:,:,subj);
 
 col1 = [1 0 0];
 col2 = [1 1 1];

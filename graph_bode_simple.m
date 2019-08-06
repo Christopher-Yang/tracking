@@ -1,4 +1,4 @@
-function graph_bode_simple(data, graph_name, groups, gblocks)
+function graph_bode_simple(data, graph_name, gblocks)
     
 %     err = struct('rot',NaN(6,7,2),'mir',NaN(6,7,2));
 %     for i = 1:2

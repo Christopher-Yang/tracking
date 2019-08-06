@@ -1,4 +1,4 @@
-function graph_rotatedMSE(data,groups,block_name,gblocks,graph_name)
+function graph_rotatedMSE(data,block_name,gblocks,graph_name)
 
 rng(1)
 col = lines;

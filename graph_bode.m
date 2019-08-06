@@ -1,4 +1,4 @@
-function graph_bode(data, graph_name, groups)
+function graph_bode(data, graph_name)
     
     rng(1);
     titles = {'rotation', 'mirror reversal'};
