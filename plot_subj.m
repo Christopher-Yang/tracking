@@ -1,5 +1,5 @@
-function plot_subj(data,hand,f)
-if(nargin<3)
+function plot_subj(data,f)
+if(nargin<2)
     f = 1; % default plot as figure 1
 end
 
@@ -42,65 +42,33 @@ axis square
 axis([-1.25 1.25 -1.25 1.25])
 title('Y_{target} -> Y_{hand}')
 
-if hand
-    for i = 1:Nfreq
-        subplot(2,2,1)
-        plot(data.y_x_all.ratio(i,:),'.','Color',colors(i,:),'MarkerSize',5)
-        error_ellipse(cov(real(data.y_x_all.ratio(i,:)),imag(data.y_x_all.ratio(i,:))),[real(mean(data.y_x_all.ratio(i,:))); imag(mean(data.y_x_all.ratio(i,:)))],'conf',0.95,'color',colors(i,:));
-        if(i>1)
-            plot(mean(data.y_x_all.ratio(i-1:i,:),2),'.-','Color',colors(i-1,:),'MarkerSize',10,'linewidth',2)
-        end
-        
-        subplot(2,2,2)
-        plot(data.x_x_all.ratio(i,:),'.','Color',colors(i,:),'MarkerSize',5)
-        error_ellipse(cov(real(data.x_x_all.ratio(i,:)),imag(data.x_x_all.ratio(i,:))),[real(mean(data.x_x_all.ratio(i,:))); imag(mean(data.x_x_all.ratio(i,:)))],'conf',0.95,'color',colors(i,:));
-        if(i>1)
-            plot(mean(data.x_x_all.ratio(i-1:i,:),2),'.-','Color',colors(i-1,:),'MarkerSize',10,'linewidth',2)
-        end
-        
-        subplot(2,2,3)
-        plot(data.y_y_all.ratio(i,:),'.','Color',colors(i,:),'MarkerSize',5)
-        error_ellipse(cov(real(data.y_y_all.ratio(i,:)),imag(data.y_y_all.ratio(i,:))),[real(mean(data.y_y_all.ratio(i,:))); imag(mean(data.y_y_all.ratio(i,:)))],'conf',0.95,'color',colors(i,:));
-        if(i>1)
-            plot(mean(data.y_y_all.ratio(i-1:i,:),2),'.-','Color',colors(i-1,:),'MarkerSize',10,'linewidth',2)
-        end
-        
-        subplot(2,2,4)
-        plot(data.x_y_all.ratio(i,:),'.','Color',colors(i,:),'MarkerSize',5)
-        error_ellipse(cov(real(data.x_y_all.ratio(i,:)),imag(data.x_y_all.ratio(i,:))),[real(mean(data.x_y_all.ratio(i,:))); imag(mean(data.x_y_all.ratio(i,:)))],'conf',0.95,'color',colors(i,:));
-        if(i>1)
-            plot(mean(data.x_y_all.ratio(i-1:i,:),2),'.-','Color',colors(i-1,:),'MarkerSize',10,'linewidth',2)
-        end
+for i = 1:Nfreq
+    subplot(2,2,1)
+    plot(data.x_x_all.ratio(i,:),'.','Color',colors(i,:),'MarkerSize',5)
+    error_ellipse(cov(real(data.x_x_all.ratio(i,:)),imag(data.x_x_all.ratio(i,:))),[real(mean(data.x_x_all.ratio(i,:))); imag(mean(data.x_x_all.ratio(i,:)))],'conf',0.95,'color',colors(i,:));
+    if(i>1)
+        plot(mean(data.x_x_all.ratio(i-1:i,:),2),'.-','Color',colors(i-1,:),'MarkerSize',10,'linewidth',2)
     end
-else
-    for i = 1:Nfreq
-        subplot(2,2,1)
-        plot(data.x_x_all.ratio(i,:),'.','Color',colors(i,:),'MarkerSize',5)
-        error_ellipse(cov(real(data.x_x_all.ratio(i,:)),imag(data.x_x_all.ratio(i,:))),[real(mean(data.x_x_all.ratio(i,:))); imag(mean(data.x_x_all.ratio(i,:)))],'conf',0.95,'color',colors(i,:));
-        if(i>1)
-            plot(mean(data.x_x_all.ratio(i-1:i,:),2),'.-','Color',colors(i-1,:),'MarkerSize',10,'linewidth',2)
-        end
-        
-        subplot(2,2,2)
-        plot(data.y_x_all.ratio(i,:),'.','Color',colors(i,:),'MarkerSize',5)
-        error_ellipse(cov(real(data.y_x_all.ratio(i,:)),imag(data.y_x_all.ratio(i,:))),[real(mean(data.y_x_all.ratio(i,:))); imag(mean(data.y_x_all.ratio(i,:)))],'conf',0.95,'color',colors(i,:));
-        if(i>1)
-            plot(mean(data.y_x_all.ratio(i-1:i,:),2),'.-','Color',colors(i-1,:),'MarkerSize',10,'linewidth',2)
-        end
-        
-        subplot(2,2,3)
-        plot(data.x_y_all.ratio(i,:),'.','Color',colors(i,:),'MarkerSize',5)
-        error_ellipse(cov(real(data.x_y_all.ratio(i,:)),imag(data.x_y_all.ratio(i,:))),[real(mean(data.x_y_all.ratio(i,:))); imag(mean(data.x_y_all.ratio(i,:)))],'conf',0.95,'color',colors(i,:));
-        if(i>1)
-            plot(mean(data.x_y_all.ratio(i-1:i,:),2),'.-','Color',colors(i-1,:),'MarkerSize',10,'linewidth',2)
-        end
-        
-        subplot(2,2,4)
-        plot(data.y_y_all.ratio(i,:),'.','Color',colors(i,:),'MarkerSize',5)
-        error_ellipse(cov(real(data.y_y_all.ratio(i,:)),imag(data.y_y_all.ratio(i,:))),[real(mean(data.y_y_all.ratio(i,:))); imag(mean(data.y_y_all.ratio(i,:)))],'conf',0.95,'color',colors(i,:));
-        if(i>1)
-            plot(mean(data.y_y_all.ratio(i-1:i,:),2),'.-','Color',colors(i-1,:),'MarkerSize',10,'linewidth',2)
-        end
+    
+    subplot(2,2,2)
+    plot(data.y_x_all.ratio(i,:),'.','Color',colors(i,:),'MarkerSize',5)
+    error_ellipse(cov(real(data.y_x_all.ratio(i,:)),imag(data.y_x_all.ratio(i,:))),[real(mean(data.y_x_all.ratio(i,:))); imag(mean(data.y_x_all.ratio(i,:)))],'conf',0.95,'color',colors(i,:));
+    if(i>1)
+        plot(mean(data.y_x_all.ratio(i-1:i,:),2),'.-','Color',colors(i-1,:),'MarkerSize',10,'linewidth',2)
+    end
+    
+    subplot(2,2,3)
+    plot(data.x_y_all.ratio(i,:),'.','Color',colors(i,:),'MarkerSize',5)
+    error_ellipse(cov(real(data.x_y_all.ratio(i,:)),imag(data.x_y_all.ratio(i,:))),[real(mean(data.x_y_all.ratio(i,:))); imag(mean(data.x_y_all.ratio(i,:)))],'conf',0.95,'color',colors(i,:));
+    if(i>1)
+        plot(mean(data.x_y_all.ratio(i-1:i,:),2),'.-','Color',colors(i-1,:),'MarkerSize',10,'linewidth',2)
+    end
+    
+    subplot(2,2,4)
+    plot(data.y_y_all.ratio(i,:),'.','Color',colors(i,:),'MarkerSize',5)
+    error_ellipse(cov(real(data.y_y_all.ratio(i,:)),imag(data.y_y_all.ratio(i,:))),[real(mean(data.y_y_all.ratio(i,:))); imag(mean(data.y_y_all.ratio(i,:)))],'conf',0.95,'color',colors(i,:));
+    if(i>1)
+        plot(mean(data.y_y_all.ratio(i-1:i,:),2),'.-','Color',colors(i-1,:),'MarkerSize',10,'linewidth',2)
     end
 end
 

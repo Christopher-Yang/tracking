@@ -50,7 +50,8 @@ axis square
 subj = 3;
 blockIdx = 4;
 
-plot_subj(data{subj}.(block_name{blockIdx}).phasors.(traj),0)
+plot_subj(data{subj}.(block_name{blockIdx}).phasors.(traj))
+
 subplot(2,2,1)
 plot(rotMat.(block_name{blockIdx})(1,1,subj).*phasor(:,subj),'k','LineWidth',3)
 subplot(2,2,2)
