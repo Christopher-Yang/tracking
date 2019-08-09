@@ -4,6 +4,7 @@ if(nargin<3)
 end
 
 Nfreq = 7;
+lims = 2;
 
 col1 = [1 0.9 0.3];
 col2 = [1 0 0];
@@ -15,31 +16,31 @@ colors = [linspace(col1(1),col2(1),Nfreq)', linspace(col1(2),col2(2),Nfreq)', li
 
 figure(f); clf; hold on
 subplot(2,2,1); hold on
-plot([-1.5 1.5],[0 0],'k')
-plot([0 0],[-1.5 1.5],'k')
+plot([-2 2],[0 0],'k')
+plot([0 0],[-2 2],'k')
 axis square
-axis([-1.25 1.25 -1.25 1.25])
+axis([-lims lims -lims lims])
 title('X_{target} -> X_{hand}')
 
 subplot(2,2,2); hold on
-plot([-1.5 1.5],[0 0],'k')
-plot([0 0],[-1.5 1.5],'k')
+plot([-2 2],[0 0],'k')
+plot([0 0],[-2 2],'k')
 axis square
-axis([-1.25 1.25 -1.25 1.25])
+axis([-lims lims -lims lims])
 title('Y_{target} -> X_{hand}')
 
 subplot(2,2,3); hold on
-plot([-1.5 1.5],[0 0],'k')
-plot([0 0],[-1.5 1.5],'k')
+plot([-2 2],[0 0],'k')
+plot([0 0],[-2 2],'k')
 axis square
-axis([-1.25 1.25 -1.25 1.25])
+axis([-lims lims -lims lims])
 title('X_{target} -> Y_{hand}')
 
 subplot(2,2,4); hold on
-plot([-1.5 1.5],[0 0],'k')
-plot([0 0],[-1.5 1.5],'k')
+plot([-2 2],[0 0],'k')
+plot([0 0],[-2 2],'k')
 axis square
-axis([-1.25 1.25 -1.25 1.25])
+axis([-lims lims -lims lims])
 title('Y_{target} -> Y_{hand}')
 
 if hand
