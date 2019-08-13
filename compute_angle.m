@@ -181,9 +181,9 @@ axis square
 %%
 group = 1;
 subj = 4;
-blockIdx = 1;
+blockIdx = 3;
 
-plot_subj(data.rot.(subj_rot{subj}).(blocks{blockIdx}),0)
+plot_subj(data.rot.(subj_rot{subj}).(blocks{blockIdx}))
 subplot(2,2,1)
 plot(rotMat(1,1,blockIdx,subj,group)*phasor(:,subj,group),'k','LineWidth',3)
 subplot(2,2,2)
