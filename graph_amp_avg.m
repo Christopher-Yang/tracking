@@ -1,11 +1,8 @@
 function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
     
-    col = [255 69 0
-           153 50 204
+    col = [30 144 255
            0 0 139
-           255 182 193
-           199 178 153
-           128 0 0]./255;
+           255 182 193]./255;
     fontSize = 12;
     titleSize = 14;
     lw = 1;
@@ -77,27 +74,23 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
         
         for i = 1:length(gblocks)
             figure(H(i))
-            subplot(2,2,k)
-            plot(freqsX,ampX,'o','Color',col(1,:),'LineWidth',lw,'MarkerFaceColor',col(1,:),'MarkerEdgeColor','none')
-            hold on
-            plot(freqsY,ampY,'o','Color',col(2,:),'LineWidth',lw,'MarkerFaceColor',col(2,:),'MarkerEdgeColor','none')
-            plot([50 51], [50 51],'Color',col(3,:),'LineWidth',lw)
-            plot([50 51], [50 51],'--','Color',col(5,:),'LineWidth',lw)
+            subplot(2,2,k); hold on
+            plot(freqsX,ampX,'ko','LineWidth',lw,'MarkerFaceColor',[0 0 0])
+            plot(freqsY,ampY,'ko','LineWidth',lw)
+            plot([50 51], [50 51],'Color',col(1,:),'LineWidth',lw)
             % plot mean with error bars; this doesn't work if averaging
             % is done in complex domain, only if individual amplitude
             % spectrums are averaged together
 %             s = shadedErrorBar(xAxis, a.x(:,i),a.errx(:,:,i));
 %             editErrorBar(s,col(3,:),0.25);
-            plot(xAxis,a.x(:,i),'Color',col(3,:),'LineWidth',lw)
 %             plot(xAxis,a.x_all(:,:,i),'Color',[col(3,:) 0.3],'LineWidth',0.25)
-            if i > 1
-                plot(xAxis,a.x(:,1),'--','Color',col(5,:),'LineWidth',lw)
-            end
-            if i == 1 || i == length(gblocks)
-                plot(freqsX,a.x(ix,i),'o','Color',col(1,:),'LineWidth',lw,'MarkerFaceColor',col(1,:),'MarkerEdgeColor','none')
-            else
-                plot(freqsY,a.x(iy,i),'o','Color',col(1,:),'LineWidth',lw,'MarkerFaceColor',col(1,:),'MarkerEdgeColor','none')
-            end
+%             if i > 1
+%                 plot(xAxis,a.x(:,1),'Color',col(2,:),'LineWidth',lw)
+%             end
+            plot(xAxis,a.x(:,i),'Color',col(1,:),'LineWidth',lw)
+            plot(freqsX,a.x(ix,i),'-ok','LineWidth',lw,'MarkerFaceColor',[0 0 0])
+            plot(freqsY,a.x(iy,i),'-ok','LineWidth',lw)
+
             set(gca,'Xtick',0:1:2,'Ytick',0:0.01:0.03,'box','off','LineWidth',1,'TickDir','out','FontSize',fontSize,'XMinorTick','on')
             ax = gca;
             ax.XAxis.MinorTickValues = 0:0.25:2.25;
@@ -105,27 +98,24 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
             ylabel('X Amplitude (m)')
             title([graph_name{gblocks(i)}, names{k}],'FontSize',titleSize)
             if k == 2
-                legend({'X target','Y target','Hand','Baseline'})
+                legend({'X target','Y target','Hand'})
                 legend boxoff
             end
 %             pbaspect([1 1 1])
             
-            subplot(2,2,k+2)
-            plot(freqsX, ampX,'o','LineWidth',lw,'Color',col(1,:),'MarkerFaceColor',col(1,:),'MarkerEdgeColor','none')
-            hold on
-            plot(freqsY, ampY,'o','LineWidth',lw,'Color',col(2,:),'MarkerFaceColor',col(2,:),'MarkerEdgeColor','none')
+            subplot(2,2,k+2); hold on
+            plot(freqsX, ampX,'ko','LineWidth',lw,'MarkerFaceColor',[0 0 0])
+            plot(freqsY, ampY,'ko','LineWidth',lw)
 %             s = shadedErrorBar(xAxis, a.y(:,i),a.erry(:,:,i),'lineProps','-b');
 %             editErrorBar(s,col(3,:),0.25);
-            plot(xAxis,a.y(:,i),'LineWidth',lw,'Color',col(3,:),'MarkerFaceColor',col(3,:))
 %             plot(xAxis,a.y_all(:,:,i),'Color',[col(3,:) 0.3],'LineWidth',0.25)
-            if i > 1
-                plot(xAxis,a.y(:,1),'--','Color',col(5,:),'LineWidth',lw)
-            end
-            if i == 1 || i == length(gblocks)
-                plot(freqsY,a.y(iy,i),'o','LineWidth',1.5,'Color',col(2,:),'MarkerFaceColor',col(2,:),'MarkerEdgeColor','none')
-            else
-                plot(freqsX,a.y(ix,i),'o','LineWidth',1.5,'Color',col(2,:),'MarkerFaceColor',col(2,:),'MarkerEdgeColor','none')
-            end
+%             if i > 1
+%                 plot(xAxis,a.y(:,1),'Color',col(2,:),'LineWidth',lw)
+%             end
+            plot(xAxis,a.y(:,i),'LineWidth',lw,'Color',col(1,:))
+            plot(freqsY,a.y(iy,i),'-ok','LineWidth',lw)
+            plot(freqsX,a.y(ix,i),'-ok','LineWidth',lw,'MarkerFaceColor',[0 0 0])
+            
             set(gca,'Xtick',0:1:2,'Ytick',0:0.01:0.03,'box','off','LineWidth',1,'TickDir','out','FontSize',fontSize,'XMinorTick','on')
             ax = gca;
             ax.XAxis.MinorTickValues = 0:0.25:2.25;
@@ -137,10 +127,10 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
         figure(H(end))
         subplot(1,2,k)
         s = shadedErrorBar(sort([freqsX freqsY]),100*a.dx,100*a.errdx);
-        editErrorBar(s,col(3,:),0.25);
+        editErrorBar(s,col(2,:),0.25);
         hold on
         s = shadedErrorBar(sort([freqsX freqsY]),100*a.dy,100*a.errdy);
-        editErrorBar(s,col(4,:),0.25);
+        editErrorBar(s,col(3,:),0.25);
         if k == 1
             title('Rotation')
         else

@@ -25,9 +25,15 @@ for q = 1:2
         thetaOpt = [1; paramsOpt(8:end)];
         thetaOpt = reshape(thetaOpt, [4 4]);
         
-        for k = 1:length(thetaOpt)
+        for k = 1:length(blocks)
             rotMat(:,:,k,p,q) = reshape(thetaOpt(:,k), [2 2]);
+            if q == 1
+                thetaInit = 0;
+                err2 = @(theta) fit_rotMat(theta,rotMat(:,:,k,p,1));
+                thetaFit(k,p) = fmincon(err2,thetaInit);
+            end
         end
+        
         
         ph = abs(phasor(:,p,q));
         lambda = mean(ph);
@@ -46,57 +52,83 @@ for q = 1:2
     end
 end
 
-%%
+thetaFit_bar = mean(thetaFit,2);
+thetaFit_se = std(thetaFit,[],2)/sqrt(10);
+
+%% bar plots of aftereffects
 col = lines;
 col = col(1:7,:);
 
-vmrXY = [squeeze(vmrBase(1,2,:)) squeeze(vmrAfter(1,2,:))];
-vmrYX = [squeeze(vmrBase(2,1,:)) squeeze(vmrAfter(2,1,:))];
-mrXY = [squeeze(mrBase(1,2,:)) squeeze(mrAfter(1,2,:))];
-mrYX = [squeeze(mrBase(2,1,:)) squeeze(mrAfter(2,1,:))];
+vmrXY = [squeeze(vmrBase(1,2,:)) squeeze(vmrLate(1,2,:)) squeeze(vmrAfter(1,2,:))];
+vmrYX = [squeeze(vmrBase(2,1,:)) squeeze(vmrLate(2,1,:)) squeeze(vmrAfter(2,1,:))];
+mrXY = [squeeze(mrBase(1,2,:)) squeeze(mrLate(1,2,:)) squeeze(mrAfter(1,2,:))];
+mrYX = [squeeze(mrBase(2,1,:)) squeeze(mrLate(2,1,:)) squeeze(mrAfter(2,1,:))];
 
 figure(1); clf
-subplot(2,3,2); 
+subplot(2,4,2:3); 
 hold on
 plot([-1 10],[0 0],'--k','LineWidth',1)
-plot(1:2,vmrXY','k','Color',[0 0 0 0.5],'MarkerSize',20)
+plot(1:0.5:2,vmrXY','k','Color',[0 0 0 0.5],'MarkerSize',20)
 scatter(repelem(1,10),vmrXY(:,1),25,col(1,:),'filled','MarkerFaceAlpha',0.5)
-scatter(repelem(2,10),vmrXY(:,2),25,col(4,:),'filled','MarkerFaceAlpha',0.5)
+scatter(repelem(1.5,10),vmrXY(:,2),25,col(3,:),'filled','MarkerFaceAlpha',0.5)
+scatter(repelem(2,10),vmrXY(:,3),25,col(4,:),'filled','MarkerFaceAlpha',0.5)
 errorbar(1,mean(vmrXY(:,1)),2*std(vmrXY(:,1))/sqrt(10),'.','Color',col(1,:),'MarkerSize',30,'LineWidth',1)
-errorbar(2,mean(vmrXY(:,2)),2*std(vmrXY(:,2))/sqrt(10),'.','Color',col(4,:),'MarkerSize',30,'LineWidth',1)
+errorbar(1.5,mean(vmrXY(:,2)),2*std(vmrXY(:,2))/sqrt(10),'.','Color',col(3,:),'MarkerSize',30,'LineWidth',1)
+errorbar(2,mean(vmrXY(:,3)),2*std(vmrXY(:,3))/sqrt(10),'.','Color',col(4,:),'MarkerSize',30,'LineWidth',1)
 
-plot(3.5:4.5,mrXY','k','Color',[0 0 0 0.5],'MarkerSize',20)
-scatter(repelem(3.5,10),mrXY(:,1),25,col(1,:),'filled','MarkerFaceAlpha',0.5)
-scatter(repelem(4.5,10),mrXY(:,2),25,col(4,:),'filled','MarkerFaceAlpha',0.5)
-errorbar(3.5,mean(mrXY(:,1)),2*std(mrXY(:,1))/sqrt(10),'.','Color',col(1,:),'MarkerSize',30,'LineWidth',1)
-errorbar(4.5,mean(mrXY(:,2)),2*std(mrXY(:,2))/sqrt(10),'.','Color',col(4,:),'MarkerSize',30,'LineWidth',1)
+plot(3:0.5:4,mrXY','k','Color',[0 0 0 0.5],'MarkerSize',20)
+scatter(repelem(3,10),mrXY(:,1),25,col(1,:),'filled','MarkerFaceAlpha',0.5)
+scatter(repelem(3.5,10),mrXY(:,2),25,col(3,:),'filled','MarkerFaceAlpha',0.5)
+scatter(repelem(4,10),mrXY(:,3),25,col(4,:),'filled','MarkerFaceAlpha',0.5)
+errorbar(3,mean(mrXY(:,1)),2*std(mrXY(:,1))/sqrt(10),'.','Color',col(1,:),'MarkerSize',30,'LineWidth',1)
+errorbar(3.5,mean(mrXY(:,2)),2*std(mrXY(:,2))/sqrt(10),'.','Color',col(3,:),'MarkerSize',30,'LineWidth',1)
+errorbar(4,mean(mrXY(:,3)),2*std(mrXY(:,3))/sqrt(10),'.','Color',col(4,:),'MarkerSize',30,'LineWidth',1)
 
-xlim([0.5 5])
+xlim([0.5 4.5])
 ylabel('XY gain')
 set(gca,'Xtick',[],'TickDir','out')
+yticks(-1:0.2:1)
 
-subplot(2,3,5); 
+subplot(2,4,6:7); 
 hold on
 plot([-1 10],[0 0],'--k','LineWidth',1)
-plot(1:2,vmrYX','k','Color',[0 0 0 0.5],'MarkerSize',20)
+plot(1:0.5:2,vmrYX','k','Color',[0 0 0 0.5],'MarkerSize',20)
 scatter(repelem(1,10),vmrYX(:,1),25,col(1,:),'filled','MarkerFaceAlpha',0.5)
-scatter(repelem(2,10),vmrYX(:,2),25,col(4,:),'filled','MarkerFaceAlpha',0.5)
+scatter(repelem(1.5,10),vmrYX(:,2),25,col(3,:),'filled','MarkerFaceAlpha',0.5)
+scatter(repelem(2,10),vmrYX(:,3),25,col(4,:),'filled','MarkerFaceAlpha',0.5)
 errorbar(1,mean(vmrYX(:,1)),2*std(vmrYX(:,1))/sqrt(10),'.','Color',col(1,:),'MarkerSize',30,'LineWidth',1)
-errorbar(2,mean(vmrYX(:,2)),2*std(vmrYX(:,2))/sqrt(10),'.','Color',col(4,:),'MarkerSize',30,'LineWidth',1)
+errorbar(1.5,mean(vmrYX(:,2)),2*std(vmrYX(:,2))/sqrt(10),'.','Color',col(3,:),'MarkerSize',30,'LineWidth',1)
+errorbar(2,mean(vmrYX(:,3)),2*std(vmrYX(:,3))/sqrt(10),'.','Color',col(4,:),'MarkerSize',30,'LineWidth',1)
 
-plot(3.5:4.5,mrYX','k','Color',[0 0 0 0.5],'MarkerSize',20)
-scatter(repelem(3.5,10),mrYX(:,1),25,col(1,:),'filled','MarkerFaceAlpha',0.5)
-scatter(repelem(4.5,10),mrYX(:,2),25,col(4,:),'filled','MarkerFaceAlpha',0.5)
-errorbar(3.5,mean(mrYX(:,1)),2*std(mrYX(:,1))/sqrt(10),'.','Color',col(1,:),'MarkerSize',30,'LineWidth',1)
-errorbar(4.5,mean(mrYX(:,2)),2*std(mrYX(:,2))/sqrt(10),'.','Color',col(4,:),'MarkerSize',30,'LineWidth',1)
+plot(3:0.5:4,mrYX','k','Color',[0 0 0 0.5],'MarkerSize',20)
+scatter(repelem(3,10),mrYX(:,1),25,col(1,:),'filled','MarkerFaceAlpha',0.5)
+scatter(repelem(3.5,10),mrYX(:,2),25,col(3,:),'filled','MarkerFaceAlpha',0.5)
+scatter(repelem(4,10),mrYX(:,3),25,col(4,:),'filled','MarkerFaceAlpha',0.5)
+errorbar(3,mean(mrYX(:,1)),2*std(mrYX(:,1))/sqrt(10),'.','Color',col(1,:),'MarkerSize',30,'LineWidth',1)
+errorbar(3.5,mean(mrYX(:,2)),2*std(mrYX(:,2))/sqrt(10),'.','Color',col(3,:),'MarkerSize',30,'LineWidth',1)
+errorbar(4,mean(mrYX(:,3)),2*std(mrYX(:,3))/sqrt(10),'.','Color',col(4,:),'MarkerSize',30,'LineWidth',1)
 
-xlim([0.5 5])
+xlim([0.5 4.5])
 ylabel('YX gain')
 set(gca,'TickDir','out')
-xticks([1.5 4])
-xticklabels({'VMR','MR'})
+xticks([1.5 3.5])
+yticks(-1:0.2:1)
+xticklabels({'Rotation','Mirror-Reversal'})
 
-%%
+%% plot vectors
+% for single subjects
+% subj = 5;
+% vmrBaseMu = vmrBase(:,:,subj);
+% vmrEarlyMu = vmrEarly(:,:,subj);
+% vmrLateMu = vmrLate(:,:,subj);
+% vmrAfterMu = vmrAfter(:,:,subj);
+% 
+% mrBaseMu = mrBase(:,:,subj);
+% mrEarlyMu = mrEarly(:,:,subj);
+% mrLateMu = mrLate(:,:,subj);
+% mrAfterMu = mrAfter(:,:,subj);
+
+% for averaging across subjects
 vmrBaseMu = mean(vmrBase,3);
 vmrEarlyMu = mean(vmrEarly,3);
 vmrLateMu = mean(vmrLate,3);
@@ -178,7 +210,7 @@ plot([0 0],[0 1],'k')
 axis([-0.45 1 -0.45 1])
 axis square
 
-%%
+%% fitted phasors for individual subjects
 group = 1;
 subj = 4;
 blockIdx = 3;
@@ -193,7 +225,7 @@ plot(rotMat(2,1,blockIdx,subj,group)*phasor(:,subj,group),'k','LineWidth',3)
 subplot(2,2,4)
 plot(rotMat(2,2,blockIdx,subj,group)*phasor(:,subj,group),'k','LineWidth',3)
 
-%%
+%% gain matrices
 col1 = [1 0 0];
 col2 = [1 1 1];
 Nstep = 100;
@@ -277,5 +309,12 @@ function e = scale(params,cplx_data)
             e(i,k) = norm(phasor - cplx_data(:,i,k))^2;
         end
     end
+    e = sum(sum(e));
+end
+
+function e = fit_rotMat(theta,rotMat_opt)
+    rot = rotz(theta);
+    rot = rot(1:2,1:2);
+    e = (rot-rotMat_opt).^2;
     e = sum(sum(e));
 end

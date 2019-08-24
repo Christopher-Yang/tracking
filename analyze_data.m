@@ -11,10 +11,8 @@ function data = analyze_data(d, subj_name, block_name, rotate, uw)
         d.most_freq = d.most_freq*2;
     end
     p = NaN(Nblocks,d.most_freq,length(subj_name));
-%     r = NaN(length(block_name)*8,d.most_freq,length(subj_name));
     all = struct('x_x',p,'y_y',p,'x_y',p,'y_x',p);
     SRcohere = struct('x_x',p,'y_y',p);
-%     SRcohere2 = struct('x_x',r,'y_y',r);
     RRcohere = struct('x_x',p,'y_y',p);
     names = {'x_x','y_y','x_y','y_x'};
     freqs_x = NaN;
@@ -42,15 +40,19 @@ function data = analyze_data(d, subj_name, block_name, rotate, uw)
                 amplitudes_y = input(num*3+1:num*4);
             end
             
-            rh = [mean(output(1:end-13,5,:),3) mean(output(1:end-13,6,:),3)]';
-            t = [mean(output(1:end-13,1,:),3) mean(output(1:end-13,2,:),3)]';
+            c = [mean(output(:,7,:),3) mean(output(:,8,:),3)]';
+            rh = [mean(output(:,5,:),3) mean(output(:,6,:),3)]';
+            t = [mean(output(:,1,:),3) mean(output(:,2,:),3)]';
 %             rh = rh - repmat([0.8 0.3]', [1 size(rh,2)]);
             t = t - repmat([0.8 0.3]', [1 size(t,2)]);
+            c = c - repmat([mean(c(1,:)) mean(c(2,:))]', [1 size(c,2)]);
             rh = rh - repmat([mean(rh(1,:)) mean(rh(2,:))]', [1 size(rh,2)]); % baseline correction for dark trials
-            rh_all = [output(1:end-13,5,:) output(1:end-13,6,:)];
-            t_all = [output(1:end-13,1,:) output(1:end-13,2,:)];
+            c_all = [output(:,7,:) output(:,8,:)];
+            rh_all = [output(:,5,:) output(:,6,:)];
+            t_all = [output(:,1,:) output(:,2,:)];
 %             rh_all = rh_all - repmat([0.8 0.3], [size(rh_all,1) 1 size(rh_all,3)]);
             t_all = t_all - repmat([0.8 0.3], [size(t_all,1) 1 size(t_all,3)]);
+            c_all = c_all - repmat(mean(c_all), [size(c_all,1) 1 1]);
             rh_all = rh_all - repmat(mean(rh_all), [size(rh_all,1) 1 1]);  % baseline correction for dark trials
             
             MSE = NaN(1,size(output,3));
@@ -59,8 +61,10 @@ function data = analyze_data(d, subj_name, block_name, rotate, uw)
             end
             
 %             create data structures to store all data
+            cursor = struct('x_pos',c(1,:)','y_pos',c(2,:)');
             Rhand = struct('x_pos',rh(1,:)','y_pos',rh(2,:)'); %no time shift
             target = struct('x_pos',t(1,:)','y_pos',t(2,:)');
+            cursor_all = struct('x_pos',squeeze(c_all(:,1,:)),'y_pos',squeeze(c_all(:,2,:)));
             Rhand_all = struct('x_pos',squeeze(rh_all(:,1,:)),'y_pos',squeeze(rh_all(:,2,:)));
             target_all = struct('x_pos',squeeze(t_all(:,1,:)),'y_pos',squeeze(t_all(:,2,:)));
             fs = 130.004;
@@ -85,17 +89,14 @@ function data = analyze_data(d, subj_name, block_name, rotate, uw)
             cohxx = NaN(size(target_all.x_pos,2),length(freqs));
             cohyy = NaN(size(target_all.x_pos,2),length(freqs));
             for k = 1:size(Rhand_all.x_pos,2)
-                coh = mscohere([Rhand_all.x_pos(:,k) Rhand_all.y_pos(:,k)],[target.x_pos target.y_pos],blackmanharris(round(N/5)),[],sorted_freqs,fs,'mimo')';
-%                 coh = mscohere([cursor_all.x_pos cursor_all.y_pos],[target.x_pos target.y_pos],blackmanharris(round(N/5)),[],N,fs,'mimo')';
+                coh = mscohere([Rhand_all.x_pos(:,k) Rhand_all.y_pos(:,k)],[target.x_pos target.y_pos],blackmanharris(round(N/5)),[],sorted_freqs,fs,'mimo')'; % compute coherence only at target frequencies
+%                 coh = mscohere([Rhand_all.x_pos Rhand_all.y_pos],[target.x_pos target.y_pos],blackmanharris(round(N/5)),[],N,fs,'mimo')'; % compute coherence at all frequencies
                 cohxx(k,:) = coh(1,:);
                 cohyy(k,:) = coh(2,:);
             end
 
             cohxx = cohxx(:,1:2:end);
             cohyy = cohyy(:,2:2:end);
-            
-%             cohxx2 = mscohere(target.x_pos,cursor_all.x_pos,blackmanharris(round(N/5)),[],freqs_x,fs);
-%             cohyy2 = mscohere(target.y_pos,cursor_all.y_pos,blackmanharris(round(N/5)),[],freqs_y,fs);
             
             data.(subj_name{i}).(block_name{j}).x_x.SRcohere = mean(cohxx);
             data.(subj_name{i}).(block_name{j}).y_y.SRcohere = mean(cohyy);
@@ -130,8 +131,11 @@ function data = analyze_data(d, subj_name, block_name, rotate, uw)
             
             Rhand.x_fft = fourier(Rhand.x_pos);   %perform fft and get amplitude data
             Rhand.y_fft = fourier(Rhand.y_pos);
+            cursor.x_fft = fourier(cursor.x_pos);
+            cursor.y_fft = fourier(cursor.y_pos);
             target.x_fft = fourier(target.x_pos);
             target.y_fft = fourier(target.y_pos);
+            data.(subj_name{i}).(block_name{j}).cursor = cursor;
             data.(subj_name{i}).(block_name{j}).Rhand = Rhand;
             data.(subj_name{i}).(block_name{j}).target = target;
             data.(subj_name{i}).(block_name{j}).time = time;
