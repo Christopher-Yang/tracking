@@ -8,12 +8,12 @@ function data = analyze_data(d, block_name, uw)
     Nblocks = length(block_name);
     Nreps = size(d{1}.(block_name{1}).traj,3);
     p = NaN(Nblocks,length(d{1}.(block_name{1}).tFile)/6,length(d));
-    all = struct('x_x',p,'y_y',p,'x_y',p,'y_x',p);
     SRcohere = struct('x_x',p,'y_y',p);
     RRcohere = struct('x_x',p,'y_y',p);
     names = {'x_x','y_y','x_y','y_x'};
     freqs_x = NaN;
     freqs_y = NaN;
+    outputs = {'cursor','Rhand','Lhand'};
 
     for i = 1:Nsubj
         disp(['   Subject ' num2str(i)]);
@@ -139,87 +139,87 @@ function data = analyze_data(d, block_name, uw)
     
     disp('   averaging...');
     n = 1000;
-    data{Nsubj+1}.x_x.amp = amplitudes_x;
-    data{Nsubj+1}.y_y.amp = amplitudes_y;
-    data{Nsubj+1}.x_x.x_axis = x_axis;
+    data{Nsubj+1}.amp = amplitudes_x;
+    data{Nsubj+1}.amp = amplitudes_y;
+    data{Nsubj+1}.x_axis = x_axis;
     
-    for
-    for i = 1:length(names)
-        data{Nsubj+1}.(names{i}).fft = mean(all.(names{i}),3); % take mean of complex ratios
-%         data{Nsubj+1}.(names{i}).d = fourier(data{Nsubj+1}.(names{i}).fft,0); % fft averaged complex ratios
-        data{Nsubj+1}.(names{i}).amplitude = abs(data{Nsubj+1}.(names{i}).fft);
-        data{Nsubj+1}.(names{i}).phase = angle(data{Nsubj+1}.(names{i}).fft);
-        data{Nsubj+1}.(names{i}).phase = unwrap(data{Nsubj+1}.(names{i}).phase,[],2); % unwrap phase
-        
-        Nblocks = size(data{Nsubj+1}.(names{i}).fft,1);
-        Nfreqs = size(data{Nsubj+1}.(names{i}).fft,2);
-        % bootstrap data
-        boot.(names{i}).fft = NaN(Nblocks,Nfreqs,n);
-        for j = 1:n
-            y = datasample(all.(names{i}),10,3);
-            boot.(names{i}).fft(:,:,j) = mean(y,3);
-        end
-        
-        data{Nsubj+1}.(names{i}).all_amp = abs(all.(names{i}));
-        
-%         boot.(names{i}).d = fourier(boot.(names{i}).fft,0);
-        boot.(names{i}).amplitude = abs(boot.(names{i}).fft);
-        y1 = 20*log10(sort(boot.(names{i}).amplitude,3));
-        boot.(names{i}).phase = angle(boot.(names{i}).fft);
-        boot.(names{i}).phase = sort(unwrap(sort(boot.(names{i}).phase,3),[],2),3);
-        
-        if uw ~= 0
-            switch names{i}
-                case {'x_x'}
-                    [y2,a] = error_unwrap(boot.(names{i}).phase,data{Nsubj+1}.(names{i}).phase,(uw-1)*4+1);
-                    data{Nsubj+1}.(names{i}).phase = a;
-                case {'y_y'}
-                    [y2,a] = error_unwrap(boot.(names{i}).phase,data{Nsubj+1}.(names{i}).phase,(uw-1)*4+2);
-                    data{Nsubj+1}.(names{i}).phase = a;
-                case {'x_y'}
-                    [y2,a] = error_unwrap(boot.(names{i}).phase,data{Nsubj+1}.(names{i}).phase,(uw-1)*4+3);
-                    data{Nsubj+1}.(names{i}).phase = a;
-                case {'y_x'}
-                    [y2,a] = error_unwrap(boot.(names{i}).phase,data{Nsubj+1}.(names{i}).phase,(uw-1)*4+4);
-                    data{Nsubj+1}.(names{i}).phase = a;
+    for k = 1:3
+        for i = 1:length(names)
+            FT = mean(all.(outputs{k}).(names{i}),3); % take mean of complex ratios
+            AMP = abs(FT);
+            PHASE = angle(FT);
+            PHASE = unwrap(PHASE,[],2); % unwrap phase
+            data{Nsubj+1}.(outputs{k}).(names{i}).fft = FT;
+            data{Nsubj+1}.(outputs{k}).(names{i}).amplitude = AMP;
+            data{Nsubj+1}.(outputs{k}).(names{i}).phase = PHASE;
+            
+            Nblocks = size(FT,1);
+            Nfreqs = size(FT,2);
+            % bootstrap data
+            boot.(names{i}).fft = NaN(Nblocks,Nfreqs,n);
+            for j = 1:n
+                y = datasample(all.(outputs{k}).(names{i}),10,3);
+                boot.(names{i}).fft(:,:,j) = mean(y,3);
             end
-        else
-            y2 = boot.(names{i}).phase*(180/pi);
+            
+            data{Nsubj+1}.(outputs{k}).(names{i}).all_amp = abs(all.(outputs{k}).(names{i}));
+            
+            %         boot.(names{i}).d = fourier(boot.(names{i}).fft,0);
+            boot.(names{i}).amplitude = abs(boot.(names{i}).fft);
+            y1 = 20*log10(sort(boot.(names{i}).amplitude,3));
+            boot.(names{i}).phase = angle(boot.(names{i}).fft);
+            boot.(names{i}).phase = sort(unwrap(sort(boot.(names{i}).phase,3),[],2),3);
+            
+            if uw ~= 0
+                switch names{i}
+                    case {'x_x'}
+                        [y2,a] = error_unwrap(boot.(names{i}).phase,PHASE,(uw-1)*4+1);
+                        data{Nsubj+1}.(outputs{k}).(names{i}).phase = a;
+                    case {'y_y'}
+                        [y2,a] = error_unwrap(boot.(names{i}).phase,PHASE,(uw-1)*4+2);
+                        data{Nsubj+1}.(outputs{k}).(names{i}).phase = a;
+                    case {'x_y'}
+                        [y2,a] = error_unwrap(boot.(names{i}).phase,PHASE,(uw-1)*4+3);
+                        data{Nsubj+1}.(names{i}).phase = a;
+                    case {'y_x'}
+                        [y2,a] = error_unwrap(boot.(names{i}).phase,PHASE,(uw-1)*4+4);
+                        data{Nsubj+1}.(names{i}).phase = a;
+                end
+            else
+                y2 = boot.(names{i}).phase*(180/pi);
+            end
+            AMP_ERR = cat(3,y1(:,:,26),y1(:,:,n-25));
+            AMP_ERR(:,:,1) = 20*log10(AMP) - AMP_ERR(:,:,1);
+            AMP_ERR(:,:,2) = AMP_ERR(:,:,2) - 20*log10(AMP);
+            data{Nsubj+1}.(outputs{k}).(names{i}).amp_err = AMP_ERR;
+            data{Nsubj+1}.(outputs{k}).(names{i}).amp_err_full = y1;
+            
+            PHASE_ERR = cat(3,y2(:,:,26),y2(:,:,n-25));
+            PHASE_ERR(:,:,1) = PHASE - PHASE_ERR(:,:,1);
+            PHASE_ERR(:,:,2) = PHASE_ERR(:,:,2) - (180/pi).*PHASE;
+            data{Nsubj+1}.(outputs{k}).(names{i}).phase_err = PHASE_ERR;
+            data{Nsubj+1}.(outputs{k}).(names{i}).phase_err_full = y2;
+            
+            switch names{i}
+                case {'x_x','x_y'}
+                    data{Nsubj+1}.(outputs{k}).(names{i}).freqs = freqs_x;
+                    data{Nsubj+1}.(outputs{k}).(names{i}).index = data{1}.(block_name{1}).phasors.cursor.x_x.index;
+                case {'y_y','y_x'}
+                    data{Nsubj+1}.(outputs{k}).(names{i}).freqs = freqs_y;
+                    data{Nsubj+1}.(outputs{k}).(names{i}).index = data{1}.(block_name{1}).phasors.cursor.y_y.index;
+            end
+            
+            if strcmp(names{i},'x_x') || strcmp(names{i},'y_y')
+                data{Nsubj+1}.(outputs{k}).(names{i}).SRcohere_full = SRcohere.(names{i});
+                data{Nsubj+1}.(outputs{k}).(names{i}).SRcohere = mean(SRcohere.(names{i}),3);
+                data{Nsubj+1}.(outputs{k}).(names{i}).SRcohere2 = mean(SRcohere2.(names{i}),3);
+                data{Nsubj+1}.(outputs{k}).(names{i}).RRcohere_full = RRcohere.(names{i});
+                data{Nsubj+1}.(outputs{k}).(names{i}).RRcohere = mean(RRcohere.(names{i}),3);
+            end
+            optimal_mag = cos(PHASE);
+            [x,y] = pol2cart(PHASE,optimal_mag);
+            data{Nsubj+1}.(outputs{k}).(names{i}).optimal_fft = complex(x,y);
         end
-        data{Nsubj+1}.(names{i}).amp_err = cat(3,y1(:,:,26),y1(:,:,n-25));
-        data{Nsubj+1}.(names{i}).amp_err(:,:,1) = 20*log10(data{Nsubj+1}.(names{i}).amplitude) - data{Nsubj+1}.(names{i}).amp_err(:,:,1);
-        data{Nsubj+1}.(names{i}).amp_err(:,:,2) = data{Nsubj+1}.(names{i}).amp_err(:,:,2) - 20*log10(data{Nsubj+1}.(names{i}).amplitude);
-        data{Nsubj+1}.(names{i}).amp_err_full = y1;
-        
-        data{Nsubj+1}.(names{i}).phase_err = cat(3,y2(:,:,26),y2(:,:,n-25));
-        data{Nsubj+1}.(names{i}).phase_err(:,:,1) = (180/pi).*data{Nsubj+1}.(names{i}).phase - data{Nsubj+1}.(names{i}).phase_err(:,:,1);
-        data{Nsubj+1}.(names{i}).phase_err(:,:,2) = data{Nsubj+1}.(names{i}).phase_err(:,:,2) - (180/pi).*data{Nsubj+1}.(names{i}).phase;
-%         for j = 1:numel(data{Nsubj+1}.(names{i}).phase_err)
-%             if data{Nsubj+1}.(names{i}).phase_err(j) < 0
-%                 data{Nsubj+1}.(names{i}).phase_err(j) = data{Nsubj+1}.(names{i}).phase_err(j) + 360;
-%             end
-%         end
-        data{Nsubj+1}.(names{i}).phase_err_full = y2;
-        
-        switch names{i}
-            case {'x_x','x_y'}
-                data{Nsubj+1}.(names{i}).freqs = freqs_x;
-                data{Nsubj+1}.(names{i}).index = data{1}.(block_name{1}).phasors.cursor.x_x.index;
-            case {'y_y','y_x'}
-                data{Nsubj+1}.(names{i}).freqs = freqs_y;
-                data{Nsubj+1}.(names{i}).index = data{1}.(block_name{1}).phasors.cursor.y_y.index;
-        end
-        
-        if strcmp(names{i},'x_x') || strcmp(names{i},'y_y')
-            data{Nsubj+1}.(names{i}).SRcohere_full = SRcohere.(names{i});
-            data{Nsubj+1}.(names{i}).SRcohere = mean(SRcohere.(names{i}),3);
-            data{Nsubj+1}.(names{i}).SRcohere2 = mean(SRcohere2.(names{i}),3);
-            data{Nsubj+1}.(names{i}).RRcohere_full = RRcohere.(names{i});
-            data{Nsubj+1}.(names{i}).RRcohere = mean(RRcohere.(names{i}),3);
-        end
-        optimal_mag = cos(data{Nsubj+1}.(names{i}).phase);
-        [x,y] = pol2cart(data{Nsubj+1}.(names{i}).phase,optimal_mag);
-        data{Nsubj+1}.(names{i}).optimal_fft = complex(x,y);
     end
 end
 
