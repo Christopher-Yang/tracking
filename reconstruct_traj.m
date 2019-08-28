@@ -1,9 +1,9 @@
 %% get trajectories from ifft
 clear all
 load dat
-subj = 'subj29';
-block = 'no_rot1';
-dat = data.rot_i.(subj).(block);
+subj = 'subj22';
+block = 'rot4';
+dat = data.rot.(subj).(block);
 Nstep = 5201;
 freq_axis = 130.004*(0:floor(Nstep/2))/5200;
 threshold = 0.006;
@@ -11,13 +11,16 @@ output = 'Rhand';
 
 % construct trajectories on- and off-target frequencies
 FT = [dat.target.x_fft.fft dat.target.y_fft.fft]; 
-idx = abs(FT)>Nstep*threshold/2; % find target indices
-idx = sum(idx,2);
+idx_half1 = abs(FT)>Nstep*threshold/2; % find target indices
+idx_half2 = [idx_half1(:,2) idx_half1(:,1)];
+idx = sum(idx_half1,2);
 idx = logical(repmat(idx,[1 2]));
 [t_onFreq, t_offFreq] = rebuild_traj(FT,idx); % on-target frequencies
 
 FT = [dat.(output).x_fft.fft dat.(output).y_fft.fft];
 [h_onFreq, h_offFreq] = rebuild_traj(FT,idx); % off-target frequencies
+h_half1 = rebuild_traj(FT,idx_half1);
+h_half2 = rebuild_traj(FT,idx_half2);
 
 %% get trajectories by pulling amplitude and phase from spectra
 tFile = d.(subj).(block).tFile;
@@ -77,7 +80,7 @@ hand(:,2) = sum(hSines(length(freqsH)/2+1:end,:));
 %% compare target and hand trajectories at different frequencies 
 % plot actual trajectories
 figure(2); clf;
-subplot(1,3,1); hold on
+subplot(2,3,1); hold on
 plot(dat.target.x_pos,dat.target.y_pos) % actual target trajectory
 plot(dat.(output).x_pos,dat.(output).y_pos) % actual output trajectory
 xlabel('X position (m)')
@@ -87,7 +90,7 @@ title('Actual trajectories')
 axis([-.1 .1 -.1 .1]) 
 
 % plot on-target frequency trajectories
-subplot(1,3,2); hold on
+subplot(2,3,4); hold on
 plot(t_onFreq(:,1),t_onFreq(:,2)) % ifft target and hand trajectories
 plot(h_onFreq(:,1),h_onFreq(:,2))
 % plot(target(:,1),target(:,2)) % simulated target and hand trajectories
@@ -95,11 +98,29 @@ plot(h_onFreq(:,1),h_onFreq(:,2))
 xlabel('X position (m)')
 ylabel('Y position (m)')
 axis square
-title('Movement at target frequencies')
+title('Movement at all target frequencies')
 axis([-.1 .1 -.1 .1]) 
 
+subplot(2,3,2); hold on
+plot(t_onFreq(:,1),t_onFreq(:,2)) % ifft target and hand trajectories
+plot(h_half1(:,1),h_half1(:,2))
+xlabel('X position (m)')
+ylabel('Y position (m)')
+axis square
+title('Movement at baseline frequencies')
+axis([-.1 .1 -.1 .1])
+
+subplot(2,3,5); hold on
+plot(t_onFreq(:,1),t_onFreq(:,2)) % ifft target and hand trajectories
+plot(h_half2(:,1),h_half2(:,2))
+xlabel('X position (m)')
+ylabel('Y position (m)')
+axis square
+title('Movement at compensated frequencies')
+axis([-.1 .1 -.1 .1])
+
 % plot off-target frequency trajectories
-subplot(1,3,3); hold on
+subplot(2,3,[3 6]); hold on
 plot(t_onFreq(1:end-50,1)-h_onFreq(51:end,1),t_onFreq(1:end-50,2)-h_onFreq(51:end,2)) % delayed difference between target and hand trajectories
 plot(h_offFreq(:,1),h_offFreq(:,2)) % ifft target and hand trajectories
 % plot(dat.(output).x_pos - hand(:,1),dat.(output).y_pos - hand(:,2)) % subtract time domain trajectories
@@ -145,7 +166,7 @@ for i = 1:3
     axis square
 end
 
-%%
+%% plot single sinusoids
 simTime2 = simTime(1:1000);
 
 figure(4); clf

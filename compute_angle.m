@@ -3,6 +3,7 @@ load dat
 subj_rot = {'subj17','subj18','subj21','subj22','subj24','subj25','subj28','subj31','subj32','subj33'};
 subj_rot_i = {'subj14','subj15','subj16','subj19','subj23','subj26','subj27','subj29','subj30','subj34'};
 blocks = {'no_rot1','rot1','rot4','no_rot2'};
+groups = {'rot','rot_i'};
 names = {'x_x_all','x_y_all','y_x_all','y_y_all'};
 for q = 1:2
     for p = 1:length(subj_rot)
@@ -54,6 +55,19 @@ end
 
 thetaFit_bar = mean(thetaFit,2);
 thetaFit_se = std(thetaFit,[],2)/sqrt(10);
+
+% for plotting heatmaps
+col1 = [1 0 0];
+col2 = [1 1 1];
+Nstep = 100;
+map1 = [linspace(col1(1),col2(1),Nstep)', linspace(col1(2),col2(2),Nstep)', linspace(col1(3),col2(3),Nstep)'];
+
+col1 = [1 1 1];
+col2 = [0 0 1];
+map2 = [linspace(col1(1),col2(1),Nstep)', linspace(col1(2),col2(2),Nstep)', linspace(col1(3),col2(3),Nstep)'];
+
+map = [map1; map2];
+clims = [-1 1];
 
 %% bar plots of aftereffects
 col = lines;
@@ -215,7 +229,7 @@ group = 1;
 subj = 4;
 blockIdx = 3;
 
-plot_subj(data.rot.(subj_rot{subj}).(blocks{blockIdx}))
+plot_subj(data.(groups{group}).(subj_rot{subj}).(blocks{blockIdx}))
 subplot(2,2,1)
 plot(rotMat(1,1,blockIdx,subj,group)*phasor(:,subj,group),'k','LineWidth',3)
 subplot(2,2,2)
@@ -225,24 +239,49 @@ plot(rotMat(2,1,blockIdx,subj,group)*phasor(:,subj,group),'k','LineWidth',3)
 subplot(2,2,4)
 plot(rotMat(2,2,blockIdx,subj,group)*phasor(:,subj,group),'k','LineWidth',3)
 
+
+%% gain matrices by individual frequency
+group = 1;
+subj = 4;
+names = {'Baseline','Early','Late','Post'};
+
+figure(1); clf
+for j = 1:length(blocks)
+    for i = 1:7
+        gains(1,1,:,j) = abs(rotMat(1,1,j,subj,group)*phasor(:,subj,group));
+        gains(1,2,:,j) = abs(rotMat(1,2,j,subj,group)*phasor(:,subj,group));
+        gains(2,1,:,j) = abs(rotMat(2,1,j,subj,group)*phasor(:,subj,group));
+        gains(2,2,:,j) = abs(rotMat(2,2,j,subj,group)*phasor(:,subj,group));
+        
+        subplot(4,7,7*(j-1)+i)
+        imagesc(gains(:,:,i,j),clims)
+        colormap(map)
+        set(gca,'Xtick',[],'Ytick',[])
+        axis square
+        if i == 1
+            ylabel(names{j})
+        end
+    end
+end
+
+figure(2); clf
+for j = 1:length(blocks)
+    for i = 1:7
+        subplot(4,7,7*(j-1)+i); hold on
+        plot([0 gains(1,1,i,j)],[0 gains(2,1,i,j)],'LineWidth',1.5)
+        plot([0 gains(1,2,i,j)],[0 gains(2,2,i,j)],'LineWidth',1.5)
+        axis([-0.45 1 -0.45 1])
+        if i == 1
+            ylabel(names{j})
+        end
+    end
+end
 %% gain matrices
-col1 = [1 0 0];
-col2 = [1 1 1];
-Nstep = 100;
-map1 = [linspace(col1(1),col2(1),Nstep)', linspace(col1(2),col2(2),Nstep)', linspace(col1(3),col2(3),Nstep)'];
-
-col1 = [1 1 1];
-col2 = [0 0 1];
-map2 = [linspace(col1(1),col2(1),Nstep)', linspace(col1(2),col2(2),Nstep)', linspace(col1(3),col2(3),Nstep)'];
-
-map = [map1; map2];
-clims = [-1 1];
-
 figure(1); clf
 subplot(2,4,1)
 imagesc(mean(vmrBase,3),clims)
 colormap(map)
-set(gca,'TickDir','out','Xtick',[],'Ytick',[])
+set(gca,'Xtick',[],'Ytick',[])
 axis square
 title('Baseline')
 ylabel('Rotation')
@@ -250,21 +289,21 @@ ylabel('Rotation')
 subplot(2,4,2)
 imagesc(mean(vmrEarly,3),clims)
 colormap(map)
-set(gca,'TickDir','out','Xtick',[],'Ytick',[])
+set(gca,'Xtick',[],'Ytick',[])
 axis square
 title('Early')
 
 subplot(2,4,3)
 imagesc(mean(vmrLate,3),clims)
 colormap(map)
-set(gca,'TickDir','out','Xtick',[],'Ytick',[])
+set(gca,'Xtick',[],'Ytick',[])
 axis square
 title('Late')
 
 subplot(2,4,4)
 imagesc(mean(vmrAfter,3),clims)
 colormap(map)
-set(gca,'TickDir','out','Xtick',[],'Ytick',[])
+set(gca,'Xtick',[],'Ytick',[])
 axis square
 title('After')
 
