@@ -18,7 +18,7 @@ function output = load_data(subj_name, block_name, folder,time)
             for k = 1:length(fnames(not([fnames.isdir])))-1
                 name = ['traj',num2str(k)];
                 data.(name) = dlmread([path,'/',fnames(3+(k-1)).name],' ',6,0);   
-                data.(name) = data.(name)(end-Nsamples:end,:);    %only trajectory after 5 sec warm up time is used
+                data.(name) = data.(name)(end-Nsamples+1:end,:);    %only trajectory after 5 sec warm up time is used
                 full = cat(3,full,data.(name));
             end
             
