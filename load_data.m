@@ -22,7 +22,7 @@ function output = load_data(subj_name, block_name, folder,time)
                 idx = data.(name)(:,9)==1;
                 data.(name) = data.(name)(idx,:);
                 data.(name) = data.(name)(end-Nsamples+1:end,:);    %only trajectory after 5 sec warm up time is used
-                data.(name) = cat(3,data.(name)(1:N,:),data.(name)(N+1:2*N,:),data.(name)(2*N+1:3*N,:)); % divide signal into trials with the length of base period
+%                 data.(name) = cat(3,data.(name)(1:N,:),data.(name)(N+1:2*N,:),data.(name)(2*N+1:3*N,:)); % divide signal into trials with the length of base period
                 full = cat(3,full,data.(name));
             end
             
