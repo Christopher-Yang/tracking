@@ -32,13 +32,13 @@ function data = analyze_data(d, block_name, uw)
             for k = 0:3
                 trajs(:,:,k+1) = [mean(output(:,k*2+1,:),3) mean(output(:,k*2+2,:),3)]';
                 trajs_all(:,:,:,k+1) = [output(:,k*2+1,:) output(:,k*2+2,:)];
-                if k == 0
-                    trajs(:,:,k+1) = trajs(:,:,k+1) - repmat([0.8 0.3]', [1 size(trajs,2)]);
-                    trajs_all(:,:,:,k+1) = trajs_all(:,:,:,k+1) - repmat([0.8 0.3], [size(trajs_all,1) 1 size(trajs_all,3)]);
-                else
+%                 if k == 0
+%                     trajs(:,:,k+1) = trajs(:,:,k+1) - repmat([0.8 0.3]', [1 size(trajs,2)]);
+%                     trajs_all(:,:,:,k+1) = trajs_all(:,:,:,k+1) - repmat([0.8 0.3], [size(trajs_all,1) 1 size(trajs_all,3)]);
+%                 else
                     trajs(:,:,k+1) = trajs(:,:,k+1) - repmat([mean(trajs(1,:,k+1)) mean(trajs(2,:,k+1))]', [1 size(trajs,2)]);
                     trajs_all(:,:,:,k+1) = trajs_all(:,:,:,k+1) - repmat(mean(trajs_all(:,:,:,k+1),1), [size(trajs_all,1) 1 1]);
-                end
+%                 end
             end
             
 %             create data structures to store all data
@@ -78,8 +78,8 @@ function data = analyze_data(d, block_name, uw)
 %             cohxx2 = mscohere(target.x_pos,cursor_all.x_pos,blackmanharris(round(N/5)),[],freqs_x,fs);
 %             cohyy2 = mscohere(target.y_pos,cursor_all.y_pos,blackmanharris(round(N/5)),[],freqs_y,fs);
             
-            data{i}.(block_name{j}).x_x.SRcohere = mean(cohxx);
-            data{i}.(block_name{j}).y_y.SRcohere = mean(cohyy);
+            data{i}.(block_name{j}).coherence.SR.x_x = mean(cohxx);
+            data{i}.(block_name{j}).coherence.SR.y_y = mean(cohyy);
             
             total = 0;
             for k = 1:size(cursor_all.x_pos,2)-1
@@ -106,8 +106,8 @@ function data = analyze_data(d, block_name, uw)
                 k3 = k3 + 1;
             end
             
-            data{i}.(block_name{j}).x_x.RRcohere = mean(cohx);
-            data{i}.(block_name{j}).y_y.RRcohere = mean(cohy);
+            data{i}.(block_name{j}).coherence.RR.x_x = mean(cohx);
+            data{i}.(block_name{j}).coherence.RR.y_y = mean(cohy);
             
             cursor.x_fft = fourier(cursor.x_pos);   %perform fft and get amplitude data
             cursor.y_fft = fourier(cursor.y_pos);
@@ -132,8 +132,8 @@ function data = analyze_data(d, block_name, uw)
             SRcohere.y_y(j,:,i) = mean(cohyy);
             SRcohere2.x_x(Nreps*(j-1)+1:Nreps*(j-1)+Nreps,:,i) = cohxx;
             SRcohere2.y_y(Nreps*(j-1)+1:Nreps*(j-1)+Nreps,:,i) = cohyy;
-            RRcohere.x_x(j,:,i) = data{i}.(block_name{j}).x_x.RRcohere;
-            RRcohere.y_y(j,:,i) = data{i}.(block_name{j}).y_y.RRcohere;
+            RRcohere.x_x(j,:,i) = mean(cohx);
+            RRcohere.y_y(j,:,i) = mean(cohy);
         end
     end
     
@@ -147,8 +147,7 @@ function data = analyze_data(d, block_name, uw)
         for i = 1:length(names)
             FT = mean(all.(outputs{k}).(names{i}),3); % take mean of complex ratios
             AMP = abs(FT);
-            PHASE = angle(FT);
-            PHASE = unwrap(PHASE,[],2); % unwrap phase
+            PHASE = unwrap(angle(FT),[],2);
             data{Nsubj+1}.(outputs{k}).(names{i}).fft = FT;
             data{Nsubj+1}.(outputs{k}).(names{i}).amplitude = AMP;
             data{Nsubj+1}.(outputs{k}).(names{i}).phase = PHASE;
@@ -173,17 +172,17 @@ function data = analyze_data(d, block_name, uw)
             if uw ~= 0
                 switch names{i}
                     case {'x_x'}
-                        [y2,a] = error_unwrap(boot.(names{i}).phase,PHASE,(uw-1)*4+1);
+                        [y2,a] = error_unwrap(boot.(names{i}).phase,PHASE,(k-1)*4+1);
                         data{Nsubj+1}.(outputs{k}).(names{i}).phase = a;
                     case {'y_y'}
-                        [y2,a] = error_unwrap(boot.(names{i}).phase,PHASE,(uw-1)*4+2);
+                        [y2,a] = error_unwrap(boot.(names{i}).phase,PHASE,(k-1)*4+2);
                         data{Nsubj+1}.(outputs{k}).(names{i}).phase = a;
                     case {'x_y'}
-                        [y2,a] = error_unwrap(boot.(names{i}).phase,PHASE,(uw-1)*4+3);
-                        data{Nsubj+1}.(names{i}).phase = a;
+                        [y2,a] = error_unwrap(boot.(names{i}).phase,PHASE,(k-1)*4+3);
+                        data{Nsubj+1}.(outputs{k}).(names{i}).phase = a;
                     case {'y_x'}
-                        [y2,a] = error_unwrap(boot.(names{i}).phase,PHASE,(uw-1)*4+4);
-                        data{Nsubj+1}.(names{i}).phase = a;
+                        [y2,a] = error_unwrap(boot.(names{i}).phase,PHASE,(k-1)*4+4);
+                        data{Nsubj+1}.(outputs{k}).(names{i}).phase = a;
                 end
             else
                 y2 = boot.(names{i}).phase*(180/pi);

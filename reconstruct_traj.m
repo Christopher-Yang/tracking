@@ -1,16 +1,16 @@
 %% get trajectories from ifft
 % clear all
 % load dat
-subj = 1;
-block = 'B1_baseline';
-dat = data{subj}.(subj).(block);
+subj = 3;
+block = 'B26';
+dat = data{subj}.(block);
 Nstep = length(data{subj}.(block).time);
-freq_axis = 130.004*(0:floor(Nstep/2))/5200;
+freq_axis = 130.004*(0:floor(Nstep/2))/Nstep;
 threshold = 0.006;
 output = 'Rhand';
 
 % construct trajectories on- and off-target frequencies
-FT = [dat.target.x_fft.fft dat.target.y_fft.fft]; 
+FT = [dat.target.x_fft.fft dat.target.y_fft.fft];
 idx_half1 = abs(FT)>Nstep*threshold/2; % find target indices
 idx_half2 = [idx_half1(:,2) idx_half1(:,1)];
 idx = sum(idx_half1,2);

@@ -19,7 +19,7 @@ function output = fourier(output_traj,input_traj,Nfreq)
                 idx = idx(1:Nfreq);
                 output.ratio = output_fft(idx)./input_fft(idx);
                 output.amplitude = abs(output.ratio);
-                output.phase = angle(output.ratio);
+                output.phase = unwrap(angle(output.ratio));
                 output.index = idx;
             else
                 output_fft = NaN(size(output_traj));
@@ -35,7 +35,7 @@ function output = fourier(output_traj,input_traj,Nfreq)
                 idx = idx(1:Nfreq);
                 output.ratio = output_fft(idx,:)./input_fft(idx,:);
                 output.amplitude = abs(output.ratio);
-                output.phase = angle(output.ratio);
+                output.phase = unwrap(angle(output.ratio),[],1);
             end
     end
 end
