@@ -1,7 +1,9 @@
 % clear all
 % load dat
 groups = {'rot','rot_i'};
-block = {'no_rot1','rot1','rot4','no_rot2'};
+block = {'no_rot1','rot1','rot2','rot3','rot4','no_rot2'};
+Nblock = length(block);
+Nsubj = 10;
 delay = 50;
 
 for l = 1:2
@@ -10,8 +12,8 @@ for l = 1:2
     else
         subj = {'subj14','subj15','subj16','subj19','subj23','subj26','subj27','subj29','subj30','subj34'};
     end
-    for i = 1:10
-        for j = 1:4
+    for i = 1:Nsubj
+        for j = 1:Nblock
             dat = data.(groups{l}).(subj{i}).(block{j});
             hand = [dat.Rhand.x_pos dat.Rhand.y_pos]';
             target = [dat.target.x_pos dat.target.y_pos]';
@@ -50,12 +52,12 @@ bestDelay = delay(idx).*(1/130.004);
 theta_bar = mean(theta_opt,2);
 theta_se = std(theta_opt,[],2)/sqrt(10);
 
-% vmr12 = reshape(squeeze(rotMat_opt_vmr(1,2,[1 4],:))',[20 1]);
-% vmr21 = reshape(squeeze(rotMat_opt_vmr(2,1,[1 4],:))',[20 1]);
-% mr12 = reshape(squeeze(rotMat_opt_mr(1,2,[1 4],:))',[20 1]);
-% mr21 = reshape(squeeze(rotMat_opt_mr(2,1,[1 4],:))',[20 1]);
+% vmr12 = reshape(squeeze(rotMat_opt_vmr(1,2,[1 Nblock],:))',[20 1]);
+% vmr21 = reshape(squeeze(rotMat_opt_vmr(2,1,[1 Nblock],:))',[20 1]);
+% mr12 = reshape(squeeze(rotMat_opt_mr(1,2,[1 Nblock],:))',[20 1]);
+% mr21 = reshape(squeeze(rotMat_opt_mr(2,1,[1 Nblock],:))',[20 1]);
 % z = [vmr12; vmr21; mr12; mr21];
-% dlmwrite('time_matrix2.csv',z);
+% dlmwrite('time_matrix.csv',z);
 %% plot fitted matrices as well as column vector representation
 col1 = [1 0 0];
 col2 = [1 1 1];
@@ -74,10 +76,11 @@ clims = [-1 1];
 % mat2 = rotMat_opt_mr(:,:,:,subj);
 mat1 = mean(rotMat_opt_vmr,4);
 mat2 = mean(rotMat_opt_mr,4);
+gblocks = [1 2 5 6];
 figure(1); clf
 for i = 1:4
     subplot(2,4,i)
-    imagesc(mat1(:,:,i),clims)
+    imagesc(mat1(:,:,gblocks(i)),clims)
     colormap(map)
     axis square
     if i == 1
@@ -94,7 +97,7 @@ for i = 1:4
     axis square
     
     subplot(2,4,i+4)
-    imagesc(mat2(:,:,i),clims)
+    imagesc(mat2(:,:,gblocks(i)),clims)
     colormap(map)
     axis square
     if i == 1
@@ -107,8 +110,8 @@ end
 figure(2); clf
 for i = 1:4
     subplot(2,4,i); hold on
-    plot([0 mat1(1,1,i)],[0 mat1(2,1,i)],'LineWidth',1.5)
-    plot([0 mat1(1,2,i)],[0 mat1(2,2,i)],'LineWidth',1.5)
+    plot([0 mat1(1,1,gblocks(i))],[0 mat1(2,1,gblocks(i))],'LineWidth',1.5)
+    plot([0 mat1(1,2,gblocks(i))],[0 mat1(2,2,gblocks(i))],'LineWidth',1.5)
     plot([0 1],[0 0],'k')
     plot([0 0],[0 1],'k')
     axis([-0.65 1 -0.65 1])
@@ -118,8 +121,8 @@ for i = 1:4
     end
     
     subplot(2,4,i+4); hold on
-    plot([0 mat2(1,1,i)],[0 mat2(2,1,i)],'LineWidth',1.5)
-    plot([0 mat2(1,2,i)],[0 mat2(2,2,i)],'LineWidth',1.5)
+    plot([0 mat2(1,1,gblocks(i))],[0 mat2(2,1,gblocks(i))],'LineWidth',1.5)
+    plot([0 mat2(1,2,gblocks(i))],[0 mat2(2,2,gblocks(i))],'LineWidth',1.5)
     plot([0 1],[0 0],'k')
     plot([0 0],[0 1],'k')
     axis([-0.65 1 -0.65 1])
@@ -133,10 +136,10 @@ end
 col = lines;
 col = col(1:7,:);
 
-vmr12 = squeeze(rotMat_opt_vmr(1,2,[1 3 4],:));
-vmr21 = squeeze(rotMat_opt_vmr(2,1,[1 3 4],:));
-mr12 = squeeze(rotMat_opt_mr(1,2,[1 3 4],:));
-mr21 = squeeze(rotMat_opt_mr(2,1,[1 3 4],:));
+% vmr12 = squeeze(rotMat_opt_vmr(1,2,[1 6],:));
+% vmr21 = squeeze(rotMat_opt_vmr(2,1,[1 6],:));
+% mr12 = squeeze(rotMat_opt_mr(1,2,[1 6],:));
+% mr21 = squeeze(rotMat_opt_mr(2,1,[1 6],:));
 
 figure(3); clf
 subplot(2,4,1:2); hold on
