@@ -5,15 +5,9 @@ function output = fourier(output_traj,input_traj,Nfreq)
         case 1 %calculate DFT
             output.fft = fft(output_traj-mean(output_traj));
             amp = output.fft(1:floor(length(output.fft)/2)+1);
-%             pow = (1/(130.004*length(output.fft)))*abs(amp).^2;
             amp = abs(amp/length(output.fft));
             amp(2:end-1) = 2*amp(2:end-1);
-%             pow(2:end-1) = 2*pow(2:end-1);
             output.amplitude = amp;
-%             output.power = pow;
-%             output.amplitude = abs(output.fft/length(output.fft));
-%             output.amplitude = output.amplitude(1:floor(length(output.fft)/2)+1);
-%             output.amplitude(2:end-1) = 2*output.amplitude(2:end-1);
         case 3
             if isvector(output_traj) == 1 && isvector(input_traj) == 1
                 output_fft = fft(output_traj-mean(output_traj));  %subtract the mean to normalize baseline
@@ -25,7 +19,7 @@ function output = fourier(output_traj,input_traj,Nfreq)
                 idx = idx(1:Nfreq);
                 output.ratio = output_fft(idx)./input_fft(idx);
                 output.amplitude = abs(output.ratio);
-                output.phase = angle(output.ratio);
+                output.phase = unwrap(angle(output.ratio));
                 output.index = idx;
             else
                 output_fft = NaN(size(output_traj));
@@ -41,7 +35,7 @@ function output = fourier(output_traj,input_traj,Nfreq)
                 idx = idx(1:Nfreq);
                 output.ratio = output_fft(idx,:)./input_fft(idx,:);
                 output.amplitude = abs(output.ratio);
-                output.phase = angle(output.ratio);
+                output.phase = unwrap(angle(output.ratio),[],1);
             end
     end
 end
