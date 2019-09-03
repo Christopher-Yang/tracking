@@ -139,8 +139,8 @@ function data = analyze_data(d, block_name, uw)
     
     disp('   averaging...');
     n = 1000;
-    data{Nsubj+1}.amp = amplitudes_x;
-    data{Nsubj+1}.amp = amplitudes_y;
+    data{Nsubj+1}.ampX = amplitudes_x;
+    data{Nsubj+1}.ampY = amplitudes_y;
     data{Nsubj+1}.x_axis = x_axis;
     
     for k = 1:3

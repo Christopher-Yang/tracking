@@ -90,9 +90,7 @@ errorbar(2,mean(vmrYX(:,3)),2*std(vmrYX(:,3))/sqrt(10),'.','Color',col(4,:),'Mar
 xlim([0.5 2.5])
 ylabel('YX gain')
 set(gca,'TickDir','out')
-xticks([1.5 3.5])
 yticks(-1:0.2:1)
-xticklabels({'Rotation','Mirror-Reversal'})
 
 %% plot vectors
 % for single subjects
@@ -110,8 +108,45 @@ AfterMu = After(:,:,subj);
 % LateMu = mean(Late,3);
 % AfterMu = mean(After,3);
 
+% gain matrices
 figure(1); clf
-subplot(1,5,1); hold on
+subplot(2,5,1)
+imagesc(BaseMu,clims)
+colormap(map)
+set(gca,'Xtick',[],'Ytick',[])
+axis square
+title('Baseline')
+
+subplot(2,5,2)
+imagesc(DarkBaseMu,clims)
+colormap(map)
+set(gca,'Xtick',[],'Ytick',[])
+axis square
+title('Dark Baseline')
+
+subplot(2,5,3)
+imagesc(EarlyMu,clims)
+colormap(map)
+set(gca,'Xtick',[],'Ytick',[])
+axis square
+title('Early')
+
+subplot(2,5,4)
+imagesc(LateMu,clims)
+colormap(map)
+set(gca,'Xtick',[],'Ytick',[])
+axis square
+title('Late')
+
+subplot(2,5,5)
+imagesc(AfterMu,clims)
+colormap(map)
+set(gca,'Xtick',[],'Ytick',[])
+axis square
+title('After')
+
+% vectors
+subplot(2,5,6); hold on
 plot([0 BaseMu(1,1)],[0 BaseMu(2,1)],'LineWidth',1.5)
 plot([0 BaseMu(1,2)],[0 BaseMu(2,2)],'LineWidth',1.5)
 plot([0 1],[0 0],'k')
@@ -120,7 +155,7 @@ title('Baseline')
 axis([-0.45 1 -0.45 1])
 axis square
 
-subplot(1,5,2); hold on
+subplot(2,5,7); hold on
 plot([0 DarkBaseMu(1,1)],[0 DarkBaseMu(2,1)],'LineWidth',1.5)
 plot([0 DarkBaseMu(1,2)],[0 DarkBaseMu(2,2)],'LineWidth',1.5)
 plot([0 1],[0 0],'k')
@@ -129,7 +164,7 @@ title('Dark Baseline')
 axis([-0.45 1 -0.45 1])
 axis square
 
-subplot(1,5,3); hold on
+subplot(2,5,8); hold on
 plot([0 EarlyMu(1,1)],[0 EarlyMu(2,1)],'LineWidth',1.5)
 plot([0 EarlyMu(1,2)],[0 EarlyMu(2,2)],'LineWidth',1.5)
 plot([0 1],[0 0],'k')
@@ -138,7 +173,7 @@ title('Early')
 axis([-0.45 1 -0.45 1])
 axis square
 
-subplot(1,5,4); hold on
+subplot(2,5,9); hold on
 plot([0 LateMu(1,1)],[0 LateMu(2,1)],'LineWidth',1.5)
 plot([0 LateMu(1,2)],[0 LateMu(2,2)],'LineWidth',1.5)
 plot([0 1],[0 0],'k')
@@ -147,7 +182,7 @@ title('Late')
 axis([-0.45 1 -0.45 1])
 axis square
 
-subplot(1,5,5); hold on
+subplot(2,5,10); hold on
 plot([0 AfterMu(1,1)],[0 AfterMu(2,1)],'LineWidth',1.5)
 plot([0 AfterMu(1,2)],[0 AfterMu(2,2)],'LineWidth',1.5)
 plot([0 1],[0 0],'k')
@@ -156,48 +191,11 @@ title('Post')
 axis([-0.45 1 -0.45 1])
 axis square
 
-% gain matrices
-figure(2); clf
-subplot(1,5,1)
-imagesc(BaseMu,clims)
-colormap(map)
-set(gca,'Xtick',[],'Ytick',[])
-axis square
-title('Baseline')
-
-subplot(1,5,2)
-imagesc(DarkBaseMu,clims)
-colormap(map)
-set(gca,'Xtick',[],'Ytick',[])
-axis square
-title('Dark Baseline')
-
-subplot(1,5,3)
-imagesc(EarlyMu,clims)
-colormap(map)
-set(gca,'Xtick',[],'Ytick',[])
-axis square
-title('Early')
-
-subplot(1,5,4)
-imagesc(LateMu,clims)
-colormap(map)
-set(gca,'Xtick',[],'Ytick',[])
-axis square
-title('Late')
-
-subplot(1,5,5)
-imagesc(AfterMu,clims)
-colormap(map)
-set(gca,'Xtick',[],'Ytick',[])
-axis square
-title('After')
-
 %% fitted phasors for individual subjects
 subj = 2;
-blockIdx = 6;
+blockIdx = 1;
 
-plot_subj(data{subj}.(blocks{blockIdx}).phasors.(output))
+plot_subj(data{subj}.(blocks{blockIdx}).phasors.(output),2)
 subplot(2,2,1)
 plot(rotMat(1,1,blockIdx,subj)*phasor(:,subj),'k','LineWidth',3)
 subplot(2,2,2)

@@ -1,142 +1,112 @@
-function graph_coherence(data, groups, gblocks, graph_name)
+function graph_coherence(data, gblocks, graph_name,output)
     
     rng(1);
     col = lines;
     col = col(1:7,:);
+    
     a = {'x_x','y_y'};
-    Nfreq = length(data.(groups{1}).avg.x_x.freqs);
-    Nblock = size(data.(groups{1}).avg.x_x.amplitude,1);
-%     SRboot = NaN(Nblock,Nfreq*2,1000);
+    Nfreq = length(data{end}.ampX);
+    Nblock = length(fieldnames(data{1}));
     SRboot = NaN(Nblock,Nfreq,1000);
     RRboot = NaN(Nblock,Nfreq,1000);
-    diffboot = NaN(Nblock,Nfreq,1000);
-    for z = 1:length(groups)
-        for i = 1:length(a)
-            diff{z}.(a{i}) = sqrt(data.(groups{z}).avg.(a{i}).RRcohere) - data.(groups{z}).avg.(a{i}).SRcohere;
-            SRcohere = data.(groups{z}).avg.(a{i}).SRcohere_full;
-            RRcohere = data.(groups{z}).avg.(a{i}).RRcohere_full;
-            diff_all = sqrt(data.(groups{z}).avg.(a{i}).RRcohere_full) - data.(groups{z}).avg.(a{i}).SRcohere_full;
-            for j = 1:1000
-                k = datasample(SRcohere,10,3);
-                SRboot(:,:,j) = mean(k,3);
-                k = datasample(sqrt(RRcohere),10,3);
-                RRboot(:,:,j) = mean(k,3);
-                k = datasample(diff_all,10,3);
-                diffboot(:,:,j) = mean(k,3);
-            end
-            SRboot = sort(SRboot,3);
-            RRboot = sort(RRboot,3);
-            diffboot = sort(diffboot,3);
-            
-            SRerr{z}.(a{i}) = cat(3,SRboot(:,:,end-25),SRboot(:,:,26));
-            SRerr{z}.(a{i})(:,:,1) = SRerr{z}.(a{i})(:,:,1) - data.(groups{z}).avg.(a{i}).SRcohere;
-            SRerr{z}.(a{i})(:,:,2) = data.(groups{z}).avg.(a{i}).SRcohere - SRerr{z}.(a{i})(:,:,2);
-            SRerr{z}.(a{i}) = permute(SRerr{z}.(a{i}), [3 2 1]);
-            
-            RRerr{z}.(a{i}) = cat(3,RRboot(:,:,end-25),RRboot(:,:,26));
-            RRerr{z}.(a{i})(:,:,1) = RRerr{z}.(a{i})(:,:,1) - sqrt(data.(groups{z}).avg.(a{i}).RRcohere);
-            RRerr{z}.(a{i})(:,:,2) = sqrt(data.(groups{z}).avg.(a{i}).RRcohere) - RRerr{z}.(a{i})(:,:,2);
-            RRerr{z}.(a{i}) = permute(RRerr{z}.(a{i}), [3 2 1]);
-            
-            Derr{z}.(a{i}) = cat(3,diffboot(:,:,end-25),diffboot(:,:,26));
-            Derr{z}.(a{i})(:,:,1) = Derr{z}.(a{i})(:,:,1) - diff{z}.(a{i});
-            Derr{z}.(a{i})(:,:,2) = diff{z}.(a{i}) - Derr{z}.(a{i})(:,:,2);
-            Derr{z}.(a{i}) = permute(Derr{z}.(a{i}), [3 2 1]);
+%     diffboot = NaN(Nblock,Nfreq,1000);
+    for i = 1:length(a)
+        dat = data{end}.(output).(a{i});
+%         diff.(a{i}) = sqrt(dat.RRcohere) - dat.SRcohere;
+        SRcohere = dat.SRcohere_full;
+        RRcohere = dat.RRcohere_full;
+%         diff_all = sqrt(dat.RRcohere_full) - dat.SRcohere_full;
+        for j = 1:1000
+            k = datasample(SRcohere,10,3);
+            SRboot(:,:,j) = mean(k,3);
+            k = datasample(sqrt(RRcohere),10,3);
+            RRboot(:,:,j) = mean(k,3);
+%             k = datasample(diff_all,10,3);
+%             diffboot(:,:,j) = mean(k,3);
         end
-    end
-    
-    f_x = data.(groups{1}).avg.x_x.freqs;
-    f_y = data.(groups{1}).avg.y_y.freqs;
-    freqs_all = sort([f_x f_y]);
-    names = {'Rotation','Mirror Reversal'};
-    
-    figure('Name','Linearity','NumberTitle','off');
-    for i = 1:length(groups)
-        subplot(2,2,i)
-        for j = 1:length(gblocks)
-            s = shadedErrorBar(f_x,data.(groups{i}).avg.x_x.SRcohere(gblocks(j),:),SRerr{i}.x_x(:,:,gblocks(j)),'lineProps','-o');
-            editErrorBar(s,col(j,:),1);
-        end
-        set(gca,'Xscale','log','box','off','TickDir','out')
-        if i == 1
-            ylabel('SR_X Coherence')
-        end
-        axis([0.09 2.3 0.25 1])
-        title(names{i})
-        yticks(0:0.25:1)
+        SRboot = sort(SRboot,3);
+        RRboot = sort(RRboot,3);
+%         diffboot = sort(diffboot,3);
         
-        subplot(2,2,i+2)
-        for j = 1:length(gblocks)
-            s = shadedErrorBar(f_y,data.(groups{i}).avg.y_y.SRcohere(gblocks(j),:),SRerr{i}.x_x(:,:,gblocks(j)),'lineProps','-o');
-            editErrorBar(s,col(j,:),1);
-        end
-        set(gca,'Xscale','log','box','off','TickDir','out')
-        xlabel('Frequency (Hz)')
-        if i == 1
-            ylabel('SR_Y Coherence')
-        end
-        axis([0.09 2.3 0.25 1])
-        yticks(0:0.25:1)
-    end
-    legend(graph_name{gblocks},'Location','southeast')
-    
-    figure('Name','Determinism','NumberTitle','off');
-    for i = 1:length(groups)
-%         RRerr{i}.x_x = RRerr{i}.x_x([2 1],:,:); % use for 1 - sqrt(RR)
-        subplot(2,2,i)
-        for j = 1:length(gblocks)
-            s = shadedErrorBar(f_x,sqrt(data.(groups{i}).avg.x_x.RRcohere(gblocks(j),:)),RRerr{i}.x_x(:,:,gblocks(j)),'lineProps','-o');
-            editErrorBar(s,col(j,:),1);
-        end
-        set(gca,'Xscale','log','box','off','TickDir','out','Ytick',0.25:0.25:1)
-        if i == 1
-            ylabel('$\sqrt{RR_X\: Coherence}$','Interpreter','latex')
-            legend(graph_name{gblocks},'Location','southwest')
-        end
-        axis([0.09 2.3 0.25 1])
-        title(names{i})
-        pbaspect([1 1 1])
+        SRerr.(a{i}) = cat(3,SRboot(:,:,end-25),SRboot(:,:,26));
+        SRerr.(a{i})(:,:,1) = SRerr.(a{i})(:,:,1) - dat.SRcohere;
+        SRerr.(a{i})(:,:,2) = dat.SRcohere - SRerr.(a{i})(:,:,2);
+        SRerr.(a{i}) = permute(SRerr.(a{i}), [3 2 1]);
         
-        RRerr{i}.y_y = RRerr{i}.y_y(:,:,[2 1]);
-        subplot(2,2,i+2)
-        for j = 1:length(gblocks)
-            s = shadedErrorBar(f_y,sqrt(data.(groups{i}).avg.y_y.RRcohere(gblocks(j),:)),RRerr{i}.x_x(:,:,gblocks(j)),'lineProps','-o');
-            editErrorBar(s,col(j,:),1);
-        end
-        set(gca,'Xscale','log','box','off','TickDir','out','Ytick',0.25:0.25:1)
-        xlabel('Frequency (Hz)')
-        if i == 1
-            ylabel('$\sqrt{RR_Y\: Coherence}$','Interpreter','latex')
-        end
-        axis([0.09 2.3 0.25 1])
-        pbaspect([1 1 1])
+        RRerr.(a{i}) = cat(3,RRboot(:,:,end-25),RRboot(:,:,26));
+        RRerr.(a{i})(:,:,1) = RRerr.(a{i})(:,:,1) - sqrt(dat.RRcohere);
+        RRerr.(a{i})(:,:,2) = sqrt(dat.RRcohere) - RRerr.(a{i})(:,:,2);
+        RRerr.(a{i}) = permute(RRerr.(a{i}), [3 2 1]);
+        
+%         Derr.(a{i}) = cat(3,diffboot(:,:,end-25),diffboot(:,:,26));
+%         Derr.(a{i})(:,:,1) = Derr.(a{i})(:,:,1) - diff.(a{i});
+%         Derr.(a{i})(:,:,2) = diff.(a{i}) - Derr.(a{i})(:,:,2);
+%         Derr.(a{i}) = permute(Derr.(a{i}), [3 2 1]);
     end
     
-    figure('Name','Nonlinearity','NumberTitle','off')
-    for i = 1:length(groups)
-        subplot(2,2,i)
-        for j = 1:length(gblocks)
-            s = shadedErrorBar(f_x,diff{i}.x_x(gblocks(j),:),Derr{i}.x_x(:,:,gblocks(j)),'lineProps','-o');
-            editErrorBar(s,col(j,:),1);
-        end
-        set(gca,'Xscale','log','box','off','TickDir','out')
-        if i == 1
-            ylabel('\surd{RR_X} - SR_X Coherence')
-        end
-        axis([0.09 2.3 0 1])
-        title(names{i})
-        
-        subplot(2,2,i+2)
-        for j = 1:length(gblocks)
-            s = shadedErrorBar(f_x,diff{i}.y_y(gblocks(j),:),Derr{i}.y_y(:,:,gblocks(j)),'lineProps','-o');
-            editErrorBar(s,col(j,:),1);
-        end
-        set(gca,'Xscale','log','box','off','TickDir','out')
-        if i == 1
-            ylabel(['\surd{RR_Y} ' char(8211) ' SR_Y Coherence'])
-        end
-        xlabel('Frequency (Hz)')
-        axis([0.09 2.3 0 1])
+    dat = data{end}.(output);
+    f_x = dat.x_x.freqs;
+    f_y = dat.y_y.freqs;
+    
+    figure
+    subplot(2,2,1)
+    for j = 1:length(gblocks)
+        s = shadedErrorBar(f_x,dat.x_x.SRcohere(gblocks(j),:),SRerr.x_x(:,:,gblocks(j)),'lineProps','-o');
+        editErrorBar(s,col(j,:),1);
     end
-    legend(graph_name{gblocks})
+    set(gca,'Xscale','log','box','off','TickDir','out')
+    ylabel([output,' X movements'])
+    axis([0.09 2.3 0 1])
+    title('SR')
+    yticks(0:0.2:1)
+    
+    subplot(2,2,3)
+    for j = 1:length(gblocks)
+        s = shadedErrorBar(f_y,dat.y_y.SRcohere(gblocks(j),:),SRerr.y_y(:,:,gblocks(j)),'lineProps','-o');
+        editErrorBar(s,col(j,:),1);
+    end
+    set(gca,'Xscale','log','box','off','TickDir','out')
+    xlabel('Frequency (Hz)')
+    ylabel([output,' Y movements'])
+    axis([0.09 2.3 0 1])
+    yticks(0:0.2:1)
+    
+    subplot(2,2,2)
+    for j = 1:length(gblocks)
+        s = shadedErrorBar(f_x,sqrt(dat.x_x.RRcohere(gblocks(j),:)),RRerr.x_x(:,:,gblocks(j)),'lineProps','-o');
+        editErrorBar(s,col(j,:),1);
+    end
+    set(gca,'Xscale','log','box','off','TickDir','out')
+    axis([0.09 2.3 0 1])
+    title('RR')
+    yticks(0:0.2:1)
+    legend(graph_name{gblocks},'Location','southwest')
+
+    subplot(2,2,4)
+    for j = 1:length(gblocks)
+        s = shadedErrorBar(f_y,sqrt(dat.y_y.RRcohere(gblocks(j),:)),RRerr.y_y(:,:,gblocks(j)),'lineProps','-o');
+        editErrorBar(s,col(j,:),1);
+    end
+    set(gca,'Xscale','log','box','off','TickDir','out')
+    xlabel('Frequency (Hz)')
+    axis([0.09 2.3 0 1])
+    yticks(0:0.2:1)
+    
+%     subplot(2,3,3)
+%     for j = 1:length(gblocks)
+%         s = shadedErrorBar(f_x,diff.x_x(gblocks(j),:),Derr.x_x(:,:,gblocks(j)),'lineProps','-o');
+%         editErrorBar(s,col(j,:),1);
+%     end
+%     set(gca,'Xscale','log','box','off','TickDir','out')
+%     axis([0.09 2.3 0 1])
+%     title('Unexplained')
+%     
+%     subplot(2,3,6)
+%     for j = 1:length(gblocks)
+%         s = shadedErrorBar(f_y,diff.y_y(gblocks(j),:),Derr.y_y(:,:,gblocks(j)),'lineProps','-o');
+%         editErrorBar(s,col(j,:),1);
+%     end
+%     set(gca,'Xscale','log','box','off','TickDir','out')
+%     axis([0.09 2.3 0 1])
+%     legend(graph_name{gblocks})
 end
