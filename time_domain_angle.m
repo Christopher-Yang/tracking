@@ -136,91 +136,78 @@ end
 col = lines;
 col = col(1:7,:);
 
-% vmr12 = squeeze(rotMat_opt_vmr(1,2,[1 6],:));
-% vmr21 = squeeze(rotMat_opt_vmr(2,1,[1 6],:));
-% mr12 = squeeze(rotMat_opt_mr(1,2,[1 6],:));
-% mr21 = squeeze(rotMat_opt_mr(2,1,[1 6],:));
+vmr12 = squeeze(rotMat_opt_vmr(1,2,[1 5 6],:));
+vmr21 = squeeze(rotMat_opt_vmr(2,1,[1 5 6],:));
+mr12 = squeeze(rotMat_opt_mr(1,2,[1 5 6],:));
+mr21 = squeeze(rotMat_opt_mr(2,1,[1 5 6],:));
+
+n = size(vmr12,1);
+idx = [1 3 4];
 
 figure(3); clf
-subplot(2,4,1:2); hold on
+subplot(2,2,1); hold on
 plot([-1 10],[0 0],'--k','LineWidth',1)
-plot(1:0.5:2,vmr12,'k','Color',[0 0 0 0.5],'MarkerSize',20)
-scatter(repelem(1,10),vmr12(1,:),25,col(1,:),'filled','MarkerFaceAlpha',0.5)
-scatter(repelem(1.5,10),vmr12(2,:),25,col(3,:),'filled','MarkerFaceAlpha',0.5)
-scatter(repelem(2,10),vmr12(3,:),25,col(4,:),'filled','MarkerFaceAlpha',0.5)
-errorbar(1,mean(vmr12(1,:)),2*std(vmr12(1,:))/sqrt(10),'.','Color',col(1,:),'MarkerSize',30,'LineWidth',1)
-errorbar(1.5,mean(vmr12(2,:)),2*std(vmr12(2,:))/sqrt(10),'.','Color',col(3,:),'MarkerSize',30,'LineWidth',1)
-errorbar(2,mean(vmr12(3,:)),2*std(vmr12(3,:))/sqrt(10),'.','Color',col(4,:),'MarkerSize',30,'LineWidth',1)
-
-plot(3:0.5:4,mr12,'k','Color',[0 0 0 0.5],'MarkerSize',20)
-scatter(repelem(3,10),mr12(1,:),25,col(1,:),'filled','MarkerFaceAlpha',0.5)
-scatter(repelem(3.5,10),mr12(2,:),25,col(3,:),'filled','MarkerFaceAlpha',0.5)
-scatter(repelem(4,10),mr12(3,:),25,col(4,:),'filled','MarkerFaceAlpha',0.5)
-errorbar(3,mean(mr12(1,:)),2*std(mr12(1,:))/sqrt(10),'.','Color',col(1,:),'MarkerSize',30,'LineWidth',1)
-errorbar(3.5,mean(mr12(2,:)),2*std(mr12(2,:))/sqrt(10),'.','Color',col(3,:),'MarkerSize',30,'LineWidth',1)
-errorbar(4,mean(mr12(3,:)),2*std(mr12(3,:))/sqrt(10),'.','Color',col(4,:),'MarkerSize',30,'LineWidth',1)
-xlim([0.5 4.5])
-ylabel('Element 1,2')
+plot(1:3,vmr12,'k','Color',[0 0 0 0.5],'MarkerSize',20)
+plot(4:6,mr12,'k','Color',[0 0 0 0.5],'MarkerSize',20)
+for i = 1:3
+    scatter(repelem(i,Nsubj),vmr12(i,:),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
+    errorbar(i,mean(vmr12(i,:)),2*std(vmr12(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
+    
+    scatter(repelem(i+n,Nsubj),mr12(i,:),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
+    errorbar(i+n,mean(mr12(i,:)),2*std(mr12(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
+end
+xlim([0.5 6.5])
+ylabel('Upper-Right')
 set(gca,'Xtick',[],'TickDir','out')
 yticks(-1:0.2:1)
 
-subplot(2,4,3:4); hold on
+subplot(2,2,2); hold on
 plot([-1 10],[0 0],'--k','LineWidth',1)
-plot(1:2,vmr12([1 3],:),'k','Color',[0 0 0 0.5],'MarkerSize',20)
-scatter(repelem(1,10),vmr12(1,:),25,col(1,:),'filled','MarkerFaceAlpha',0.5)
-scatter(repelem(2,10),vmr12(3,:),25,col(4,:),'filled','MarkerFaceAlpha',0.5)
-errorbar(1,mean(vmr12(1,:)),2*std(vmr12(1,:))/sqrt(10),'.','Color',col(1,:),'MarkerSize',30,'LineWidth',1)
-errorbar(2,mean(vmr12(3,:)),2*std(vmr12(3,:))/sqrt(10),'.','Color',col(4,:),'MarkerSize',30,'LineWidth',1)
-
-plot(3:4,mr12([1 3],:),'k','Color',[0 0 0 0.5],'MarkerSize',20)
-scatter(repelem(3,10),mr12(1,:),25,col(1,:),'filled','MarkerFaceAlpha',0.5)
-scatter(repelem(4,10),mr12(3,:),25,col(4,:),'filled','MarkerFaceAlpha',0.5)
-errorbar(3,mean(mr12(1,:)),2*std(mr12(1,:))/sqrt(10),'.','Color',col(1,:),'MarkerSize',30,'LineWidth',1)
-errorbar(4,mean(mr12(3,:)),2*std(mr12(3,:))/sqrt(10),'.','Color',col(4,:),'MarkerSize',30,'LineWidth',1)
-xlim([0.5 4.5])
+plot([1 3],vmr12([1 3],:),'k','Color',[0 0 0 0.5],'MarkerSize',20)
+plot([4 6],mr12([1 3],:),'k','Color',[0 0 0 0.5],'MarkerSize',20)
+for i = [1 3]
+    scatter(repelem(i,Nsubj),vmr12(i,:),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
+    errorbar(i,mean(vmr12(i,:)),2*std(vmr12(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
+    
+    scatter(repelem(i+n,Nsubj),mr12(i,:),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
+    errorbar(i+n,mean(mr12(i,:)),2*std(mr12(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
+end
+xlim([0.5 6.5])
 set(gca,'Xtick',[],'TickDir','out')
 yticks(-1:0.2:1)
 
-subplot(2,4,5:6); hold on
+subplot(2,2,3); hold on
 plot([-1 10],[0 0],'--k','LineWidth',1)
-plot(1:0.5:2,vmr21,'k','Color',[0 0 0 0.5],'MarkerSize',20)
-scatter(repelem(1,10),vmr21(1,:),25,col(1,:),'filled','MarkerFaceAlpha',0.5)
-scatter(repelem(1.5,10),vmr21(2,:),25,col(3,:),'filled','MarkerFaceAlpha',0.5)
-scatter(repelem(2,10),vmr21(3,:),25,col(4,:),'filled','MarkerFaceAlpha',0.5)
-errorbar(1,mean(vmr21(1,:)),2*std(vmr21(1,:))/sqrt(10),'.','Color',col(1,:),'MarkerSize',30,'LineWidth',1)
-errorbar(1.5,mean(vmr21(2,:)),2*std(vmr21(2,:))/sqrt(10),'.','Color',col(3,:),'MarkerSize',30,'LineWidth',1)
-errorbar(2,mean(vmr21(3,:)),2*std(vmr21(3,:))/sqrt(10),'.','Color',col(4,:),'MarkerSize',30,'LineWidth',1)
-
-plot(3:0.5:4,mr21,'k','Color',[0 0 0 0.5],'MarkerSize',20)
-scatter(repelem(3,10),mr21(1,:),25,col(1,:),'filled','MarkerFaceAlpha',0.5)
-scatter(repelem(3.5,10),mr21(2,:),25,col(3,:),'filled','MarkerFaceAlpha',0.5)
-scatter(repelem(4,10),mr21(3,:),25,col(4,:),'filled','MarkerFaceAlpha',0.5)
-errorbar(3,mean(mr21(1,:)),2*std(mr21(1,:))/sqrt(10),'.','Color',col(1,:),'MarkerSize',30,'LineWidth',1)
-errorbar(3.5,mean(mr21(2,:)),2*std(mr21(2,:))/sqrt(10),'.','Color',col(3,:),'MarkerSize',30,'LineWidth',1)
-errorbar(4,mean(mr21(3,:)),2*std(mr21(3,:))/sqrt(10),'.','Color',col(4,:),'MarkerSize',30,'LineWidth',1)
-axis([0.5 4.5 -0.2 0.65])
-ylabel('Element 2,1')
+plot(1:3,vmr21,'k','Color',[0 0 0 0.5],'MarkerSize',20)
+plot(4:6,mr21,'k','Color',[0 0 0 0.5],'MarkerSize',20)
+for i = 1:3
+    scatter(repelem(i,Nsubj),vmr21(i,:),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
+    errorbar(i,mean(vmr21(i,:)),2*std(vmr21(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
+    
+    scatter(repelem(i+n,Nsubj),mr21(i,:),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
+    errorbar(i+n,mean(mr21(i,:)),2*std(mr21(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
+end
+axis([0.5 6.5 -0.2 0.65])
+ylabel('Lower-Left')
 set(gca,'Xtick',[],'TickDir','out')
-xticks([1.5 3.5])
+xticks([2 5])
 yticks(-1:0.2:1)
 xticklabels({'Rotation','Mirror-Reversal'})
 
-subplot(2,4,7:8); hold on
+subplot(2,2,4); hold on
 plot([-1 10],[0 0],'--k','LineWidth',1)
-plot(1:2,vmr21([1 3],:),'k','Color',[0 0 0 0.5],'MarkerSize',20)
-scatter(repelem(1,10),vmr21(1,:),25,col(1,:),'filled','MarkerFaceAlpha',0.5)
-scatter(repelem(2,10),vmr21(3,:),25,col(4,:),'filled','MarkerFaceAlpha',0.5)
-errorbar(1,mean(vmr21(1,:)),2*std(vmr21(1,:))/sqrt(10),'.','Color',col(1,:),'MarkerSize',30,'LineWidth',1)
-errorbar(2,mean(vmr21(3,:)),2*std(vmr21(3,:))/sqrt(10),'.','Color',col(4,:),'MarkerSize',30,'LineWidth',1)
-
-plot(3:4,mr21([1 3],:),'k','Color',[0 0 0 0.5],'MarkerSize',20)
-scatter(repelem(3,10),mr21(1,:),25,col(1,:),'filled','MarkerFaceAlpha',0.5)
-scatter(repelem(4,10),mr21(3,:),25,col(4,:),'filled','MarkerFaceAlpha',0.5)
-errorbar(3,mean(mr21(1,:)),2*std(mr21(1,:))/sqrt(10),'.','Color',col(1,:),'MarkerSize',30,'LineWidth',1)
-errorbar(4,mean(mr21(3,:)),2*std(mr21(3,:))/sqrt(10),'.','Color',col(4,:),'MarkerSize',30,'LineWidth',1)
-xlim([0.5 4.5])
+plot([1 3],vmr21([1 3],:),'k','Color',[0 0 0 0.5],'MarkerSize',20)
+plot([4 6],mr21([1 3],:),'k','Color',[0 0 0 0.5],'MarkerSize',20)
+for i = [1 3]
+    scatter(repelem(i,Nsubj),vmr21(i,:),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
+    errorbar(i,mean(vmr21(i,:)),2*std(vmr21(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
+    
+    scatter(repelem(i+n,Nsubj),mr21(i,:),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
+    errorbar(i+n,mean(mr21(i,:)),2*std(mr21(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
+end
+xlim([0.5 6.5])
 set(gca,'Xtick',[],'TickDir','out')
-xticks([1.5 3.5])
+xticks([2 5])
 yticks(-1:0.2:1)
 xticklabels({'Rotation','Mirror-Reversal'})
 

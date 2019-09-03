@@ -74,52 +74,81 @@ clims = [-1 1];
 col = lines;
 col = col(1:7,:);
 
-% vmrXY = [squeeze(vmrBase(1,2,:)) squeeze(vmrLate(1,2,:)) squeeze(vmrAfter(1,2,:))];
-% vmrYX = [squeeze(vmrBase(2,1,:)) squeeze(vmrLate(2,1,:)) squeeze(vmrAfter(2,1,:))];
-% mrXY = [squeeze(mrBase(1,2,:)) squeeze(mrLate(1,2,:)) squeeze(mrAfter(1,2,:))];
-% mrYX = [squeeze(mrBase(2,1,:)) squeeze(mrLate(2,1,:)) squeeze(mrAfter(2,1,:))];
+vmrXY = [squeeze(vmrBase(1,2,:)) squeeze(vmrLate(1,2,:)) squeeze(vmrAfter(1,2,:))];
+vmrYX = [squeeze(vmrBase(2,1,:)) squeeze(vmrLate(2,1,:)) squeeze(vmrAfter(2,1,:))];
+mrXY = [squeeze(mrBase(1,2,:)) squeeze(mrLate(1,2,:)) squeeze(mrAfter(1,2,:))];
+mrYX = [squeeze(mrBase(2,1,:)) squeeze(mrLate(2,1,:)) squeeze(mrAfter(2,1,:))];
 
-vmrXY = [squeeze(vmrBase(1,2,:)) squeeze(vmrAfter(1,2,:))];
-vmrYX = [squeeze(vmrBase(2,1,:)) squeeze(vmrAfter(2,1,:))];
-mrXY = [squeeze(mrBase(1,2,:)) squeeze(mrAfter(1,2,:))];
-mrYX = [squeeze(mrBase(2,1,:)) squeeze(mrAfter(2,1,:))];
+% vmrXY = [squeeze(vmrBase(1,2,:)) squeeze(vmrAfter(1,2,:))];
+% vmrYX = [squeeze(vmrBase(2,1,:)) squeeze(vmrAfter(2,1,:))];
+% mrXY = [squeeze(mrBase(1,2,:)) squeeze(mrAfter(1,2,:))];
+% mrYX = [squeeze(mrBase(2,1,:)) squeeze(mrAfter(2,1,:))];
 
 n = size(vmrXY,2);
-xAxis = 1:n;
 idx = [1 3 4];
 
 figure(1); clf
-subplot(2,4,2:3); 
-hold on
+subplot(2,2,1); hold on
 plot([-1 10],[0 0],'--k','LineWidth',1)
-plot(xAxis,vmrXY','k','Color',[0 0 0 0.5],'MarkerSize',20)
-plot(xAxis+n,mrXY','k','Color',[0 0 0 0.5],'MarkerSize',20)
-for i = 1:length(xAxis)
-    scatter(repelem(xAxis(i),Nsubj),vmrXY(:,i),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
-    errorbar(xAxis(i),mean(vmrXY(:,i)),2*std(vmrXY(:,i))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
+plot(1:3,vmrXY','k','Color',[0 0 0 0.5],'MarkerSize',20)
+plot(4:6,mrXY','k','Color',[0 0 0 0.5],'MarkerSize',20)
+for i = 1:3
+    scatter(repelem(i,Nsubj),vmrXY(:,i),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
+    errorbar(i,mean(vmrXY(:,i)),2*std(vmrXY(:,i))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
     
-    scatter(repelem(xAxis(i)+n,Nsubj),mrXY(:,i),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
-    errorbar(xAxis(i)+n,mean(mrXY(:,i)),2*std(mrXY(:,i))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
+    scatter(repelem(i+n,Nsubj),mrXY(:,i),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
+    errorbar(i+n,mean(mrXY(:,i)),2*std(mrXY(:,i))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
 end
-xlim([0.5 n(end)*2+0.5])
+xlim([0.5 6.5])
 ylabel('XY gain')
 set(gca,'Xtick',[],'TickDir','out')
 yticks(-1:0.2:1)
 
-subplot(2,4,6:7);
-hold on
+subplot(2,2,3); hold on
 plot([-1 10],[0 0],'--k','LineWidth',1)
-plot(xAxis,vmrYX','k','Color',[0 0 0 0.5],'MarkerSize',20)
-plot(xAxis+n,mrYX','k','Color',[0 0 0 0.5],'MarkerSize',20)
-for i = 1:length(xAxis)
-    scatter(repelem(xAxis(i),Nsubj),vmrYX(:,i),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
-    errorbar(xAxis(i),mean(vmrYX(:,i)),2*std(vmrYX(:,i))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
+plot(1:3,vmrYX','k','Color',[0 0 0 0.5],'MarkerSize',20)
+plot(4:6,mrYX','k','Color',[0 0 0 0.5],'MarkerSize',20)
+for i = 1:3
+    scatter(repelem(i,Nsubj),vmrYX(:,i),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
+    errorbar(i,mean(vmrYX(:,i)),2*std(vmrYX(:,i))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
     
-    scatter(repelem(xAxis(i)+n,Nsubj),mrYX(:,i),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
-    errorbar(xAxis(i)+n,mean(mrYX(:,i)),2*std(mrYX(:,i))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
+    scatter(repelem(i+n,Nsubj),mrYX(:,i),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
+    errorbar(i+n,mean(mrYX(:,i)),2*std(mrYX(:,i))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
 end
-xlim([0.5 n(end)*2+0.5])
+xlim([0.5 6.5])
 ylabel('YX gain')
+set(gca,'TickDir','out')
+xticks([2 5])
+yticks(-1:0.2:1)
+xticklabels({'Rotation','Mirror-Reversal'})
+
+subplot(2,2,2); hold on
+plot([-1 10],[0 0],'--k','LineWidth',1)
+plot([1 3],vmrXY(:,[1 3])','k','Color',[0 0 0 0.5],'MarkerSize',20)
+plot([4 6],mrXY(:,[1 3])','k','Color',[0 0 0 0.5],'MarkerSize',20)
+for i = [1 3]
+    scatter(repelem(i,Nsubj),vmrXY(:,i),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
+    errorbar(i,mean(vmrXY(:,i)),2*std(vmrXY(:,i))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
+    
+    scatter(repelem(i+n,Nsubj),mrXY(:,i),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
+    errorbar(i+n,mean(mrXY(:,i)),2*std(mrXY(:,i))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
+end
+xlim([0.5 6.5])
+set(gca,'Xtick',[],'TickDir','out')
+yticks(-1:0.2:1)
+
+subplot(2,2,4); hold on
+plot([-1 10],[0 0],'--k','LineWidth',1)
+plot([1 3],vmrYX(:,[1 3])','k','Color',[0 0 0 0.5],'MarkerSize',20)
+plot([4 6],mrYX(:,[1 3])','k','Color',[0 0 0 0.5],'MarkerSize',20)
+for i = [1 3]
+    scatter(repelem(i,Nsubj),vmrYX(:,i),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
+    errorbar(i,mean(vmrYX(:,i)),2*std(vmrXY(:,i))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
+    
+    scatter(repelem(i+n,Nsubj),mrYX(:,i),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
+    errorbar(i+n,mean(mrYX(:,i)),2*std(mrYX(:,i))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
+end
+xlim([0.5 6.5])
 set(gca,'TickDir','out')
 xticks([2 5])
 yticks(-1:0.2:1)
@@ -221,20 +250,31 @@ axis([-0.45 1 -0.45 1])
 axis square
 
 %% fitted phasors for individual subjects
-group = 1;
-subj = 1;
+group = 2;
+subj = 9;
 blockIdx = 6;
 
-plot_subj(data.(groups{group}).(subj_rot{subj}).(blocks{blockIdx}))
+plot_subj(data.(groups{group}).(subj_rot_i{subj}).(blocks{blockIdx}))
 subplot(2,2,1)
 plot(rotMat(1,1,blockIdx,subj,group)*phasor(:,subj,group),'k','LineWidth',3)
+xticks(-1:1)
+yticks(-1:1)
+set(gca,'TickDir','out')
 subplot(2,2,2)
 plot(rotMat(1,2,blockIdx,subj,group)*phasor(:,subj,group),'k','LineWidth',3)
+xticks(-1:1)
+yticks(-1:1)
+set(gca,'TickDir','out')
 subplot(2,2,3)
 plot(rotMat(2,1,blockIdx,subj,group)*phasor(:,subj,group),'k','LineWidth',3)
+xticks(-1:1)
+yticks(-1:1)
+set(gca,'TickDir','out')
 subplot(2,2,4)
 plot(rotMat(2,2,blockIdx,subj,group)*phasor(:,subj,group),'k','LineWidth',3)
-
+xticks(-1:1)
+yticks(-1:1)
+set(gca,'TickDir','out')
 
 %% gain matrices by individual frequency
 group = 1;
