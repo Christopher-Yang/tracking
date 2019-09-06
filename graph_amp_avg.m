@@ -17,7 +17,7 @@ function graph_amp_avg(data,block_name,gblocks,graph_name,output)
     xAxis = data{end}.x_axis;
     ix = data{end}.(output).x_x.index;
     iy = data{end}.(output).y_y.index;
-    Nsteps = length(data{1}.(block_name{1}).cursor.x_pos);
+    Nsteps = length(data{1}.(block_name{1}).(output).x_pos);
     
     g1 = NaN(length(xAxis),length(gblocks),Nsubj);
     g2 = NaN(length(xAxis),1000,length(gblocks));
@@ -32,8 +32,8 @@ function graph_amp_avg(data,block_name,gblocks,graph_name,output)
     
     for i = 1:Nsubj
         for j = 1:length(gblocks)
-            a.x_all(:,j,i) = data{i}.(block_name{gblocks(j)}).cursor.x_fft.amplitude; % puts each subject's amplitude spectrums into data structure
-            a.y_all(:,j,i) = data{i}.(block_name{gblocks(j)}).cursor.y_fft.amplitude;
+            a.x_all(:,j,i) = data{i}.(block_name{gblocks(j)}).(output).x_fft.amplitude; % puts each subject's amplitude spectrums into data structure
+            a.y_all(:,j,i) = data{i}.(block_name{gblocks(j)}).(output).y_fft.amplitude;
         end
     end
     
