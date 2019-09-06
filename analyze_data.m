@@ -1,18 +1,17 @@
-function data = analyze_data(d, block_name, uw)
+function data = analyze_data(d, block_name, uw, rotate)
     
     disp('Analyzing...');
     rng(3);
-    R = rotz(180);
-    R = R(1:2, 1:2);
+    if rotate == 1
+        R = rotz(-45);
+        R = R(1:2, 1:2);
+    else
+        R = eye(2);
+    end
     Nsubj = length(d);
     Nblocks = length(block_name);
     Nreps = size(d{1}.(block_name{1}).traj,3);
-    p = NaN(Nblocks,length(d{1}.(block_name{1}).tFile)/6,length(d));
-    SRcohere = struct('x_x',p,'y_y',p);
-    RRcohere = struct('x_x',p,'y_y',p);
     names = {'x_x','y_y','x_y','y_x'};
-    freqs_x = NaN;
-    freqs_y = NaN;
     outputs = {'cursor','Rhand','Lhand'};
 
     for i = 1:Nsubj
@@ -22,23 +21,29 @@ function data = analyze_data(d, block_name, uw)
             input = d{i}.(block_name{j}).tFile;
             num = length(input)/6;
             
-            freqs = input(1:num*2);
-            sorted_freqs = sort(freqs);
-            freqs_x = input(1:num);
-            freqs_y = input(num+1:num*2);
-            amplitudes_x = input(num*2+1:num*3);
-            amplitudes_y = input(num*3+1:num*4);
+            if rotate == 1
+                freqs = input(1:num);
+                sorted_freqs = freqs;
+                freqs_x = input(1:2:num);
+                freqs_y = input(2:2:num);
+                amplitudes_x = input(3*num+1:2:4*num);
+                amplitudes_y = input(3*num+2:2:4*num);
+            else
+                freqs = input(1:num*2);
+                sorted_freqs = sort(freqs);
+                freqs_x = input(1:num);
+                freqs_y = input(num+1:num*2);
+                amplitudes_x = input(num*2+1:num*3);
+                amplitudes_y = input(num*3+1:num*4);
+            end
             
             for k = 0:3
-                trajs(:,:,k+1) = [mean(output(:,k*2+1,:),3) mean(output(:,k*2+2,:),3)]';
-                trajs_all(:,:,:,k+1) = [output(:,k*2+1,:) output(:,k*2+2,:)];
-%                 if k == 0
-%                     trajs(:,:,k+1) = trajs(:,:,k+1) - repmat([0.8 0.3]', [1 size(trajs,2)]);
-%                     trajs_all(:,:,:,k+1) = trajs_all(:,:,:,k+1) - repmat([0.8 0.3], [size(trajs_all,1) 1 size(trajs_all,3)]);
-%                 else
-                    trajs(:,:,k+1) = trajs(:,:,k+1) - repmat([mean(trajs(1,:,k+1)) mean(trajs(2,:,k+1))]', [1 size(trajs,2)]);
-                    trajs_all(:,:,:,k+1) = trajs_all(:,:,:,k+1) - repmat(mean(trajs_all(:,:,:,k+1),1), [size(trajs_all,1) 1 1]);
-%                 end
+                trajs(:,:,k+1) = R*([mean(output(:,k*2+1,:),3) mean(output(:,k*2+2,:),3)]');
+                for l = 1:Nreps
+                    trajs_all(:,:,l,k+1) = (R*([output(:,k*2+1,l) output(:,k*2+2,l)])')';
+                end
+                trajs(:,:,k+1) = trajs(:,:,k+1) - repmat([mean(trajs(1,:,k+1)) mean(trajs(2,:,k+1))]', [1 size(trajs,2)]);
+                trajs_all(:,:,:,k+1) = trajs_all(:,:,:,k+1) - repmat(mean(trajs_all(:,:,:,k+1),1), [size(trajs_all,1) 1 1]);
             end
             
 %             create data structures to store all data
@@ -52,8 +57,17 @@ function data = analyze_data(d, block_name, uw)
             Rhand_all = struct('x_pos',squeeze(trajs_all(:,1,:,3)),'y_pos',squeeze(trajs_all(:,2,:,3)));
             cursor_all = struct('x_pos',squeeze(trajs_all(:,1,:,4)),'y_pos',squeeze(trajs_all(:,2,:,4)));
             
+            % compute mean-squared error
             MSE = mean((cursor_all.x_pos-target_all.x_pos).^2 + (cursor_all.y_pos-target_all.y_pos).^2);
-                
+            
+            % compute cross-correlation
+            for k = 1:Nreps
+                corMat = corrcoef(Lhand_all.x_pos(:,k),Rhand_all.x_pos(:,k));
+                xCor(k) = corMat(1,2);
+                corMat = corrcoef(Lhand_all.y_pos(:,k),Rhand_all.y_pos(:,k));
+                yCor(k) = corMat(1,2);
+            end
+            
             fs = 130.004;
             x_axis = fs*(0:length(cursor.x_pos)/2)/length(cursor.x_pos);
             time = output(:,11,1)-output(1,11,1);
@@ -62,52 +76,14 @@ function data = analyze_data(d, block_name, uw)
             data{i}.(block_name{j}).phasors.Rhand = fourier2(Rhand,target,Rhand_all,target_all,freqs_x,freqs_y);
             data{i}.(block_name{j}).phasors.cursor = fourier2(cursor,target,cursor_all,target_all,freqs_x,freqs_y);
             
-            N = size(target.x_pos,1);
-            cohxx = NaN(size(target_all.x_pos,2),length(freqs));
-            cohyy = NaN(size(target_all.x_pos,2),length(freqs));
-            for k = 1:size(cursor_all.x_pos,2)
-                coh = mscohere([cursor_all.x_pos(:,k) cursor_all.y_pos(:,k)],[target.x_pos target.y_pos],blackmanharris(round(N/5)),[],sorted_freqs,fs,'mimo')';
-%                 coh = mscohere([cursor_all.x_pos cursor_all.y_pos],[target.x_pos target.y_pos],blackmanharris(round(N/5)),[],N,fs,'mimo')';
-                cohxx(k,:) = coh(1,:);
-                cohyy(k,:) = coh(2,:);
-            end
-
-            cohxx = cohxx(:,1:2:end);
-            cohyy = cohyy(:,2:2:end);
-            
-%             cohxx2 = mscohere(target.x_pos,cursor_all.x_pos,blackmanharris(round(N/5)),[],freqs_x,fs);
-%             cohyy2 = mscohere(target.y_pos,cursor_all.y_pos,blackmanharris(round(N/5)),[],freqs_y,fs);
-            
-            data{i}.(block_name{j}).coherence.SR.x_x = mean(cohxx);
-            data{i}.(block_name{j}).coherence.SR.y_y = mean(cohyy);
-            
-            total = 0;
-            for k = 1:size(cursor_all.x_pos,2)-1
-                total = total + k;
-            end
-
-            FLAG = 1;
-            k1 = 1;
-            k2 = size(cursor_all.x_pos,2);
-            k3 = 1;
-            cohx = NaN(total,length(freqs_x));
-            cohy = NaN(total,length(freqs_y));
-            while FLAG
-                cohx(k3,:) = mscohere(cursor_all.x_pos(:,k1),cursor_all.x_pos(:,k2),[],[],freqs_x,fs);
-                cohy(k3,:) = mscohere(cursor_all.y_pos(:,k1),cursor_all.y_pos(:,k2),[],[],freqs_y,fs);
-                k1 = k1 + 1;
-                if k1 == k2
-                    k1 = 1;
-                    k2 = k2 - 1;
-                end
-                if k2 == 1
-                    FLAG = 0;
-                end
-                k3 = k3 + 1;
-            end
-            
-            data{i}.(block_name{j}).coherence.RR.x_x = mean(cohx);
-            data{i}.(block_name{j}).coherence.RR.y_y = mean(cohy);
+            cursor.x_pos_all = cursor_all.x_pos;
+            cursor.y_pos_all = cursor_all.y_pos;
+            target.x_pos_all = target_all.x_pos;
+            target.y_pos_all = target_all.y_pos;
+            Rhand.x_pos_all = Rhand_all.x_pos;
+            Rhand.y_pos_all = Rhand_all.y_pos;
+            Lhand.x_pos_all = Lhand_all.x_pos;
+            Lhand.y_pos_all = Lhand_all.y_pos;
             
             cursor.x_fft = fourier(cursor.x_pos);   %perform fft and get amplitude data
             cursor.y_fft = fourier(cursor.y_pos);
@@ -117,30 +93,27 @@ function data = analyze_data(d, block_name, uw)
             Rhand.y_fft = fourier(Rhand.y_pos);
             Lhand.x_fft = fourier(Lhand.x_pos);
             Lhand.y_fft = fourier(Lhand.y_pos);
+            
             data{i}.(block_name{j}).cursor = cursor;
             data{i}.(block_name{j}).target = target;
             data{i}.(block_name{j}).Rhand = Rhand;
             data{i}.(block_name{j}).Lhand = Lhand;
             data{i}.(block_name{j}).time = time;
             data{i}.(block_name{j}).MSE = MSE;
+            data{i}.(block_name{j}).xCor = xCor;
+            data{i}.(block_name{j}).yCor = yCor;
             for k = 1:length(names)
                 all.cursor.(names{k})(j,:,i) = data{i}.(block_name{j}).phasors.cursor.(names{k}).ratio;
                 all.Rhand.(names{k})(j,:,i) = data{i}.(block_name{j}).phasors.Rhand.(names{k}).ratio;
                 all.Lhand.(names{k})(j,:,i) = data{i}.(block_name{j}).phasors.Lhand.(names{k}).ratio;
             end
-            SRcohere.x_x(j,:,i) = mean(cohxx);
-            SRcohere.y_y(j,:,i) = mean(cohyy);
-            SRcohere2.x_x(Nreps*(j-1)+1:Nreps*(j-1)+Nreps,:,i) = cohxx;
-            SRcohere2.y_y(Nreps*(j-1)+1:Nreps*(j-1)+Nreps,:,i) = cohyy;
-            RRcohere.x_x(j,:,i) = mean(cohx);
-            RRcohere.y_y(j,:,i) = mean(cohy);
         end
     end
     
     disp('   averaging...');
     n = 1000;
-    data{Nsubj+1}.amp = amplitudes_x;
-    data{Nsubj+1}.amp = amplitudes_y;
+    data{Nsubj+1}.ampX = amplitudes_x;
+    data{Nsubj+1}.ampY = amplitudes_y;
     data{Nsubj+1}.x_axis = x_axis;
     
     for k = 1:3
@@ -206,14 +179,6 @@ function data = analyze_data(d, block_name, uw)
                 case {'y_y','y_x'}
                     data{Nsubj+1}.(outputs{k}).(names{i}).freqs = freqs_y;
                     data{Nsubj+1}.(outputs{k}).(names{i}).index = data{1}.(block_name{1}).phasors.cursor.y_y.index;
-            end
-            
-            if strcmp(names{i},'x_x') || strcmp(names{i},'y_y')
-                data{Nsubj+1}.(outputs{k}).(names{i}).SRcohere_full = SRcohere.(names{i});
-                data{Nsubj+1}.(outputs{k}).(names{i}).SRcohere = mean(SRcohere.(names{i}),3);
-                data{Nsubj+1}.(outputs{k}).(names{i}).SRcohere2 = mean(SRcohere2.(names{i}),3);
-                data{Nsubj+1}.(outputs{k}).(names{i}).RRcohere_full = RRcohere.(names{i});
-                data{Nsubj+1}.(outputs{k}).(names{i}).RRcohere = mean(RRcohere.(names{i}),3);
             end
             optimal_mag = cos(PHASE);
             [x,y] = pol2cart(PHASE,optimal_mag);
