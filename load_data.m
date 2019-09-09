@@ -11,14 +11,14 @@ function output = load_data(subj_name, block_name, folder,time)
             Tb = 1/(tFile(1)/2);
             Ncycles = floor(time/Tb);
             trial_time = Tb*Ncycles;
-            Nsamples = round(trial_time*130.004)+13;
+            Nsamples = round(trial_time*130.004);
             fnames = dir(path);
             full = [];
             
             for k = 1:length(fnames(not([fnames.isdir])))-1
                 name = ['traj',num2str(k)];
                 data.(name) = dlmread([path,'/',fnames(3+(k-1)).name],' ',6,0);   
-                data.(name) = data.(name)(end-Nsamples:end,:);    %only trajectory after 5 sec warm up time is used
+                data.(name) = data.(name)(end-Nsamples+1:end,:);    %only trajectory after 5 sec warm up time is used
                 full = cat(3,full,data.(name));
             end
             
