@@ -52,10 +52,10 @@ bestDelay = delay(idx).*(1/130.004);
 theta_bar = mean(theta_opt,2);
 theta_se = std(theta_opt,[],2)/sqrt(10);
 
-% vmr12 = reshape(squeeze(rotMat_opt_vmr(1,2,[1 Nblock],:))',[20 1]);
-% vmr21 = reshape(squeeze(rotMat_opt_vmr(2,1,[1 Nblock],:))',[20 1]);
-% mr12 = reshape(squeeze(rotMat_opt_mr(1,2,[1 Nblock],:))',[20 1]);
-% mr21 = reshape(squeeze(rotMat_opt_mr(2,1,[1 Nblock],:))',[20 1]);
+% vmr12 = reshape(squeeze(rotMat_opt_vmr(1,2,[1 5 Nblock],:))',[30 1]);
+% vmr21 = reshape(squeeze(rotMat_opt_vmr(2,1,[1 5 Nblock],:))',[30 1]);
+% mr12 = reshape(squeeze(rotMat_opt_mr(1,2,[1 5 Nblock],:))',[30 1]);
+% mr21 = reshape(squeeze(rotMat_opt_mr(2,1,[1 5 Nblock],:))',[30 1]);
 % z = [vmr12; vmr21; mr12; mr21];
 % dlmwrite('time_matrix.csv',z);
 %% plot fitted matrices as well as column vector representation
