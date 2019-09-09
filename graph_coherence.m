@@ -15,12 +15,12 @@ col = copper;
 n = round(64.*((1:Nfreq-1)/(Nfreq-1)));
 col = col([1 n],:);
 
-for i = subj
+for i = 1:Nsubj
     for j = 1:Nblock
-        targetX = mean(data{subj}.(block_name{j}).target.x_pos_all,2);
-        targetY = mean(data{subj}.(block_name{j}).target.y_pos_all,2);
-        outX = data{subj}.(block_name{j}).(output).x_pos_all;
-        outY = data{subj}.(block_name{j}).(output).y_pos_all;
+        targetX = mean(data{subj(i)}.(block_name{j}).target.x_pos_all,2);
+        targetY = mean(data{subj(i)}.(block_name{j}).target.y_pos_all,2);
+        outX = data{subj(i)}.(block_name{j}).(output).x_pos_all;
+        outY = data{subj(i)}.(block_name{j}).(output).y_pos_all;
         
         N = size(targetX,1);
         for k = 1:Nreps
@@ -156,7 +156,7 @@ end
 title('SR')
 ylabel([output,' X coherence'])
 xticks(tick)
-xticklabels({graph_name{tick}})
+xticklabels(graph_name(tick))
 yticks(0:0.2:1)
 ylim([0 1])
 legend(leg,'Location','southeast')
@@ -168,7 +168,7 @@ end
 xlabel('Block')
 ylabel([output,' Y coherence'])
 xticks(tick)
-xticklabels({graph_name{tick}})
+xticklabels(graph_name(tick))
 yticks(0:0.2:1)
 ylim([0 1])
 
@@ -178,7 +178,7 @@ for i = 1:Nfreq
 end
 title('RR')
 xticks(tick)
-xticklabels({graph_name{tick}})
+xticklabels(graph_name(tick))
 yticks(0:0.2:1)
 ylim([0 1])
 
@@ -188,7 +188,7 @@ for i = 1:Nfreq
 end
 xlabel('Block')
 xticks(tick)
-xticklabels({graph_name{tick}})
+xticklabels(graph_name(tick))
 yticks(0:0.2:1)
 ylim([0 1])
 end
