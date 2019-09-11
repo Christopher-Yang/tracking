@@ -52,9 +52,8 @@ gblocks = [1 4 10 20];
 subj = 1:2;
 
 % graph_amp_avg(data,block_name,gblocks,graph_name,'Rhand'); % amplitude spectrums
-% graph_MSE(data, block_name, graph_name); % mean squared error
-% graph_rotatedMSE(data, block_name, gblocks, graph_name);
-graph_lag(data, gblocks, graph_name,'cursor'); % response lag
+graph_MSE(data, block_name, graph_name); % mean squared error
+% graph_lag(data, gblocks, graph_name,'cursor'); % response lag
 % graph_complexError(data, graph_name, gblocks); % complex tracking error
 % graph_coherence(data, block_name, graph_name, 'cursor', subj) % coherence
 % graph_xcorr(data,block_name,graph_name)
