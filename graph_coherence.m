@@ -1,9 +1,9 @@
-function graph_coherence(data, block_name, graph_name, output, subj)
+function graph_coherence(data, block_name, graph_name, output)
     
 rng(1);
 names1 = {'x_all','y_all'};
 names2 = {'x','y'};
-Nsubj = length(subj);
+Nsubj = length(data)-1;
 Nfreq = length(data{end}.ampX);
 Nreps = length(data{1}.(block_name{1}).MSE);
 Nblock = length(block_name);
@@ -17,10 +17,10 @@ col = col([1 n],:);
 
 for i = 1:Nsubj
     for j = 1:Nblock
-        targetX = mean(data{subj(i)}.(block_name{j}).target.x_pos_all,2);
-        targetY = mean(data{subj(i)}.(block_name{j}).target.y_pos_all,2);
-        outX = data{subj(i)}.(block_name{j}).(output).x_pos_all;
-        outY = data{subj(i)}.(block_name{j}).(output).y_pos_all;
+        targetX = mean(data{i}.(block_name{j}).target.x_pos_all,2);
+        targetY = mean(data{i}.(block_name{j}).target.y_pos_all,2);
+        outX = data{i}.(block_name{j}).(output).x_pos_all;
+        outY = data{i}.(block_name{j}).(output).y_pos_all;
         
         N = size(targetX,1);
         for k = 1:Nreps
@@ -148,47 +148,81 @@ for i = 1:Nfreq
 end
 tick = find(contains(graph_name,'('));
 
-figure
-subplot(2,2,1); hold on
+figure(1); clf
+subplot(2,1,1); hold on
 for i = 1:Nfreq
-    plot(1:Nblock,SR.x(:,i),'-o','Color',col(i,:),'LineWidth',1,'MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+    plot(1:Nblock,SR.x(:,i),'Color',col(i,:),'LineWidth',1)
+end
+for i = 1:Nfreq
+    plot(tick,SR.x(tick,i),'.','Color',col(i,:),'MarkerSize',25)
 end
 title('SR')
 ylabel([output,' X coherence'])
 xticks(tick)
 xticklabels(graph_name(tick))
 yticks(0:0.2:1)
-ylim([0 1])
+axis([1 Nblock 0 1])
 legend(leg,'Location','southeast')
 
-subplot(2,2,3); hold on
+subplot(2,1,2); hold on
 for i = 1:Nfreq
-    plot(1:Nblock,SR.y(:,i),'-o','Color',col(i,:),'LineWidth',1,'MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+    plot(1:Nblock,SR.y(:,i),'Color',col(i,:),'LineWidth',1)
+    plot(tick,SR.y(tick,i),'.','Color',col(i,:),'MarkerSize',25)
 end
 xlabel('Block')
 ylabel([output,' Y coherence'])
 xticks(tick)
 xticklabels(graph_name(tick))
 yticks(0:0.2:1)
-ylim([0 1])
+axis([1 Nblock 0 1])
 
-subplot(2,2,2); hold on
+figure(2); clf
+subplot(2,1,1); hold on
 for i = 1:Nfreq
-    plot(1:Nblock,RR.x(:,i),'-o','Color',col(i,:),'LineWidth',1,'MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+    plot(1:Nblock,RR.x(:,i),'Color',col(i,:),'LineWidth',1)
+    plot(tick,RR.x(tick,i),'.','Color',col(i,:),'MarkerSize',25)
 end
 title('RR')
+ylabel([output,' X coherence'])
 xticks(tick)
 xticklabels(graph_name(tick))
 yticks(0:0.2:1)
-ylim([0 1])
+axis([1 Nblock 0 1])
 
-subplot(2,2,4); hold on
+subplot(2,1,2); hold on
 for i = 1:Nfreq
-    plot(1:Nblock,RR.y(:,i),'-o','Color',col(i,:),'LineWidth',1,'MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+    plot(1:Nblock,RR.y(:,i),'Color',col(i,:),'LineWidth',1)
+    plot(tick,RR.y(tick,i),'.','Color',col(i,:),'MarkerSize',25)
 end
+ylabel([output,' Y coherence'])
 xlabel('Block')
 xticks(tick)
 xticklabels(graph_name(tick))
 yticks(0:0.2:1)
-ylim([0 1])
+axis([1 Nblock 0 1])
+
+idx = setdiff(1:Nblock,tick);
+idx = [idx(2) idx(end)];
+
+figure(3); clf; hold on
+for i = 1:Nfreq
+    plot([-8 -7],[0 0],'Color',col(i,:),'LineWidth',1.5,'MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+end
+for i = 1:Nfreq
+    plot(1:2,SR.x(idx,i),'-o','Color',col(i,:),'LineWidth',1.5,'MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+    plot(3:4,SR.y(idx,i),'-o','Color',col(i,:),'LineWidth',1.5,'MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+    plot(5:6,RR.x(idx,i),'-o','Color',col(i,:),'LineWidth',1.5,'MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+    plot(7:8,RR.y(idx,i),'-o','Color',col(i,:),'LineWidth',1.5,'MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+    for j = 1:Nsubj
+        plot(1:2,SR.x_all(idx,i,j),'Color',[col(i,:) 0.4])
+        plot(3:4,SR.y_all(idx,i,j),'Color',[col(i,:) 0.4])
+        plot(5:6,RR.x_all(idx,i,j),'Color',[col(i,:) 0.4])
+        plot(7:8,RR.y_all(idx,i,j),'Color',[col(i,:) 0.4])
+    end
+end
+xticks(1.5:2:7.5)
+xticklabels({'SR_X','SR_Y','RR_X','RR_Y'})
+ylabel([output,' coherence'])
+legend(leg,'Location','northeast')
+xlim([1 8])
 end
