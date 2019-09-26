@@ -11,8 +11,8 @@ d.L = load_data(subj_name,block_name,folder,time);
 folder = 'Data/stroke/right/';
 d.R = load_data(subj_name,block_name,folder,time);
 
-data.L = analyze_data(d.L,subj_name,block_name,false,0);
-data.R = analyze_data(d.R,subj_name,block_name,false,0);
+data.L = analyze_data(d.L,block_name,false,0);
+data.R = analyze_data(d.R,block_name,false,0);
 
 % save dat data;
 disp('Done')
