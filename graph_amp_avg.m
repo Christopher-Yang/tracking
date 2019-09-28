@@ -1,4 +1,4 @@
-function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
+function graph_amp_avg(data,groups,block_name,gblocks,graph_name,output)
     
     col = [30 144 255
            0 0 139
@@ -15,16 +15,14 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
     
     for k = 1:length(groups)
         d = data.(groups{k});
-        subj = fieldnames(d);
-        subj(end) = [];
-        Nsubj = length(subj);
-        freqsX = d.avg.x_x.freqs;
-        freqsY = d.avg.y_y.freqs;
-        ampX = d.avg.x_x.amp;
-        ampY = d.avg.y_y.amp;
-        xAxis = d.avg.x_x.x_axis;
-        ix = d.avg.x_x.index;
-        iy = d.avg.y_y.index;
+        Nsubj = length(d)-1;
+        freqsX = d{end}.freqX;
+        freqsY = d{end}.freqY;
+        ampX = d{end}.ampX;
+        ampY = d{end}.ampY;
+        xAxis = d{end}.x_axis;
+        ix = d{end}.(output).x_x.index;
+        iy = d{end}.(output).y_y.index;
         
         g1 = NaN(length(xAxis),length(gblocks),Nsubj);
         g2 = NaN(length(xAxis),1000,length(gblocks));
@@ -33,16 +31,14 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
         a = amps.(groups{k});
         a.bootx = g2;
         a.booty = g2;
-
-        names1 = {'x','y','dx','dy'};
-        names2 = {'bootx','booty','bootdx','bootdy'};
-        names3 = {'errx','erry','errdx','errdy'};
-        names4 = {'x_all','y_all','dx_all','dy_all'};
-            
+        
         for i = 1:Nsubj
             for j = 1:length(gblocks)
-                a.x_all(:,j,i) = d.(subj{i}).(block_name{gblocks(j)}).Rhand.x_fft.amplitude; % puts each subject's amplitude spectrums into data structure
-                a.y_all(:,j,i) = d.(subj{i}).(block_name{gblocks(j)}).Rhand.y_fft.amplitude;
+                dat = d{i}.(block_name{gblocks(j)});
+                pX = dat.(output).x_fft;
+                pY = dat.(output).y_fft;
+                a.x_all(:,j,i) = squeeze(abs(mean(pX,2)));
+                a.y_all(:,j,i) = squeeze(abs(mean(pY,2)));
             end
         end
         
@@ -58,8 +54,10 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
         a.dx = mean(a.dx_all,2);
         a.dy = mean(a.dy_all,2);
         
-        x(:,:,k) = a.dx_all';
-        y(:,:,k) = a.dy_all';
+        names1 = {'x','y','dx','dy'};
+        names2 = {'bootx','booty','bootdx','bootdy'};
+        names3 = {'errx','erry','errdx','errdy'};
+        names4 = {'x_all','y_all','dx_all','dy_all'};
         
         % bootstrap data
         for j = 1:length(names1)
@@ -78,19 +76,10 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
             plot(freqsX,ampX,'ko','LineWidth',lw,'MarkerFaceColor',[0 0 0])
             plot(freqsY,ampY,'ko','LineWidth',lw)
             plot([50 51], [50 51],'Color',col(1,:),'LineWidth',lw)
-            % plot mean with error bars; this doesn't work if averaging
-            % is done in complex domain, only if individual amplitude
-            % spectrums are averaged together
-%             s = shadedErrorBar(xAxis, a.x(:,i),a.errx(:,:,i));
-%             editErrorBar(s,col(3,:),0.25);
-%             plot(xAxis,a.x_all(:,:,i),'Color',[col(3,:) 0.3],'LineWidth',0.25)
-%             if i > 1
-%                 plot(xAxis,a.x(:,1),'Color',col(2,:),'LineWidth',lw)
-%             end
+            plot(xAxis,a.x_all(:,:,i),'Color',[col(1,:) 0.3],'LineWidth',0.25)
             plot(xAxis,a.x(:,i),'Color',col(1,:),'LineWidth',lw)
             plot(freqsX,a.x(ix,i),'-ok','LineWidth',lw,'MarkerFaceColor',[0 0 0])
             plot(freqsY,a.x(iy,i),'-ok','LineWidth',lw)
-
             set(gca,'Xtick',0:1:2,'Ytick',0:0.01:0.03,'box','off','LineWidth',1,'TickDir','out','FontSize',fontSize,'XMinorTick','on')
             ax = gca;
             ax.XAxis.MinorTickValues = 0:0.25:2.25;
@@ -101,21 +90,14 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
                 legend({'X target','Y target','Hand'})
                 legend boxoff
             end
-%             pbaspect([1 1 1])
             
             subplot(2,2,k+2); hold on
             plot(freqsX, ampX,'ko','LineWidth',lw,'MarkerFaceColor',[0 0 0])
             plot(freqsY, ampY,'ko','LineWidth',lw)
-%             s = shadedErrorBar(xAxis, a.y(:,i),a.erry(:,:,i),'lineProps','-b');
-%             editErrorBar(s,col(3,:),0.25);
-%             plot(xAxis,a.y_all(:,:,i),'Color',[col(3,:) 0.3],'LineWidth',0.25)
-%             if i > 1
-%                 plot(xAxis,a.y(:,1),'Color',col(2,:),'LineWidth',lw)
-%             end
+            plot(xAxis,a.y_all(:,:,i),'Color',[col(1,:) 0.3],'LineWidth',0.25)
             plot(xAxis,a.y(:,i),'LineWidth',lw,'Color',col(1,:))
             plot(freqsY,a.y(iy,i),'-ok','LineWidth',lw)
             plot(freqsX,a.y(ix,i),'-ok','LineWidth',lw,'MarkerFaceColor',[0 0 0])
-            
             set(gca,'Xtick',0:1:2,'Ytick',0:0.01:0.03,'box','off','LineWidth',1,'TickDir','out','FontSize',fontSize,'XMinorTick','on')
             ax = gca;
             ax.XAxis.MinorTickValues = 0:0.25:2.25;
@@ -142,16 +124,4 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name)
         ylabel('|Post - Baseline| (%)')
         pbaspect([1 1 1])
     end
-    
-% %     comp.x_on = [x_on(:,:,1); x_on(:,:,2)];
-% %     comp.x_off = [x_off(:,:,1); x_off(:,:,2)];
-%     comp = [x_on(:,:,1); x_on(:,:,2)];
-%     comp = cat(3, comp, [x_off(:,:,1); x_off(:,:,2)]);
-% %     comp.y_on = [y_on(:,:,1); y_on(:,:,2)];s
-% %     comp.y_off = [y_off(:,:,1); y_off(:,:,2)];
-%     comp2 = [repelem(0,10)'; repelem(1,10)'];
-%     within = {'frequency','axis'};
-%     between = {'perturbation'};
-%     [tbl,rm] = simple_mixed_anova(comp, comp2, within, between)
-    
 end

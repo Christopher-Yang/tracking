@@ -1,11 +1,11 @@
 rng(1);
 a = {'x_x','y_y'};
-Nfreq = length(data.(groups{1}).avg.x_x.freqs);
-Nblock = size(data.(groups{1}).avg.x_x.amplitude,1);
+Nfreq = length(data.(groups{1}){end}.freqX);
+Nblock = size(data.(groups{1}){end}.cursor.x_x.gain,1);
 SRboot = NaN(Nblock,Nfreq,1000);
 for z = 1:length(groups)
     for i = 1:length(a)
-        SRcohere = data.(groups{z}).avg.(a{i}).SRcohere_full;
+        SRcohere = data.(groups{z}){end}.(a{i}).SRcohere_full;
         for j = 1:1000
             k = datasample(SRcohere,10,3);
             SRboot(:,:,j) = mean(k,3);

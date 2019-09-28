@@ -1,20 +1,18 @@
 clear all
 load dat
-subj_rot = {'subj17','subj18','subj21','subj22','subj24','subj25','subj28','subj31','subj32','subj33'};
-subj_rot_i = {'subj14','subj15','subj16','subj19','subj23','subj26','subj27','subj29','subj30','subj34'};
 blocks = {'no_rot1','rot1','rot2','rot3','rot4','no_rot2'};
 groups = {'rot','rot_i'};
 names = {'x_x_all','x_y_all','y_x_all','y_y_all'};
-Nsubj = length(subj_rot);
+Nsubj = length(data.rot)-1;
 Nblocks = length(blocks);
 for q = 1:2
     for p = 1:Nsubj
         for k = 1:Nblocks
             for i = 1:length(names)
                 if q == 1
-                    cplx(:,i,k) = mean(data.rot.(subj_rot{p}).(blocks{k}).(names{i}).ratio,2);
+                    cplx(:,i,k) = mean(data.rot{p}.(blocks{k}).(names{i}).ratio,2);
                 else
-                    cplx(:,i,k) = mean(data.rot_i.(subj_rot_i{p}).(blocks{k}).(names{i}).ratio,2);
+                    cplx(:,i,k) = mean(data.mir{p}.(blocks{k}).(names{i}).ratio,2);
                 end
             end
         end
@@ -254,7 +252,7 @@ group = 2;
 subj = 9;
 blockIdx = 6;
 
-plot_subj(data.(groups{group}).(subj_rot_i{subj}).(blocks{blockIdx}))
+plot_subj(data.(groups{group}){subj}.(blocks{blockIdx}))
 subplot(2,2,1)
 plot(rotMat(1,1,blockIdx,subj,group)*phasor(:,subj,group),'k','LineWidth',3)
 xticks(-1:1)
