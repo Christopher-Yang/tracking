@@ -1,7 +1,7 @@
 clear all
 load dat
+groups = {'rot','mir'};
 blocks = {'no_rot1','rot1','rot2','rot3','rot4','no_rot2'};
-groups = {'rot','rot_i'};
 names = {'x_x_all','x_y_all','y_x_all','y_y_all'};
 Nsubj = length(data.rot)-1;
 Nblocks = length(blocks);
@@ -9,11 +9,7 @@ for q = 1:2
     for p = 1:Nsubj
         for k = 1:Nblocks
             for i = 1:length(names)
-                if q == 1
-                    cplx(:,i,k) = mean(data.rot{p}.(blocks{k}).(names{i}).ratio,2);
-                else
-                    cplx(:,i,k) = mean(data.mir{p}.(blocks{k}).(names{i}).ratio,2);
-                end
+                cplx(:,i,k) = mean(data.(groups{q}){p}.(blocks{k}).phasors.Rhand.(names{i}).ratio,2);
             end
         end
         
@@ -77,10 +73,6 @@ vmrYX = [squeeze(vmrBase(2,1,:)) squeeze(vmrLate(2,1,:)) squeeze(vmrAfter(2,1,:)
 mrXY = [squeeze(mrBase(1,2,:)) squeeze(mrLate(1,2,:)) squeeze(mrAfter(1,2,:))];
 mrYX = [squeeze(mrBase(2,1,:)) squeeze(mrLate(2,1,:)) squeeze(mrAfter(2,1,:))];
 
-% vmrXY = [squeeze(vmrBase(1,2,:)) squeeze(vmrAfter(1,2,:))];
-% vmrYX = [squeeze(vmrBase(2,1,:)) squeeze(vmrAfter(2,1,:))];
-% mrXY = [squeeze(mrBase(1,2,:)) squeeze(mrAfter(1,2,:))];
-% mrYX = [squeeze(mrBase(2,1,:)) squeeze(mrAfter(2,1,:))];
 
 n = size(vmrXY,2);
 idx = [1 3 4];
@@ -252,7 +244,7 @@ group = 2;
 subj = 9;
 blockIdx = 6;
 
-plot_subj(data.(groups{group}){subj}.(blocks{blockIdx}))
+plot_subj(data.(groups{group}){subj}.(blocks{blockIdx}).phasors.Rhand)
 subplot(2,2,1)
 plot(rotMat(1,1,blockIdx,subj,group)*phasor(:,subj,group),'k','LineWidth',3)
 xticks(-1:1)
@@ -274,42 +266,6 @@ xticks(-1:1)
 yticks(-1:1)
 set(gca,'TickDir','out')
 
-%% gain matrices by individual frequency
-group = 1;
-subj = 4;
-names = {'Baseline','Early','Late','Post'};
-
-figure(1); clf
-for j = 1:Nblocks
-    for i = 1:7
-        gains(1,1,:,j) = abs(rotMat(1,1,j,subj,group)*phasor(:,subj,group));
-        gains(1,2,:,j) = abs(rotMat(1,2,j,subj,group)*phasor(:,subj,group));
-        gains(2,1,:,j) = abs(rotMat(2,1,j,subj,group)*phasor(:,subj,group));
-        gains(2,2,:,j) = abs(rotMat(2,2,j,subj,group)*phasor(:,subj,group));
-        
-        subplot(4,7,7*(j-1)+i)
-        imagesc(gains(:,:,i,j),clims)
-        colormap(map)
-        set(gca,'Xtick',[],'Ytick',[])
-        axis square
-        if i == 1
-            ylabel(names{j})
-        end
-    end
-end
-
-figure(2); clf
-for j = 1:Nblocks
-    for i = 1:7
-        subplot(4,7,7*(j-1)+i); hold on
-        plot([0 gains(1,1,i,j)],[0 gains(2,1,i,j)],'LineWidth',1.5)
-        plot([0 gains(1,2,i,j)],[0 gains(2,2,i,j)],'LineWidth',1.5)
-        axis([-0.45 1 -0.45 1])
-        if i == 1
-            ylabel(names{j})
-        end
-    end
-end
 %% gain matrices
 figure(1); clf
 subplot(2,4,1)

@@ -1,26 +1,19 @@
 clear all
 load dat
-groups = {'rot','rot_i'};
-subj_rot = {'subj17','subj18','subj21','subj22','subj24','subj25','subj28','subj31','subj32','subj33'};
-subj_rot_i = {'subj14','subj15','subj16','subj19','subj23','subj26','subj27','subj29','subj30','subj34'};
+groups = {'rot','mir'};
 blocks = {'no_rot1','rot1','rot2','rot3','rot4','no_rot2'};
 names = {'x_x_all','x_y_all','y_x_all','y_y_all'};
 Nblock = length(blocks);
-Nsubj = length(subj_rot);
-Nfreq = length(data.rot.avg.x_x.freqs);
+Nsubj = length(data.rot)-1;
+Nfreq = length(data.rot{end}.freqX);
 Ngroups = length(groups);
 paramsInit = zeros([2*Nblock 1]);
 
 for q = 1:2 % loop over groups
-    if q == 1
-        subj_name = subj_rot;
-    else
-        subj_name = subj_rot_i;
-    end
     for p = 1:Nsubj % loop over subjects
         for k = 1:Nblock
             for i = 1:4
-                cplx(:,i,k,p,q) = mean(data.(groups{q}).(subj_name{p}).(blocks{k}).(names{i}).ratio,2); % put all complex ratios in cplx
+                cplx(:,i,k,p,q) = mean(data.(groups{q}){p}.(blocks{k}).phasors.Rhand.(names{i}).ratio,2); % put all complex ratios in cplx
             end
         end
         
@@ -60,12 +53,6 @@ subj = 9;
 blockIdx = 5;
 freq = 1;
 
-if g == 1
-    subj_name = subj_rot;
-else
-    subj_name = subj_rot_i;
-end
-
 % slope is the line which all data for a given frequency projects onto
 slope = template(:,freq,subj,g);
 for i = 1:numel(slope)
@@ -79,7 +66,7 @@ phasor = squeeze(thetaOpt(:,blockIdx,:,subj,g)).*template2;
 dat = squeeze(cplx(freq,:,:,subj,g)); % extract data to plot
 
 gblocks = [1 3 2 4];
-plot_subj(data.(groups{g}).(subj_name{subj}).(blocks{blockIdx}))
+plot_subj(data.(groups{g}){subj}.(blocks{blockIdx}).phasors.Rhand)
 for i = 1:4
     subplot(2,2,gblocks(i)); hold on
     plot(phasor(i,:),'-ok','LineWidth',1.5,'MarkerFaceColor',[0 0 0],'MarkerEdgeColor','none')
