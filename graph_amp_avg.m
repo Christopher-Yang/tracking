@@ -11,8 +11,8 @@ function graph_amp_avg(data,block_name,gblocks,graph_name,output)
     end
     
     Nsubj = length(data)-1;
-    freqsX = data{end}.(output).x_x.freqs;
-    freqsY = data{end}.(output).y_y.freqs;
+    freqsX = data{end}.freqX;
+    freqsY = data{end}.freqY;
     ampX = data{end}.ampX;
     ampY = data{end}.ampY;
     xAxis = data{end}.x_axis;

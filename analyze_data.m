@@ -107,6 +107,8 @@ function data = analyze_data(d, block_name, uw, rotate)
     
     disp('   averaging...');
     n = 1000;
+    data{Nsubj+1}.freqX = freqs_x;
+    data{Nsubj+1}.freqY = freqs_y;
     data{Nsubj+1}.ampX = amplitudes_x;
     data{Nsubj+1}.ampY = amplitudes_y;
     data{Nsubj+1}.x_axis = x_axis;
@@ -169,10 +171,8 @@ function data = analyze_data(d, block_name, uw, rotate)
             
             switch names{i}
                 case {'x_x','x_y'}
-                    data{Nsubj+1}.(outputs{k}).(names{i}).freqs = freqs_x;
                     data{Nsubj+1}.(outputs{k}).(names{i}).index = data{1}.(block_name{1}).phasors.cursor.x_x_all.index;
                 case {'y_y','y_x'}
-                    data{Nsubj+1}.(outputs{k}).(names{i}).freqs = freqs_y;
                     data{Nsubj+1}.(outputs{k}).(names{i}).index = data{1}.(block_name{1}).phasors.cursor.y_y_all.index;
             end
             optimal_mag = cos(PHASE);
