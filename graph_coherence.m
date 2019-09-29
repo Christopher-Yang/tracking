@@ -1,112 +1,97 @@
-function graph_coherence(data, gblocks, graph_name,output)
+function graph_coherence(data, block_name, gblocks, graph_name, output)
     
-    rng(1);
-    col = lines;
-    col = col(1:7,:);
-    
-    a = {'x_x','y_y'};
-    Nfreq = length(data{end}.ampX);
-    Nblock = length(fieldnames(data{1}));
-    SRboot = NaN(Nblock,Nfreq,1000);
-    RRboot = NaN(Nblock,Nfreq,1000);
-%     diffboot = NaN(Nblock,Nfreq,1000);
-    for i = 1:length(a)
-        dat = data{end}.(output).(a{i});
-%         diff.(a{i}) = sqrt(dat.RRcohere) - dat.SRcohere;
-        SRcohere = dat.SRcohere_full;
-        RRcohere = dat.RRcohere_full;
-%         diff_all = sqrt(dat.RRcohere_full) - dat.SRcohere_full;
-        for j = 1:1000
-            k = datasample(SRcohere,10,3);
-            SRboot(:,:,j) = mean(k,3);
-            k = datasample(sqrt(RRcohere),10,3);
-            RRboot(:,:,j) = mean(k,3);
-%             k = datasample(diff_all,10,3);
-%             diffboot(:,:,j) = mean(k,3);
-        end
-        SRboot = sort(SRboot,3);
-        RRboot = sort(RRboot,3);
-%         diffboot = sort(diffboot,3);
-        
-        SRerr.(a{i}) = cat(3,SRboot(:,:,end-25),SRboot(:,:,26));
-        SRerr.(a{i})(:,:,1) = SRerr.(a{i})(:,:,1) - dat.SRcohere;
-        SRerr.(a{i})(:,:,2) = dat.SRcohere - SRerr.(a{i})(:,:,2);
-        SRerr.(a{i}) = permute(SRerr.(a{i}), [3 2 1]);
-        
-        RRerr.(a{i}) = cat(3,RRboot(:,:,end-25),RRboot(:,:,26));
-        RRerr.(a{i})(:,:,1) = RRerr.(a{i})(:,:,1) - sqrt(dat.RRcohere);
-        RRerr.(a{i})(:,:,2) = sqrt(dat.RRcohere) - RRerr.(a{i})(:,:,2);
-        RRerr.(a{i}) = permute(RRerr.(a{i}), [3 2 1]);
-        
-%         Derr.(a{i}) = cat(3,diffboot(:,:,end-25),diffboot(:,:,26));
-%         Derr.(a{i})(:,:,1) = Derr.(a{i})(:,:,1) - diff.(a{i});
-%         Derr.(a{i})(:,:,2) = diff.(a{i}) - Derr.(a{i})(:,:,2);
-%         Derr.(a{i}) = permute(Derr.(a{i}), [3 2 1]);
-    end
-    
-    dat = data{end}.(output);
-    f_x = dat.x_x.freqs;
-    f_y = dat.y_y.freqs;
-    
-    figure
-    subplot(2,2,1)
-    for j = 1:length(gblocks)
-        s = shadedErrorBar(f_x,dat.x_x.SRcohere(gblocks(j),:),SRerr.x_x(:,:,gblocks(j)),'lineProps','-o');
-        editErrorBar(s,col(j,:),1);
-    end
-    set(gca,'Xscale','log','box','off','TickDir','out')
-    ylabel([output,' X movements'])
-    axis([0.09 2.3 0 1])
-    title('SR')
-    yticks(0:0.2:1)
-    
-    subplot(2,2,3)
-    for j = 1:length(gblocks)
-        s = shadedErrorBar(f_y,dat.y_y.SRcohere(gblocks(j),:),SRerr.y_y(:,:,gblocks(j)),'lineProps','-o');
-        editErrorBar(s,col(j,:),1);
-    end
-    set(gca,'Xscale','log','box','off','TickDir','out')
-    xlabel('Frequency (Hz)')
-    ylabel([output,' Y movements'])
-    axis([0.09 2.3 0 1])
-    yticks(0:0.2:1)
-    
-    subplot(2,2,2)
-    for j = 1:length(gblocks)
-        s = shadedErrorBar(f_x,sqrt(dat.x_x.RRcohere(gblocks(j),:)),RRerr.x_x(:,:,gblocks(j)),'lineProps','-o');
-        editErrorBar(s,col(j,:),1);
-    end
-    set(gca,'Xscale','log','box','off','TickDir','out')
-    axis([0.09 2.3 0 1])
-    title('RR')
-    yticks(0:0.2:1)
-    legend(graph_name{gblocks},'Location','southwest')
+rng(1);
+names1 = {'x_all','y_all'};
+names2 = {'x','y'};
+Nsubj = length(data)-1;
+Nfreq = length(data{end}.ampX);
+Nreps = length(data{1}.(block_name{1}).MSE);
+Nblock = length(block_name);
+f_x = data{end}.freqX;
+f_y = data{end}.freqY;
+sorted_freqs = sort([f_x f_y]);
 
-    subplot(2,2,4)
-    for j = 1:length(gblocks)
-        s = shadedErrorBar(f_y,sqrt(dat.y_y.RRcohere(gblocks(j),:)),RRerr.y_y(:,:,gblocks(j)),'lineProps','-o');
-        editErrorBar(s,col(j,:),1);
+col = lines;
+col = col(1:7,:);
+
+for i = 1:Nsubj
+    for j = 1:Nblock
+        targetX = mean(data{i}.(block_name{j}).target.x_pos_all,2);
+        targetY = mean(data{i}.(block_name{j}).target.y_pos_all,2);
+        outX = data{i}.(block_name{j}).(output).x_pos_all;
+        outY = data{i}.(block_name{j}).(output).y_pos_all;
+        
+        N = size(targetX,1);
+        for k = 1:Nreps
+            coh = mscohere([outX(:,k) outY(:,k)],[targetX targetY],blackmanharris(round(N/5)),[],sorted_freqs,130.004,'mimo')';
+            cohxx(k,:) = coh(1,:);
+            cohyy(k,:) = coh(2,:);
+        end
+        SR.x_all(j,:,i) = mean(cohxx(:,1:2:end));
+        SR.y_all(j,:,i) = mean(cohyy(:,2:2:end));
+        
+        FLAG = 1;
+        k1 = 1;
+        k2 = Nreps;
+        k3 = 1;
+        while FLAG
+            cohx(k3,:) = mscohere(outX(:,k1),outX(:,k2),[],[],f_x,130.004);
+            cohy(k3,:) = mscohere(outY(:,k1),outY(:,k2),[],[],f_y,130.004);
+            k1 = k1 + 1;
+            if k1 == k2
+                k1 = 1;
+                k2 = k2 - 1;
+            end
+            if k2 == 1
+                FLAG = 0;
+            end
+            k3 = k3 + 1;
+        end
+        RR.x_all(j,:,i) = mean(cohx);
+        RR.y_all(j,:,i) = mean(cohy);
     end
-    set(gca,'Xscale','log','box','off','TickDir','out')
-    xlabel('Frequency (Hz)')
-    axis([0.09 2.3 0 1])
-    yticks(0:0.2:1)
-    
-%     subplot(2,3,3)
-%     for j = 1:length(gblocks)
-%         s = shadedErrorBar(f_x,diff.x_x(gblocks(j),:),Derr.x_x(:,:,gblocks(j)),'lineProps','-o');
-%         editErrorBar(s,col(j,:),1);
-%     end
-%     set(gca,'Xscale','log','box','off','TickDir','out')
-%     axis([0.09 2.3 0 1])
-%     title('Unexplained')
-%     
-%     subplot(2,3,6)
-%     for j = 1:length(gblocks)
-%         s = shadedErrorBar(f_y,diff.y_y(gblocks(j),:),Derr.y_y(:,:,gblocks(j)),'lineProps','-o');
-%         editErrorBar(s,col(j,:),1);
-%     end
-%     set(gca,'Xscale','log','box','off','TickDir','out')
-%     axis([0.09 2.3 0 1])
-%     legend(graph_name{gblocks})
 end
+
+SR.x = squeeze(mean(SR.x_all,3));
+SR.y = squeeze(mean(SR.y_all,3));
+RR.x = squeeze(mean(RR.x_all,3));
+RR.y = squeeze(mean(RR.y_all,3));
+
+figure(1); clf
+subplot(2,1,1); hold on
+for i = 1:length(gblocks)
+    plot(f_x,SR.x(gblocks(i),:),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+end
+title('Rotation')
+ylabel([output,' X coherence'])
+yticks(0:0.2:1)
+axis([0 2.3 0 1])
+
+subplot(2,1,2); hold on
+for i = 1:length(gblocks)
+    plot(f_y,SR.y(gblocks(i),:),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+end
+xlabel('Frequency (Hz)')
+yticks(0:0.2:1)
+axis([0 2.3 0 1])
+legend(graph_name(gblocks),'Location','southeast')
+    
+figure(2); clf
+subplot(2,1,1); hold on
+for i = 1:length(gblocks)
+    plot(f_x,RR.x(gblocks(i),:),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+end
+title('Rotation')
+ylabel([output,' X coherence'])
+yticks(0:0.2:1)
+axis([0 2.3 0 1])
+
+subplot(2,1,2); hold on
+for i = 1:length(gblocks)
+    plot(f_y,RR.y(gblocks(i),:),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+end
+ylabel([output,' Y coherence'])
+xlabel('Frequency (Hz)')
+yticks(0:0.2:1)
+axis([0 2.3 0 1])
+legend(graph_name(gblocks),'Location','southeast')

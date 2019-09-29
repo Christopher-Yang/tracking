@@ -27,9 +27,9 @@ graph_bode_simple(data, graph_name, groups, gblocks);
 %% graph performance
 gblocks = [1:2 6:7];
 
-% graph_amp_avg(data,block_name,gblocks,graph_name,'Rhand'); % amplitude spectrums
+graph_amp_avg(data,block_name,gblocks,graph_name,'Rhand'); % amplitude spectrums
 % graph_MSE(data, block_name, graph_name); % mean squared error
 % graph_rotatedMSE(data, block_name, gblocks, graph_name);
 % graph_lag(data, gblocks, graph_name, 'Rhand'); % response lag
 % graph_complexError(data, graph_name, gblocks); % complex tracking error
-graph_coherence(data, gblocks, graph_name, 'Rhand') % coherence
+% graph_coherence(data, block_name, gblocks, graph_name, 'Rhand') % coherence
