@@ -12,6 +12,7 @@ function data = analyze_data(d, block_name, uw, rotate)
     Nblocks = length(block_name);
     Nreps = size(d{1}.(block_name{1}).traj,3);
     names = {'x_x','y_y','x_y','y_x'};
+    names2 = {'x_x_all','y_y_all','x_y_all','y_x_all'};
     outputs = {'cursor','Rhand','Lhand'};
 
     for i = 1:Nsubj
@@ -47,24 +48,19 @@ function data = analyze_data(d, block_name, uw, rotate)
             end
             
 %             create data structures to store all data
-            target = struct('x_pos',trajs(1,:,1)','y_pos',trajs(2,:,1)'); %no time shift
-            Lhand = struct('x_pos',trajs(1,:,2)','y_pos',trajs(2,:,2)'); 
-            Rhand = struct('x_pos',trajs(1,:,3)','y_pos',trajs(2,:,3)');
-            cursor = struct('x_pos',trajs(1,:,4)','y_pos',trajs(2,:,4)');
-            
-            target_all = struct('x_pos',squeeze(trajs_all(:,1,:,1)),'y_pos',squeeze(trajs_all(:,2,:,1)));
-            Lhand_all = struct('x_pos',squeeze(trajs_all(:,1,:,2)),'y_pos',squeeze(trajs_all(:,2,:,2)));
-            Rhand_all = struct('x_pos',squeeze(trajs_all(:,1,:,3)),'y_pos',squeeze(trajs_all(:,2,:,3)));
-            cursor_all = struct('x_pos',squeeze(trajs_all(:,1,:,4)),'y_pos',squeeze(trajs_all(:,2,:,4)));
+            target = struct('x_pos',trajs(1,:,1)','y_pos',trajs(2,:,1)','x_pos_all',squeeze(trajs_all(:,1,:,1)),'y_pos_all',squeeze(trajs_all(:,2,:,1))); %no time shift
+            Lhand = struct('x_pos',trajs(1,:,2)','y_pos',trajs(2,:,2)','x_pos_all',squeeze(trajs_all(:,1,:,2)),'y_pos_all',squeeze(trajs_all(:,2,:,2))); 
+            Rhand = struct('x_pos',trajs(1,:,3)','y_pos',trajs(2,:,3)','x_pos_all',squeeze(trajs_all(:,1,:,3)),'y_pos_all',squeeze(trajs_all(:,2,:,3)));
+            cursor = struct('x_pos',trajs(1,:,4)','y_pos',trajs(2,:,4)','x_pos_all',squeeze(trajs_all(:,1,:,4)),'y_pos_all',squeeze(trajs_all(:,2,:,4)));
             
             % compute mean-squared error
-            MSE = mean((cursor_all.x_pos-target_all.x_pos).^2 + (cursor_all.y_pos-target_all.y_pos).^2);
+            MSE = mean((cursor.x_pos_all-target.x_pos_all).^2 + (cursor.y_pos_all-target.y_pos_all).^2);
             
             % compute cross-correlation
             for k = 1:Nreps
-                corMat = corrcoef(Lhand_all.x_pos(:,k),Rhand_all.x_pos(:,k));
+                corMat = corrcoef(Lhand.x_pos_all(:,k),Rhand.x_pos_all(:,k));
                 xCor(k) = corMat(1,2);
-                corMat = corrcoef(Lhand_all.y_pos(:,k),Rhand_all.y_pos(:,k));
+                corMat = corrcoef(Lhand.y_pos_all(:,k),Rhand.y_pos_all(:,k));
                 yCor(k) = corMat(1,2);
             end
             
@@ -72,27 +68,26 @@ function data = analyze_data(d, block_name, uw, rotate)
             x_axis = fs*(0:length(cursor.x_pos)/2)/length(cursor.x_pos);
             time = output(:,11,1)-output(1,11,1);
             
-            data{i}.(block_name{j}).phasors.Lhand = fourier2(Lhand,target,Lhand_all,target_all,freqs_x,freqs_y);
-            data{i}.(block_name{j}).phasors.Rhand = fourier2(Rhand,target,Rhand_all,target_all,freqs_x,freqs_y);
-            data{i}.(block_name{j}).phasors.cursor = fourier2(cursor,target,cursor_all,target_all,freqs_x,freqs_y);
+            data{i}.(block_name{j}).phasors.Lhand = fourier2(Lhand,target,freqs_x,freqs_y);
+            data{i}.(block_name{j}).phasors.Rhand = fourier2(Rhand,target,freqs_x,freqs_y);
+            data{i}.(block_name{j}).phasors.cursor = fourier2(cursor,target,freqs_x,freqs_y);
             
-            cursor.x_pos_all = cursor_all.x_pos;
-            cursor.y_pos_all = cursor_all.y_pos;
-            target.x_pos_all = target_all.x_pos;
-            target.y_pos_all = target_all.y_pos;
-            Rhand.x_pos_all = Rhand_all.x_pos;
-            Rhand.y_pos_all = Rhand_all.y_pos;
-            Lhand.x_pos_all = Lhand_all.x_pos;
-            Lhand.y_pos_all = Lhand_all.y_pos;
+            for l = 1:length(outputs)
+                for k = 1:length(names)
+                    data{i}.(block_name{j}).phasors.(outputs{l}).(names{k}).ratio = mean(data{i}.(block_name{j}).phasors.(outputs{l}).(names2{k}).ratio,2);
+                    data{i}.(block_name{j}).phasors.(outputs{l}).(names{k}).gain = abs(data{i}.(block_name{j}).phasors.(outputs{l}).(names{k}).ratio);
+                    data{i}.(block_name{j}).phasors.(outputs{l}).(names{k}).phase = unwrap(angle(data{i}.(block_name{j}).phasors.(outputs{l}).(names{k}).gain));
+                end
+            end
             
-            cursor.x_fft = fourier(cursor.x_pos);   %perform fft and get amplitude data
-            cursor.y_fft = fourier(cursor.y_pos);
-            target.x_fft = fourier(target.x_pos);
-            target.y_fft = fourier(target.y_pos);
-            Rhand.x_fft = fourier(Rhand.x_pos);
-            Rhand.y_fft = fourier(Rhand.y_pos);
-            Lhand.x_fft = fourier(Lhand.x_pos);
-            Lhand.y_fft = fourier(Lhand.y_pos);
+            cursor.x_fft = fourier(cursor.x_pos_all);   %perform fft and get amplitude data
+            cursor.y_fft = fourier(cursor.y_pos_all);
+            target.x_fft = fourier(target.x_pos_all);
+            target.y_fft = fourier(target.y_pos_all);
+            Rhand.x_fft = fourier(Rhand.x_pos_all);
+            Rhand.y_fft = fourier(Rhand.y_pos_all);
+            Lhand.x_fft = fourier(Lhand.x_pos_all);
+            Lhand.y_fft = fourier(Lhand.y_pos_all);
             
             data{i}.(block_name{j}).cursor = cursor;
             data{i}.(block_name{j}).target = target;
@@ -175,10 +170,10 @@ function data = analyze_data(d, block_name, uw, rotate)
             switch names{i}
                 case {'x_x','x_y'}
                     data{Nsubj+1}.(outputs{k}).(names{i}).freqs = freqs_x;
-                    data{Nsubj+1}.(outputs{k}).(names{i}).index = data{1}.(block_name{1}).phasors.cursor.x_x.index;
+                    data{Nsubj+1}.(outputs{k}).(names{i}).index = data{1}.(block_name{1}).phasors.cursor.x_x_all.index;
                 case {'y_y','y_x'}
                     data{Nsubj+1}.(outputs{k}).(names{i}).freqs = freqs_y;
-                    data{Nsubj+1}.(outputs{k}).(names{i}).index = data{1}.(block_name{1}).phasors.cursor.y_y.index;
+                    data{Nsubj+1}.(outputs{k}).(names{i}).index = data{1}.(block_name{1}).phasors.cursor.y_y_all.index;
             end
             optimal_mag = cos(PHASE);
             [x,y] = pol2cart(PHASE,optimal_mag);
@@ -187,13 +182,9 @@ function data = analyze_data(d, block_name, uw, rotate)
     end
 end
 
-function out = fourier2(output,input,output_all,input_all,freqs_x,freqs_y)
-    out.x_x = fourier(output.x_pos,input.x_pos,length(freqs_x));
-    out.y_y = fourier(output.y_pos,input.y_pos,length(freqs_y));
-    out.x_y = fourier(output.y_pos,input.x_pos,length(freqs_x));
-    out.y_x = fourier(output.x_pos,input.y_pos,length(freqs_y));
-    out.x_x_all = fourier(output_all.x_pos,input_all.x_pos,length(freqs_x));
-    out.y_y_all = fourier(output_all.y_pos,input_all.y_pos,length(freqs_y));
-    out.x_y_all = fourier(output_all.y_pos,input_all.x_pos,length(freqs_x));
-    out.y_x_all = fourier(output_all.x_pos,input_all.y_pos,length(freqs_y));
+function out = fourier2(output,input,freqs_x,freqs_y)
+    out.x_x_all = fourier(output.x_pos_all,input.x_pos_all,length(freqs_x));
+    out.y_y_all = fourier(output.y_pos_all,input.y_pos_all,length(freqs_y));
+    out.x_y_all = fourier(output.y_pos_all,input.x_pos_all,length(freqs_x));
+    out.y_x_all = fourier(output.x_pos_all,input.y_pos_all,length(freqs_y));
 end
