@@ -1,11 +1,12 @@
-output = 'cursor';
+output = 'Lhand';
 groups = {'rot','mir'};
 names = {'x_x_all','x_y_all','y_x_all','y_y_all'};
 Nblock = length(block_name);
 Nsubj = length(data)-1;
 Nfreq = length(data{end}.freqX);
 Ngroups = 1;
-paramsInit = zeros([2*Nblock 1]);
+paramsInit = zeros([2 Nblock]);
+idx = find(contains(graph_name,'('));
 
 for p = 1:Nsubj % loop over subjects
     for k = 1:Nblock
@@ -17,11 +18,11 @@ for p = 1:Nsubj % loop over subjects
     for i = 1:Nfreq
         x = cos(angle(cplx(i,[1 4],1,p)));
         y = sin(angle(cplx(i,[1 4],1,p)));
-        template(:,i,p) = [(x(1)+y(1)*1j); (x(2)+y(2)*1j)]; % generate template of gain = 1 and phase same as baseline
+        template(:,i,p) = x+y*1j; % generate template of gain = 1 and phase same as baseline
         error = @(params) scale(params,cplx(i,[1 2],:,p),template(1,i,p));
-        opt1(:,i,p) = fmincon(error,paramsInit); % fit gains for x frequencies
+        opt1(:,:,i,p) = fmincon(error,paramsInit); % fit gains for x frequencies
         error = @(params) scale(params,cplx(i,[3 4],:,p),template(2,i,p));
-        opt2(:,i,p) = fmincon(error,paramsInit); % fit gains for y frequencies
+        opt2(:,:,i,p) = fmincon(error,paramsInit); % fit gains for y frequencies
     end
 end
 
@@ -31,6 +32,28 @@ thetaOpt = [reshape(opt1,[2 Nblock Nfreq Nsubj Ngroups]); reshape(opt2,[2 Nblock
 % shape thetaOpt into gain matrix format
 rotMat = reshape(thetaOpt,[2 2 Nblock Nfreq Nsubj Ngroups]);
 rotMat = permute(rotMat,[1 2 4 3 5 6]);
+
+% for plotting heatmaps
+col1 = [1 0 0];
+col2 = [1 1 1];
+Nstep = 100;
+map1 = [linspace(col1(1),col2(1),Nstep)', linspace(col1(2),col2(2),Nstep)', linspace(col1(3),col2(3),Nstep)'];
+
+col1 = [1 1 1];
+col2 = [0 0 1];
+map2 = [linspace(col1(1),col2(1),Nstep)', linspace(col1(2),col2(2),Nstep)', linspace(col1(3),col2(3),Nstep)'];
+
+map = [map1; map2];
+clims = [-1 1];
+
+% for plotting vectors
+col1 = [255 192 203]/255;
+col2 = [139 0 0]/255;
+map1 = [linspace(col1(1),col2(1),Nblock)', linspace(col1(2),col2(2),Nblock)', linspace(col1(3),col2(3),Nblock)'];
+
+col1 = [176 224 230]/255;
+col2 = [0 0 205]/255;
+map2 = [linspace(col1(1),col2(1),Nblock)', linspace(col1(2),col2(2),Nblock)', linspace(col1(3),col2(3),Nblock)'];
 
 %% display results of fitting process
 g = 1;
@@ -76,53 +99,61 @@ for i = 1:4
 end
 
 %% plot vectors and gain matrices
-% for single subjects
-% subj = 5;
-% rotMat_mu = squeeze(rotMat(:,:,:,:,subj,:));
-
 % for averaging across subjects
-rotMat_mu = squeeze(mean(rotMat,5));
+m = mean(thetaOpt,4);
+for i = 1:Nfreq
+    mat(:,:,i) = squeeze(m(:,:,i));
+end
 
-figure(1); clf
-for k = 1:4
-    for i = 1:Nfreq
-        subplot(4,Nfreq,Nfreq*(k-1)+i); hold on
-        plot([0 rotMat_mu(1,1,i,gblocks(k),1)],[0 rotMat_mu(2,1,i,gblocks(k),1)],'LineWidth',1.5)
-        plot([0 rotMat_mu(1,2,i,gblocks(k),1)],[0 rotMat_mu(2,2,i,gblocks(k),1)],'LineWidth',1.5)
+if strcmp(output,'cursor')
+    names2 = {'X_{T}X_{O} (response)','X_{T}Y_{O}','Y_{T}X_{O}','Y_{T}Y_{O} (response)'};
+elseif strcmp(output,'Rhand')
+    names2 = {'X_{T}X_{O}','X_{T}Y_{O}','Y_{T}X_{O} (response)','Y_{T}Y_{O}'};
+elseif strcmp(output,'Lhand')
+    names2 = {'X_{T}X_{O}','X_{T}Y_{O} (response)','Y_{T}X_{O}','Y_{T}Y_{O}'};
+end
+
+index = 1:Nblock;
+remove = 1;
+if remove
+    index(idx) = [];
+end
+
+figure(2); clf
+for k = 1:Nfreq
+    for i = index
+        subplot(1,Nfreq,k); hold on
+        plot([0 mat(1,i,k)],[0 mat(3,i,k)],'LineWidth',1.5,'Color',map1(i,:))
+        plot([0 mat(2,i,k)],[0 mat(4,i,k)],'LineWidth',1.5,'Color',map2(i,:))
         plot([0 1],[0 0],'k')
         plot([0 0],[0 1],'k')
-        if i == 1
-            ylabel('Baseline')
-        end
         axis([-0.45 1 -0.45 1])
         axis square
+    end
+    if k == 1
+        title('Low Freq')
+    elseif k == 6
+        title('High Freq')
     end
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % gain matrices
-col1 = [1 0 0];
-col2 = [1 1 1];
-Nstep = 100;
-map1 = [linspace(col1(1),col2(1),Nstep)', linspace(col1(2),col2(2),Nstep)', linspace(col1(3),col2(3),Nstep)'];
-
-col1 = [1 1 1];
-col2 = [0 0 1];
-map2 = [linspace(col1(1),col2(1),Nstep)', linspace(col1(2),col2(2),Nstep)', linspace(col1(3),col2(3),Nstep)'];
-
-map = [map1; map2];
-clims = [-1 1];
-
-figure(2); clf
-for k = 1:4
-    for i = 1:Nfreq
-        subplot(4,Nfreq,Nfreq*(k-1)+i)
-        imagesc(rotMat_mu(:,:,i,gblocks(k),1),clims)
-        colormap(map)
-        set(gca,'TickDir','out','Xtick',[],'Ytick',[])
-        axis square
-        if i == 1
-            ylabel('Baseline')
+figure(3); clf
+for i = 1:Nfreq
+    subplot(1,Nfreq,i)
+    imagesc(mat(:,index,i),clims)
+    colormap(map)
+    set(gca,'TickDir','out','Xtick',[],'Ytick',[])
+    if i == 1
+        title('Low freq')
+        yticks(1:4)
+        yticklabels(names2)
+    elseif i == Nfreq
+        title('High freq')
+        if remove == 0
+            xticks(idx)
+            xticklabels(graph_name(idx))
         end
     end
 end
@@ -164,8 +195,7 @@ end
 
 %%
 function e = scale(params,cplx_data,template)
-    theta = reshape(params,[2 length(params)/2]);
-    phasors = theta*template;
+    phasors = params*template;
     e = (phasors - squeeze(cplx_data)).^2;
     for k = 1:numel(e)
         e(k) = norm(e(k));

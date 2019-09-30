@@ -2,7 +2,7 @@ Nsubj = length(data)-1;
 Nblock = length(block_name);
 Nfreq = length(data{end}.ampX);
 names = {'x_x_all','x_y_all','y_x_all','y_y_all'};
-output = 'Lhand';
+output = 'Rhand';
 
 for p = 1:Nsubj
     for k = 1:length(block_name)
@@ -55,30 +55,39 @@ col2 = [0 0 205]/255;
 map2 = [linspace(col1(1),col2(1),Nblock)', linspace(col1(2),col2(2),Nblock)', linspace(col1(3),col2(3),Nblock)'];
 
 %% plot gain matrices and vectors
+% for single subjects
 % subj = 2;
 % block = 1:4;
-
-% for single subjects
 % mat = gainMat(:,:,block,subj);
 
 % for averaging across subjects
-% mat = mean(gainMat(:,:,block,:),4);
-
 m = mean(gainMat,4);
 mat(1,:) = m(1,1,:);
-mat(2,:) = m(1,2,:);
-mat(3,:) = m(2,1,:);
+mat(2,:) = m(2,1,:);
+mat(3,:) = m(1,2,:);
 mat(4,:) = m(2,2,:);
-names2 = {'X_{O}X_{T}','X_{O}Y_{T}','Y_{O}X_{T}','Y_{O}Y_{T}'};
 
+index = 1:Nblock;
+remove = 1;
+if remove
+    index(idx) = [];
+end
+
+if strcmp(output,'cursor')
+    names2 = {'X_{T}X_{O} (response)','X_{T}Y_{O}','Y_{T}X_{O}','Y_{T}Y_{O} (response)'};
+elseif strcmp(output,'Rhand')
+    names2 = {'X_{T}X_{O}','X_{T}Y_{O}','Y_{T}X_{O} (response)','Y_{T}Y_{O}'};
+elseif strcmp(output,'Lhand')
+    names2 = {'X_{T}X_{O}','X_{T}Y_{O} (response)','Y_{T}X_{O}','Y_{T}Y_{O}'};
+end
+
+% gain matrices
 figure(1); clf
-for i = 1:4
-    % gain matrices
-    subplot(4,1,i)
-    imagesc(mat(i,:),clims)
-    colormap(map)
-    set(gca,'Ytick',[])
-    ylabel(names2{i})
+imagesc(mat(:,index),clims)
+colormap(map)
+yticks(1:4)
+yticklabels(names2)
+if remove == 0
     xticks(idx)
     xticklabels(graph_name(idx))
 end
@@ -86,7 +95,7 @@ end
 figure(2); clf; hold on
 plot([10 11],[0 0],'r','LineWidth',1.5)
 plot([10 11],[0 0],'b','LineWidth',1.5)
-for i = 1:Nblock
+for i = index
     plot([0 m(1,1,i)],[0 m(2,1,i)],'LineWidth',1.5,'Color',map1(i,:))
     plot([0 m(1,2,i)],[0 m(2,2,i)],'LineWidth',1.5,'Color',map2(i,:))
     plot([0 1],[0 0],'k')
@@ -96,12 +105,7 @@ for i = 1:Nblock
 end
 legend({'Target_X Freq','Target_Y Freq'})
 
-for i = 1:Nsubj
-    mat2(1,:,i) = gainMat(1,1,:,i);
-    mat2(2,:,i) = gainMat(1,2,:,i);
-    mat2(3,:,i) = gainMat(2,1,:,i);
-    mat2(4,:,i) = gainMat(2,2,:,i);
-end
+mat2 = reshape(gainMat,[4 Nblock Nsubj]);
 
 col = lines;
 col = col(1:7,:);
