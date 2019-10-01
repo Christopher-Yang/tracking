@@ -68,7 +68,7 @@ mat(3,:) = m(1,2,:);
 mat(4,:) = m(2,2,:);
 
 index = 1:Nblock;
-remove = 1;
+remove = 0;
 if remove
     index(idx) = [];
 end

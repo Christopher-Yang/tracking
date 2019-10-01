@@ -8,6 +8,21 @@ Ngroups = 1;
 paramsInit = zeros([2 Nblock]);
 idx = find(contains(graph_name,'('));
 
+% set remove = 1 if you want to remove special blocks
+index = 1:Nblock;
+remove = 1;
+if remove
+    index(idx) = [];
+end
+
+if strcmp(output,'cursor')
+    labels = {'X_{T}X_{O} (response)','X_{T}Y_{O}','Y_{T}X_{O}','Y_{T}Y_{O} (response)'};
+elseif strcmp(output,'Rhand')
+    labels = {'X_{T}X_{O}','X_{T}Y_{O}','Y_{T}X_{O} (response)','Y_{T}Y_{O}'};
+elseif strcmp(output,'Lhand')
+    labels = {'X_{T}X_{O}','X_{T}Y_{O} (response)','Y_{T}X_{O}','Y_{T}Y_{O}'};
+end
+
 for p = 1:Nsubj % loop over subjects
     for k = 1:Nblock
         for i = 1:4
@@ -32,6 +47,9 @@ thetaOpt = [reshape(opt1,[2 Nblock Nfreq Nsubj Ngroups]); reshape(opt2,[2 Nblock
 % shape thetaOpt into gain matrix format
 rotMat = reshape(thetaOpt,[2 2 Nblock Nfreq Nsubj Ngroups]);
 rotMat = permute(rotMat,[1 2 4 3 5 6]);
+
+% for averaging across subjects
+mat = squeeze(mean(thetaOpt,4));
 
 % for plotting heatmaps
 col1 = [1 0 0];
@@ -99,26 +117,6 @@ for i = 1:4
 end
 
 %% plot vectors and gain matrices
-% for averaging across subjects
-m = mean(thetaOpt,4);
-for i = 1:Nfreq
-    mat(:,:,i) = squeeze(m(:,:,i));
-end
-
-if strcmp(output,'cursor')
-    names2 = {'X_{T}X_{O} (response)','X_{T}Y_{O}','Y_{T}X_{O}','Y_{T}Y_{O} (response)'};
-elseif strcmp(output,'Rhand')
-    names2 = {'X_{T}X_{O}','X_{T}Y_{O}','Y_{T}X_{O} (response)','Y_{T}Y_{O}'};
-elseif strcmp(output,'Lhand')
-    names2 = {'X_{T}X_{O}','X_{T}Y_{O} (response)','Y_{T}X_{O}','Y_{T}Y_{O}'};
-end
-
-index = 1:Nblock;
-remove = 1;
-if remove
-    index(idx) = [];
-end
-
 figure(2); clf
 for k = 1:Nfreq
     for i = index
@@ -148,7 +146,7 @@ for i = 1:Nfreq
     if i == 1
         title('Low freq')
         yticks(1:4)
-        yticklabels(names2)
+        yticklabels(labels)
     elseif i == Nfreq
         title('High freq')
         if remove == 0
@@ -158,6 +156,28 @@ for i = 1:Nfreq
     end
 end
 
+%% plot matrices as lines
+col = lines;
+col = col(1:7,:);
+for k = 1:Nfreq
+    figure(3+k); clf; hold on
+    plot(mat(:,index,k)','LineWidth',2)
+    for i = 1:Nsubj
+        for j = 1:4
+            plot(thetaOpt(j,index,k,i),'Color',[col(j,:) 0.4])
+        end
+    end
+    plot([0 Nblock+1],[0 0],'--k','LineWidth',1)
+    xlim([1 length(index)])
+    xticks([])
+    if remove == 0
+        xticks(idx)
+        xticklabels(graph_name(idx))
+        set(gca,'ColorOrderIndex',1)
+        plot(idx,mat(:,idx,k)','.','MarkerSize',25)
+    end
+    legend(labels)
+end
 %% graph average fitted phasors across subjects
 col1 = [1 0.9 0.3];
 col2 = [1 0 0];

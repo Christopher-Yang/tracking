@@ -27,12 +27,20 @@ folder = 'Data/bimanual_pilot/';
 % rotate = 0;
 % data = analyze_data(d,block_name,0,rotate);
 
+% time = 60; %in seconds
+% block_name = {'B1_baseline','B3_dualBaseline','B4_darkBaseline','B5','B6','B7_dual','B8_dark','B9','B10','B11','B12','B13_dual','B14_dark','B15','B16','B17','B18','B19_dual','B20_dark','B22','B23','B24','B25_dual','B26_dark','B27','B28','B29','B30_dual','B31_dark','B32_habit','B33_habit'};
+% graph_name = {'B1','B3(D)','B4(F)','B5','B6','B7(D)','B8(F)','B9','B10','B11','B12','B13(D)','B14(F)','B15','B16','B17','B18','B19(D)','B20(F)','B22','B23','B24','B25(D)','B26(F)','B27','B28','B29','B30(D)','B31(F)','B32(H)','B33(H)'};
+% subj_name = {'subj10','subj11'};
+% d = load_data(subj_name,block_name,folder,time);
+% rotate = 1;
+% data = analyze_data(d,block_name,0,rotate);
+
 time = 60; %in seconds
-block_name = {'B1_baseline','B3_dualBaseline','B4_darkBaseline','B5','B6','B7_dual','B8_dark','B9','B10','B11','B12','B13_dual','B14_dark','B15','B16','B17','B18','B19_dual','B20_dark','B22','B23','B24','B25_dual','B26_dark','B27','B28','B29','B30_dual','B31_dark','B32_habit','B33_habit'};
-graph_name = {'B1','B3(D)','B4(F)','B5','B6','B7(D)','B8(F)','B9','B10','B11','B12','B13(D)','B14(F)','B15','B16','B17','B18','B19(D)','B20(F)','B22','B23','B24','B25(D)','B26(F)','B27','B28','B29','B30(D)','B31(F)','B32(H)','B33(H)'};
-subj_name = {'subj10','subj11'};
+block_name = {'B1_baseline','B2_dark','B3','B4','B5','B6_dark','B7','B8','B9','B10','B11_dark','B12','B13','B14','B15','B16_dark','B17','B18','B19','B20','B21_dark','B22','B23','B24','B25_dark','B26_habit','B27_habit'};
+graph_name = {'B1','B2 (D)','B3','B4','B5','B6 (D)','B7','B8','B9','B10','B11 (D)','B12','B13','B14','B15','B16(D)','B17','B18','B19','B20','B21 (D)','B22','B23','B24','B25 (D)','B26 (H)','B27 (H)'};
+subj_name = {'subj12'};
 d = load_data(subj_name,block_name,folder,time);
-rotate = 1;
+rotate = 0;
 data = analyze_data(d,block_name,0,rotate);
 
 % save dat data;
