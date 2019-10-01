@@ -98,6 +98,7 @@ end
 % for averaging across subjects
 rotMat_mu = squeeze(mean(rotMat,5));
 
+graph_name = {'Baseline','Early','Late','Post'};
 gblocks = [1 2 5 6];
 figure(1); clf
 for k = 1:4
@@ -107,12 +108,11 @@ for k = 1:4
         plot([0 rotMat_mu(1,2,i,gblocks(k),1)],[0 rotMat_mu(2,2,i,gblocks(k),1)],'LineWidth',1.5)
         plot([0 1],[0 0],'k')
         plot([0 0],[0 1],'k')
-        if i == 1
-            ylabel('Baseline')
-        end
-        axis([-0.45 1 -0.45 1])
+        axis([-0.75 1 -0.75 1])
         axis square
     end
+    subplot(4,7,7*(k-1)+1)
+    ylabel(graph_name(k))
 end
 
 figure(2); clf
@@ -123,12 +123,11 @@ for k = 1:4
         plot([0 rotMat_mu(1,2,i,gblocks(k),2)],[0 rotMat_mu(2,2,i,gblocks(k),2)],'LineWidth',1.5)
         plot([0 1],[0 0],'k')
         plot([0 0],[0 1],'k')
-        if i == 1
-            ylabel('Baseline')
-        end
-        axis([-0.45 1 -0.45 1])
+        axis([-0.75 1 -0.75 1])
         axis square
     end
+    subplot(4,7,7*(k-1)+1)
+    ylabel(graph_name(k))
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -153,10 +152,9 @@ for k = 1:4
         colormap(map)
         set(gca,'TickDir','out','Xtick',[],'Ytick',[])
         axis square
-        if i == 1
-            ylabel('Baseline')
-        end
     end
+    subplot(4,7,7*(k-1)+1)
+    ylabel(graph_name(k))
 end
 
 figure(4); clf
@@ -167,10 +165,9 @@ for k = 1:4
         colormap(map)
         set(gca,'TickDir','out','Xtick',[],'Ytick',[])
         axis square
-        if i == 1
-            ylabel('Baseline')
-        end
     end
+    subplot(4,7,7*(k-1)+1)
+    ylabel(graph_name(k))
 end
 
 %% graph average fitted phasors across subjects
