@@ -36,8 +36,8 @@ function graph_MSE(data,groups,block_name,graph_name)
 %     grid on;
     
     figure(1)
-    errorbar(mean(MSE.rot.subjects,2), 2*MSE.rot.se2,'r','LineWidth',1); hold on; 
-    errorbar(mean(MSE.mir.subjects,2), 2*MSE.mir.se2, 'b','LineWidth',1);
+    errorbar(mean(MSE.rot.subjects,2), MSE.rot.se2,'r','LineWidth',1); hold on; 
+    errorbar(mean(MSE.mir.subjects,2), MSE.mir.se2, 'b','LineWidth',1);
     plot(MSE.rot.subjects(:,1),'Color',[1 0 0 0.25],'LineWidth',0.5) 
     plot(MSE.mir.subjects(:,1),'Color',[0 0 1 0.25],'LineWidth',0.5)
     plot(MSE.rot.subjects(:,2:end),'Color',[1 0 0 0.25],'LineWidth',0.5)
@@ -50,9 +50,9 @@ function graph_MSE(data,groups,block_name,graph_name)
 
     figure(2)
     for i = 1:6
-        s = shadedErrorBar(8*(i-1)+1:8*(i-1)+8,mean(MSE.rot.full(8*(i-1)+1:8*(i-1)+8,:),2),2*MSE.rot.full_se(8*(i-1)+1:8*(i-1)+8)); hold on;
+        s = shadedErrorBar(8*(i-1)+1:8*(i-1)+8,mean(MSE.rot.full(8*(i-1)+1:8*(i-1)+8,:),2),MSE.rot.full_se(8*(i-1)+1:8*(i-1)+8)); hold on;
         editErrorBar(s,col2(1,:),1);
-        s = shadedErrorBar(8*(i-1)+1:8*(i-1)+8,mean(MSE.mir.full(8*(i-1)+1:8*(i-1)+8,:),2),2*MSE.mir.full_se(8*(i-1)+1:8*(i-1)+8));
+        s = shadedErrorBar(8*(i-1)+1:8*(i-1)+8,mean(MSE.mir.full(8*(i-1)+1:8*(i-1)+8,:),2),MSE.mir.full_se(8*(i-1)+1:8*(i-1)+8));
         editErrorBar(s,col2(2,:),1);
     end
 %     plot(MSE.rot.full,'Color',[col2(3,:) 0.25],'LineWidth',0.5)

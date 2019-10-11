@@ -1,20 +1,15 @@
-% clear all
-% load dat
-groups = {'rot','rot_i'};
+clear all
+load dat
+groups = {'rot','mir'};
 block = {'no_rot1','rot1','rot2','rot3','rot4','no_rot2'};
 Nblock = length(block);
 Nsubj = 10;
 delay = 50;
 
 for l = 1:2
-    if l == 1
-        subj = {'subj17','subj18','subj21','subj22','subj24','subj25','subj28','subj31','subj32','subj33'};
-    else
-        subj = {'subj14','subj15','subj16','subj19','subj23','subj26','subj27','subj29','subj30','subj34'};
-    end
     for i = 1:Nsubj
         for j = 1:Nblock
-            dat = data.(groups{l}).(subj{i}).(block{j});
+            dat = data.(groups{l}){i}.(block{j});
             hand = [dat.Rhand.x_pos dat.Rhand.y_pos]';
             target = [dat.target.x_pos dat.target.y_pos]';
             paramsInit = [1 0 0 1];
@@ -33,15 +28,15 @@ for l = 1:2
             
             % store fitted matrices
             if l == 1
-                rotMat_opt_vmr(:,:,j,i) = rotMat(:,:,idx);
+                rotMat_vmr(:,:,j,i) = rotMat(:,:,idx);
             else
-                rotMat_opt_mr(:,:,j,i) = rotMat(:,:,idx);
+                rotMat_mr(:,:,j,i) = rotMat(:,:,idx);
             end
             
             % estimate rotation angle for the VMR group
             if l == 1
                 thetaInit = 0;
-                err2 = @(theta) sim_error2(theta,rotMat_opt_vmr(:,:,j,i));
+                err2 = @(theta) sim_error2(theta,rotMat_vmr(:,:,j,i));
                 theta_opt(j,i) = fmincon(err2,thetaInit);
             end
         end
@@ -49,14 +44,14 @@ for l = 1:2
 end
 
 bestDelay = delay(idx).*(1/130.004);
-theta_bar = mean(theta_opt,2);
-theta_se = std(theta_opt,[],2)/sqrt(10);
+thetaBar = mean(theta_opt,2);
+thetaSE = std(theta_opt,[],2)/sqrt(10);
 
-% vmr12 = reshape(squeeze(rotMat_opt_vmr(1,2,[1 5 Nblock],:))',[30 1]);
-% vmr21 = reshape(squeeze(rotMat_opt_vmr(2,1,[1 5 Nblock],:))',[30 1]);
-% mr12 = reshape(squeeze(rotMat_opt_mr(1,2,[1 5 Nblock],:))',[30 1]);
-% mr21 = reshape(squeeze(rotMat_opt_mr(2,1,[1 5 Nblock],:))',[30 1]);
-% z = [vmr12; vmr21; mr12; mr21];
+% vmr = cat(3,squeeze(-rotMat_vmr(1,2,[1 5 6],:)),squeeze(rotMat_vmr(2,1,[1 5 6],:)));
+% mr = cat(3,squeeze(rotMat_mr(1,2,[1 5 6],:)),squeeze(rotMat_mr(2,1,[1 5 6],:)));
+% vmr = reshape(mean(vmr,3)',[30 1]);
+% mr = reshape(mean(mr,3)',[30 1]);
+% z = [vmr; mr];
 % dlmwrite('time_matrix.csv',z);
 %% plot fitted matrices as well as column vector representation
 col1 = [1 0 0];
@@ -74,8 +69,8 @@ clims = [-1 1];
 % subj = 10;
 % mat1 = rotMat_opt_vmr(:,:,:,subj);
 % mat2 = rotMat_opt_mr(:,:,:,subj);
-mat1 = mean(rotMat_opt_vmr,4);
-mat2 = mean(rotMat_opt_mr,4);
+mat1 = mean(rotMat_vmr,4);
+mat2 = mean(rotMat_mr,4);
 gblocks = [1 2 5 6];
 figure(1); clf
 for i = 1:4
@@ -110,10 +105,10 @@ end
 figure(2); clf
 for i = 1:4
     subplot(2,4,i); hold on
-    plot([0 mat1(1,1,gblocks(i))],[0 mat1(2,1,gblocks(i))],'LineWidth',1.5)
-    plot([0 mat1(1,2,gblocks(i))],[0 mat1(2,2,gblocks(i))],'LineWidth',1.5)
     plot([0 1],[0 0],'k')
     plot([0 0],[0 1],'k')
+    plot([0 mat1(1,1,gblocks(i))],[0 mat1(2,1,gblocks(i))],'LineWidth',1.5)
+    plot([0 mat1(1,2,gblocks(i))],[0 mat1(2,2,gblocks(i))],'LineWidth',1.5)
     axis([-0.65 1 -0.65 1])
     axis square
     if i == 1
@@ -121,10 +116,10 @@ for i = 1:4
     end
     
     subplot(2,4,i+4); hold on
-    plot([0 mat2(1,1,gblocks(i))],[0 mat2(2,1,gblocks(i))],'LineWidth',1.5)
-    plot([0 mat2(1,2,gblocks(i))],[0 mat2(2,2,gblocks(i))],'LineWidth',1.5)
     plot([0 1],[0 0],'k')
     plot([0 0],[0 1],'k')
+    plot([0 mat2(1,1,gblocks(i))],[0 mat2(2,1,gblocks(i))],'LineWidth',1.5)
+    plot([0 mat2(1,2,gblocks(i))],[0 mat2(2,2,gblocks(i))],'LineWidth',1.5)
     axis([-0.65 1 -0.65 1])
     axis square
     if i == 1
@@ -136,80 +131,45 @@ end
 col = lines;
 col = col(1:7,:);
 
-vmr12 = squeeze(rotMat_opt_vmr(1,2,[1 5 6],:));
-vmr21 = squeeze(rotMat_opt_vmr(2,1,[1 5 6],:));
-mr12 = squeeze(rotMat_opt_mr(1,2,[1 5 6],:));
-mr21 = squeeze(rotMat_opt_mr(2,1,[1 5 6],:));
+vmr = cat(3,squeeze(-rotMat_vmr(1,2,[1 2 5 6],:)),squeeze(rotMat_vmr(2,1,[1 2 5 6],:)));
+mr = cat(3,squeeze(rotMat_mr(1,2,[1 2 5 6],:)),squeeze(rotMat_mr(2,1,[1 2 5 6],:)));
+vmr = mean(vmr,3);
+mr = mean(mr,3);
 
-n = size(vmr12,1);
-idx = [1 3 4];
+n = size(vmr,1);
+idx = 1:4;
 
 figure(3); clf
-subplot(2,2,1); hold on
+subplot(2,1,1); hold on
 plot([-1 10],[0 0],'--k','LineWidth',1)
-plot(1:3,vmr12,'k','Color',[0 0 0 0.5],'MarkerSize',20)
-plot(4:6,mr12,'k','Color',[0 0 0 0.5],'MarkerSize',20)
-for i = 1:3
-    scatter(repelem(i,Nsubj),vmr12(i,:),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
-    errorbar(i,mean(vmr12(i,:)),2*std(vmr12(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
+plot(1:4,vmr,'k','Color',[0 0 0 0.5])
+plot(5:8,mr,'k','Color',[0 0 0 0.5])
+for i = 1:4
+    scatter(repelem(i,Nsubj),vmr(i,:),10,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
+    errorbar(i,mean(vmr(i,:)),std(vmr(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',20,'LineWidth',1)
     
-    scatter(repelem(i+n,Nsubj),mr12(i,:),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
-    errorbar(i+n,mean(mr12(i,:)),2*std(mr12(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
+    scatter(repelem(i+n,Nsubj),mr(i,:),10,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
+    errorbar(i+n,mean(mr(i,:)),std(mr(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',20,'LineWidth',1)
 end
-xlim([0.5 6.5])
-ylabel('Upper-Right')
+axis([0.5 8.5 -.1 0.65])
 set(gca,'Xtick',[],'TickDir','out')
+ylabel('Cross-axis scaling')
 yticks(-1:0.2:1)
 
-subplot(2,2,2); hold on
+subplot(2,1,2); hold on
 plot([-1 10],[0 0],'--k','LineWidth',1)
-plot([1 3],vmr12([1 3],:),'k','Color',[0 0 0 0.5],'MarkerSize',20)
-plot([4 6],mr12([1 3],:),'k','Color',[0 0 0 0.5],'MarkerSize',20)
-for i = [1 3]
-    scatter(repelem(i,Nsubj),vmr12(i,:),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
-    errorbar(i,mean(vmr12(i,:)),2*std(vmr12(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
+plot([1 4],vmr([1 4],:),'k','Color',[0 0 0 0.5])
+plot([5 8],mr([1 4],:),'k','Color',[0 0 0 0.5])
+for i = [1 4]
+    scatter(repelem(i,Nsubj),vmr(i,:),10,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
+    errorbar(i,mean(vmr(i,:)),std(vmr(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',20,'LineWidth',1)
     
-    scatter(repelem(i+n,Nsubj),mr12(i,:),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
-    errorbar(i+n,mean(mr12(i,:)),2*std(mr12(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
+    scatter(repelem(i+n,Nsubj),mr(i,:),10,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
+    errorbar(i+n,mean(mr(i,:)),std(mr(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',20,'LineWidth',1)
 end
-xlim([0.5 6.5])
+axis([0.5 8.5 -.1 0.65])
 set(gca,'Xtick',[],'TickDir','out')
 yticks(-1:0.2:1)
-
-subplot(2,2,3); hold on
-plot([-1 10],[0 0],'--k','LineWidth',1)
-plot(1:3,vmr21,'k','Color',[0 0 0 0.5],'MarkerSize',20)
-plot(4:6,mr21,'k','Color',[0 0 0 0.5],'MarkerSize',20)
-for i = 1:3
-    scatter(repelem(i,Nsubj),vmr21(i,:),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
-    errorbar(i,mean(vmr21(i,:)),2*std(vmr21(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
-    
-    scatter(repelem(i+n,Nsubj),mr21(i,:),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
-    errorbar(i+n,mean(mr21(i,:)),2*std(mr21(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
-end
-axis([0.5 6.5 -0.2 0.65])
-ylabel('Lower-Left')
-set(gca,'Xtick',[],'TickDir','out')
-xticks([2 5])
-yticks(-1:0.2:1)
-xticklabels({'Rotation','Mirror-Reversal'})
-
-subplot(2,2,4); hold on
-plot([-1 10],[0 0],'--k','LineWidth',1)
-plot([1 3],vmr21([1 3],:),'k','Color',[0 0 0 0.5],'MarkerSize',20)
-plot([4 6],mr21([1 3],:),'k','Color',[0 0 0 0.5],'MarkerSize',20)
-for i = [1 3]
-    scatter(repelem(i,Nsubj),vmr21(i,:),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
-    errorbar(i,mean(vmr21(i,:)),2*std(vmr21(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
-    
-    scatter(repelem(i+n,Nsubj),mr21(i,:),25,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
-    errorbar(i+n,mean(mr21(i,:)),2*std(mr21(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',30,'LineWidth',1)
-end
-xlim([0.5 6.5])
-set(gca,'Xtick',[],'TickDir','out')
-xticks([2 5])
-yticks(-1:0.2:1)
-xticklabels({'Rotation','Mirror-Reversal'})
 
 %% plot hand and target trajectories before and after optimization
 
@@ -223,7 +183,7 @@ for j = 1:4
     hand = [dat.Rhand.x_pos dat.Rhand.y_pos]';
     target = [dat.target.x_pos dat.target.y_pos]';
     
-    rotTarget = rotMat_opt_vmr(:,:,j,i)*target;
+    rotTarget = rotMat_vmr(:,:,j,i)*target;
     
     subplot(2,4,j); hold on
     plot(target(1,:),target(2,:))
@@ -241,6 +201,54 @@ for j = 1:4
         ylabel('After Optimization')
     end
 end
+
+%% plot mirror-reversal compensation perpendicular to mirroring axis
+gblocks = [1 2 5 6];
+colors = lines;
+colors = colors(1:7,:);
+
+R = rotz(-45);
+R = R(1:2,1:2);
+perpAxis = R*[1 0]';
+
+for k = 1:Nsubj
+    for p = 1:Nblock
+        comp(p,k) = perpAxis'*rotMat_mr(:,:,p,k)*perpAxis;
+    end
+end
+
+compBar = mean(comp,2);
+compSE = std(comp,[],2)/sqrt(Nsubj);
+
+figure(3); clf
+subplot(1,2,1); hold on
+plot(theta_opt(gblocks,:),'Color',[0 0 0 0.5])
+for i = 1:length(gblocks)
+    errorbar(i,thetaBar(gblocks(i)),thetaSE(gblocks(i)),'-o','Color',colors(i,:),'MarkerFaceColor',colors(i,:),'MarkerEdgeColor','none','LineWidth',1)
+end
+plot([0 5],[0 0],'k','LineWidth',1)
+plot([0 5],[90 90],'--k','LineWidth',1)
+title('Rotation')
+xticks(1:4)
+xticklabels(graph_name(gblocks))
+yticks(0:30:90)
+ylabel(['Angle (' char(176) ')'])
+axis([0.5 4.5 -10 90])
+
+subplot(1,2,2); hold on
+plot(comp(gblocks,:),'Color',[0 0 0 0.5])
+for i = 1:length(gblocks)
+    errorbar(i,compBar(gblocks(i)),compSE(gblocks(i)),'-o','Color',colors(i,:),'MarkerFaceColor',colors(i,:),'MarkerEdgeColor','none','LineWidth',1)
+end
+plot([0 5],[1 1],'k','LineWidth',1)
+plot([0 5],[-1 -1],'--k','LineWidth',1)
+title('Mirror-Reversal')
+xticks(1:4)
+xticklabels(graph_name(gblocks))
+yticks(-1:0.5:1)
+ylabel('Scaling (orthogonal to mirror axis)')
+xlim([0.5 4.5])
+
 %%
 function e = sim_error(params,hand,target,delay)
     rotMat = [params(1:2); params(3:4)];

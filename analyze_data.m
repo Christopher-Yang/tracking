@@ -53,12 +53,12 @@ function data = analyze_data(d, subj_name, block_name, uw)
                 end
             end
             
-            Rhand.x_fft = fourier(Rhand.x_pos_all);   %perform fft and get amplitude data
-            Rhand.y_fft = fourier(Rhand.y_pos_all);
-            cursor.x_fft = fourier(cursor.x_pos_all);
-            cursor.y_fft = fourier(cursor.y_pos_all);
-            target.x_fft = fourier(target.x_pos_all);
-            target.y_fft = fourier(target.y_pos_all);
+            [Rhand.x_fft, Rhand.x_fftRaw] = fourier(Rhand.x_pos_all);   %perform fft and get amplitude data
+            [Rhand.y_fft, Rhand.y_fftRaw] = fourier(Rhand.y_pos_all);
+            [cursor.x_fft, cursor.x_fftRaw] = fourier(cursor.x_pos_all);
+            [cursor.y_fft, cursor.y_fftRaw] = fourier(cursor.y_pos_all);
+            [target.x_fft, target.x_fftRaw] = fourier(target.x_pos_all);
+            [target.y_fft, target.y_fftRaw] = fourier(target.y_pos_all);
             data{i}.(block_name{j}).cursor = cursor;
             data{i}.(block_name{j}).Rhand = Rhand;
             data{i}.(block_name{j}).target = target;

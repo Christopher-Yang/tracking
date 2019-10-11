@@ -8,7 +8,7 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name,output)
     lw = 1;
     names = {' (Rotation)',' (Mirror Reversal)'};
     
-    H = gobjects(length(gblocks)+1,1);
+    H = gobjects(length(gblocks),1);
     for i = 1:length(H)
         H(i) = figure;
     end
@@ -76,7 +76,7 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name,output)
             plot(freqsX,ampX,'ko','LineWidth',lw,'MarkerFaceColor',[0 0 0])
             plot(freqsY,ampY,'ko','LineWidth',lw)
             plot([50 51], [50 51],'Color',col(1,:),'LineWidth',lw)
-            plot(xAxis,a.x_all(:,:,i),'Color',[col(1,:) 0.3],'LineWidth',0.25)
+            plot(xAxis,a.x_all(:,:,i),'Color',[0 0 0 0.3],'LineWidth',0.25)
             plot(xAxis,a.x(:,i),'Color',col(1,:),'LineWidth',lw)
             plot(freqsX,a.x(ix,i),'-ok','LineWidth',lw,'MarkerFaceColor',[0 0 0])
             plot(freqsY,a.x(iy,i),'-ok','LineWidth',lw)
@@ -94,7 +94,7 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name,output)
             subplot(2,2,k+2); hold on
             plot(freqsX, ampX,'ko','LineWidth',lw,'MarkerFaceColor',[0 0 0])
             plot(freqsY, ampY,'ko','LineWidth',lw)
-            plot(xAxis,a.y_all(:,:,i),'Color',[col(1,:) 0.3],'LineWidth',0.25)
+            plot(xAxis,a.y_all(:,:,i),'Color',[0 0 0 0.3],'LineWidth',0.25)
             plot(xAxis,a.y(:,i),'LineWidth',lw,'Color',col(1,:))
             plot(freqsY,a.y(iy,i),'-ok','LineWidth',lw)
             plot(freqsX,a.y(ix,i),'-ok','LineWidth',lw,'MarkerFaceColor',[0 0 0])
@@ -106,22 +106,22 @@ function graph_amp_avg(data,groups,block_name,gblocks,graph_name,output)
             xlabel('Frequency (Hz)')
         end
         
-        figure(H(end))
-        subplot(1,2,k)
-        s = shadedErrorBar(sort([freqsX freqsY]),100*a.dx,100*a.errdx);
-        editErrorBar(s,col(2,:),0.25);
-        hold on
-        s = shadedErrorBar(sort([freqsX freqsY]),100*a.dy,100*a.errdy);
-        editErrorBar(s,col(3,:),0.25);
-        if k == 1
-            title('Rotation')
-        else
-            title('Mirror Reversal')
-        end
-        set(gca,'Xscale','log','TickDir','out')
-        axis([0.1 2.3 0 60])
-        xlabel('Frequency(Hz)')
-        ylabel('|Post - Baseline| (%)')
-        pbaspect([1 1 1])
+%         figure(H(end))
+%         subplot(1,2,k)
+%         s = shadedErrorBar(sort([freqsX freqsY]),100*a.dx,100*a.errdx);
+%         editErrorBar(s,col(2,:),0.25);
+%         hold on
+%         s = shadedErrorBar(sort([freqsX freqsY]),100*a.dy,100*a.errdy);
+%         editErrorBar(s,col(3,:),0.25);
+%         if k == 1
+%             title('Rotation')
+%         else
+%             title('Mirror Reversal')
+%         end
+%         set(gca,'Xscale','log','TickDir','out')
+%         axis([0.1 2.3 0 60])
+%         xlabel('Frequency(Hz)')
+%         ylabel('|Post - Baseline| (%)')
+%         pbaspect([1 1 1])
     end
 end

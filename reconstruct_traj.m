@@ -1,23 +1,23 @@
 %% get trajectories from ifft
-clear all
-load dat
-subj = 'subj22';
-block = 'rot4';
-dat = data.rot.(subj).(block);
-Nstep = 5201;
+% clear all
+% load dat
+subj = 4;
+block = 'no_rot1';
+dat = data.rot{subj}.(block);
+Nstep = 2601;
 freq_axis = 130.004*(0:floor(Nstep/2))/5200;
 threshold = 0.006;
 output = 'Rhand';
 
 % construct trajectories on- and off-target frequencies
-FT = [dat.target.x_fft.fft dat.target.y_fft.fft]; 
+FT = [mean(dat.target.x_fftRaw,2) mean(dat.target.y_fftRaw,2)]; 
 idx_half1 = abs(FT)>Nstep*threshold/2; % find target indices
 idx_half2 = [idx_half1(:,2) idx_half1(:,1)];
 idx = sum(idx_half1,2);
 idx = logical(repmat(idx,[1 2]));
 [t_onFreq, t_offFreq] = rebuild_traj(FT,idx); % on-target frequencies
 
-FT = [dat.(output).x_fft.fft dat.(output).y_fft.fft];
+FT = [mean(dat.Rhand.x_fftRaw,2) mean(dat.Rhand.y_fftRaw,2)];
 [h_onFreq, h_offFreq] = rebuild_traj(FT,idx); % off-target frequencies
 h_half1 = rebuild_traj(FT,idx_half1);
 h_half2 = rebuild_traj(FT,idx_half2);
