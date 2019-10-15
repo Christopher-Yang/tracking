@@ -1,6 +1,6 @@
 %% get trajectories from ifft
-% clear all
-% load dat
+clear all
+load dat
 subj = 4;
 block = 'no_rot1';
 dat = data.rot{subj}.(block);
@@ -88,6 +88,8 @@ ylabel('Y position (m)')
 axis square
 title('Actual trajectories')
 axis([-.1 .1 -.1 .1]) 
+xticks(-.1:.1:.1)
+yticks(-.1:.1:.1)
 
 % plot on-target frequency trajectories
 subplot(2,3,4); hold on
@@ -100,6 +102,8 @@ ylabel('Y position (m)')
 axis square
 title('Movement at all target frequencies')
 axis([-.1 .1 -.1 .1]) 
+xticks(-.1:.1:.1)
+yticks(-.1:.1:.1)
 
 subplot(2,3,2); hold on
 plot(t_onFreq(:,1),t_onFreq(:,2)) % ifft target and hand trajectories
@@ -109,6 +113,8 @@ ylabel('Y position (m)')
 axis square
 title('Movement at baseline frequencies')
 axis([-.1 .1 -.1 .1])
+xticks(-.1:.1:.1)
+yticks(-.1:.1:.1)
 
 subplot(2,3,5); hold on
 plot(t_onFreq(:,1),t_onFreq(:,2)) % ifft target and hand trajectories
@@ -118,10 +124,13 @@ ylabel('Y position (m)')
 axis square
 title('Movement at compensated frequencies')
 axis([-.1 .1 -.1 .1])
+xticks(-.1:.1:.1)
+yticks(-.1:.1:.1)
 
 % plot off-target frequency trajectories
-subplot(2,3,[3 6]); hold on
-plot(t_onFreq(1:end-50,1)-h_onFreq(51:end,1),t_onFreq(1:end-50,2)-h_onFreq(51:end,2)) % delayed difference between target and hand trajectories
+subplot(2,3,3); hold on
+% plot(t_onFreq(1:end-50,1)-h_onFreq(51:end,1),t_onFreq(1:end-50,2)-h_onFreq(51:end,2)) % delayed difference between target and hand trajectories
+plot(t_onFreq(:,1),t_onFreq(:,2))
 plot(h_offFreq(:,1),h_offFreq(:,2)) % ifft target and hand trajectories
 % plot(dat.(output).x_pos - hand(:,1),dat.(output).y_pos - hand(:,2)) % subtract time domain trajectories
 xlabel('X position (m)')
@@ -129,6 +138,8 @@ ylabel('Y position (m)')
 axis square
 title('Movement at non-target frequencies')
 axis([-.1 .1 -.1 .1]) 
+xticks(-.1:.1:.1)
+yticks(-.1:.1:.1)
 
 %% plot transformation matrices
 figure(3); clf
