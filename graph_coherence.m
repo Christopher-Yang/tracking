@@ -48,8 +48,8 @@ for p = 1:length(groups)
                 end
                 k3 = k3 + 1;
             end
-            RR.x_all(j,:,i,p) = mean(cohx);
-            RR.y_all(j,:,i,p) = mean(cohy);
+            RR.x_all(j,:,i,p) = mean(sqrt(cohx));
+            RR.y_all(j,:,i,p) = mean(sqrt(cohy));
         end
     end
 end
@@ -70,7 +70,7 @@ for j = 1:2
     else
         title('Mirror-Reversal')
     end
-    ylabel([output,' X coherence'])
+    ylabel([output,' SR_X coherence'])
     yticks(0:0.2:1)
     axis([0 2.3 0 1])
     
@@ -79,6 +79,7 @@ for j = 1:2
         plot(f_y,SR.y(gblocks(i),:,j),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
     end
     xlabel('Frequency (Hz)')
+    ylabel([output,' SR_Y coherence'])
     yticks(0:0.2:1)
     axis([0 2.3 0 1])
 end
@@ -95,7 +96,7 @@ for j = 1:2
     else
         title('Mirror-Reversal')
     end
-    ylabel([output,' X coherence'])
+    ylabel([output,' RR_X coherence'])
     yticks(0:0.2:1)
     axis([0 2.3 0 1])
     
@@ -103,7 +104,7 @@ for j = 1:2
     for i = 1:length(gblocks)
         plot(f_y,RR.y(gblocks(i),:,j),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
     end
-    ylabel([output,' Y coherence'])
+    ylabel([output,' RR_Y coherence'])
     xlabel('Frequency (Hz)')
     yticks(0:0.2:1)
     axis([0 2.3 0 1])
