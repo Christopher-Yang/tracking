@@ -1,4 +1,4 @@
-output = 'Lhand';
+output = 'Rhand';
 groups = {'rot','mir'};
 names = {'x_x_all','x_y_all','y_x_all','y_y_all'};
 Nblock = length(block_name);
@@ -65,13 +65,13 @@ map = [map1; map2];
 clims = [-1 1];
 
 % for plotting vectors
-col1 = [255 192 203]/255;
-col2 = [139 0 0]/255;
-map1 = [linspace(col1(1),col2(1),Nblock)', linspace(col1(2),col2(2),Nblock)', linspace(col1(3),col2(3),Nblock)'];
+col1 = [0 128 0]/255;
+col2 = [152 251 152]/255;
+map1 = [linspace(col1(1),col2(1),Nfreq)', linspace(col1(2),col2(2),Nfreq)', linspace(col1(3),col2(3),Nfreq)'];
 
-col1 = [176 224 230]/255;
-col2 = [0 0 205]/255;
-map2 = [linspace(col1(1),col2(1),Nblock)', linspace(col1(2),col2(2),Nblock)', linspace(col1(3),col2(3),Nblock)'];
+col1 = [128 0 128]/255;
+col2 = [230 230 250]/255;
+map2 = [linspace(col1(1),col2(1),Nfreq)', linspace(col1(2),col2(2),Nfreq)', linspace(col1(3),col2(3),Nfreq)'];
 
 %% display results of fitting process
 g = 1;
@@ -117,22 +117,19 @@ for i = 1:4
 end
 
 %% plot vectors and gain matrices
+gblocks = [1 5 10 15 20];
 figure(2); clf
-for k = 1:Nfreq
-    for i = index
-        subplot(1,Nfreq,k); hold on
-        plot([0 mat(1,i,k)],[0 mat(3,i,k)],'LineWidth',1.5,'Color',map1(i,:))
-        plot([0 mat(2,i,k)],[0 mat(4,i,k)],'LineWidth',1.5,'Color',map2(i,:))
-        plot([0 1],[0 0],'k')
-        plot([0 0],[0 1],'k')
-        axis([-0.45 1 -0.45 1])
+for k = 1:length(gblocks)
+    subplot(1,length(gblocks),k); hold on
+    plot([0 1],[0 0],'k')
+    plot([0 0],[0 1],'k')
+    for i = 1:Nfreq
+        plot([0 mat(1,gblocks(k),i)],[0 mat(2,gblocks(k),i)],'LineWidth',1.5,'Color',map1(i,:))
+        plot([0 mat(3,gblocks(k),i)],[0 mat(4,gblocks(k),i)],'LineWidth',1.5,'Color',map2(i,:))
+        axis([-0.45 1.2 -0.45 1.2])
         axis square
     end
-    if k == 1
-        title('Low Freq')
-    elseif k == 6
-        title('High Freq')
-    end
+    title(graph_name{gblocks(k)})
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
