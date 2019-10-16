@@ -56,14 +56,19 @@ end
 
 SR.x = squeeze(mean(SR.x_all,3));
 SR.y = squeeze(mean(SR.y_all,3));
+SR.xSE = squeeze(std(SR.x_all,[],3)/sqrt(Nsubj));
+SR.ySE = squeeze(std(SR.y_all,[],3)/sqrt(Nsubj));
 RR.x = squeeze(mean(RR.x_all,3));
 RR.y = squeeze(mean(RR.y_all,3));
+RR.xSE = squeeze(std(RR.x_all,[],3)/sqrt(Nsubj));
+RR.ySE = squeeze(std(RR.y_all,[],3)/sqrt(Nsubj));
 
 figure(1); clf
 for j = 1:2
     subplot(2,2,j); hold on
     for i = 1:length(gblocks)
-        plot(f_x,SR.x(gblocks(i),:,j),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+%         plot(f_x,SR.x(gblocks(i),:,j),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+        errorbar(f_x,SR.x(gblocks(i),:,j),SR.xSE(gblocks(i),:,j),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
     end
     if j == 1
         title('Rotation')
@@ -76,7 +81,8 @@ for j = 1:2
     
     subplot(2,2,j+2); hold on
     for i = 1:length(gblocks)
-        plot(f_y,SR.y(gblocks(i),:,j),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+%         plot(f_y,SR.y(gblocks(i),:,j),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+        errorbar(f_y,SR.y(gblocks(i),:,j),SR.ySE(gblocks(i),:,j),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
     end
     xlabel('Frequency (Hz)')
     ylabel([output,' SR_Y coherence'])
@@ -89,7 +95,8 @@ figure(2); clf
 for j = 1:2
     subplot(2,2,j); hold on
     for i = 1:length(gblocks)
-        plot(f_x,RR.x(gblocks(i),:,j),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+%         plot(f_x,RR.x(gblocks(i),:,j),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+        errorbar(f_x,RR.x(gblocks(i),:,j),RR.xSE(gblocks(i),:,j),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
     end
     if j == 1
         title('Rotation')
@@ -102,7 +109,8 @@ for j = 1:2
     
     subplot(2,2,j+2); hold on
     for i = 1:length(gblocks)
-        plot(f_y,RR.y(gblocks(i),:,j),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+%         plot(f_y,RR.y(gblocks(i),:,j),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+        errorbar(f_y,RR.y(gblocks(i),:,j),RR.ySE(gblocks(i),:,j),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
     end
     ylabel([output,' RR_Y coherence'])
     xlabel('Frequency (Hz)')
