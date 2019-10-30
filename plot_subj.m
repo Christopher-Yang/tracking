@@ -20,6 +20,8 @@ plot([0 0],[-1.5 1.5],'k')
 axis square
 axis([-1.25 1.25 -1.25 1.25])
 title('X_{target} -> X_{hand}')
+xticks(-2:1:2)
+yticks(-2:1:2)
 
 subplot(2,2,2); hold on
 plot([-1.5 1.5],[0 0],'k')
@@ -27,6 +29,8 @@ plot([0 0],[-1.5 1.5],'k')
 axis square
 axis([-1.25 1.25 -1.25 1.25])
 title('Y_{target} -> X_{hand}')
+xticks(-2:1:2)
+yticks(-2:1:2)
 
 subplot(2,2,3); hold on
 plot([-1.5 1.5],[0 0],'k')
@@ -34,6 +38,8 @@ plot([0 0],[-1.5 1.5],'k')
 axis square
 axis([-1.25 1.25 -1.25 1.25])
 title('X_{target} -> Y_{hand}')
+xticks(-2:1:2)
+yticks(-2:1:2)
 
 subplot(2,2,4); hold on
 plot([-1.5 1.5],[0 0],'k')
@@ -41,6 +47,8 @@ plot([0 0],[-1.5 1.5],'k')
 axis square
 axis([-1.25 1.25 -1.25 1.25])
 title('Y_{target} -> Y_{hand}')
+xticks(-2:1:2)
+yticks(-2:1:2)
 
 for i = 1:Nfreq
     subplot(2,2,1)

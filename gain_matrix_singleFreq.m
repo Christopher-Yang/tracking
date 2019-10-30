@@ -123,8 +123,8 @@ end
 
 %% plot vectors and gain matrices
 % for single subjects
-% subj = 5;
-% rotMat_mu = squeeze(rotMat(:,:,:,:,subj,:));
+% subj = 6;
+% mat = squeeze(thetaOpt(:,:,:,subj,:));
 
 % for averaging across subjects
 mat = squeeze(mean(thetaOpt,4));

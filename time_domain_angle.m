@@ -131,43 +131,47 @@ end
 col = lines;
 col = col(1:7,:);
 
-vmr = cat(3,squeeze(-rotMat_vmr(1,2,[1 2 5 6],:)),squeeze(rotMat_vmr(2,1,[1 2 5 6],:)));
-mr = cat(3,squeeze(rotMat_mr(1,2,[1 2 5 6],:)),squeeze(rotMat_mr(2,1,[1 2 5 6],:)));
+% vmr = cat(3,squeeze(-rotMat_vmr(1,2,[1 2 5 6],:)),squeeze(rotMat_vmr(2,1,[1 2 5 6],:)));
+% mr = cat(3,squeeze(rotMat_mr(1,2,[1 2 5 6],:)),squeeze(rotMat_mr(2,1,[1 2 5 6],:)));
+vmr = cat(3,squeeze(-rotMat_vmr(1,2,:,:)),squeeze(rotMat_vmr(2,1,:,:)));
+mr = cat(3,squeeze(rotMat_mr(1,2,:,:)),squeeze(rotMat_mr(2,1,:,:)));
 vmr = mean(vmr,3);
 mr = mean(mr,3);
 
 n = size(vmr,1);
-idx = 1:4;
+idx = [1 2 0 0 3 4];
 
 figure(3); clf
 subplot(2,1,1); hold on
-plot([-1 10],[0 0],'--k','LineWidth',1)
-plot(1:4,vmr,'k','Color',[0 0 0 0.5])
-plot(5:8,mr,'k','Color',[0 0 0 0.5])
-for i = 1:4
-    scatter(repelem(i,Nsubj),vmr(i,:),10,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
-    errorbar(i,mean(vmr(i,:)),std(vmr(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',20,'LineWidth',1)
-    
-    scatter(repelem(i+n,Nsubj),mr(i,:),10,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
-    errorbar(i+n,mean(mr(i,:)),std(mr(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',20,'LineWidth',1)
+plot([0 13],[0 0],'--k','LineWidth',1)
+plot(1:6,vmr,'k','Color',[0 0 0 0.5])
+plot(7:12,mr,'k','Color',[0 0 0 0.5])
+for i = 1:6
+    if i == 3 || i == 4
+        errorbar(i,mean(vmr(i,:)),std(vmr(i,:))/sqrt(Nsubj),'.k','MarkerSize',20,'LineWidth',1)
+        
+        errorbar(i+n,mean(mr(i,:)),std(mr(i,:))/sqrt(Nsubj),'.k','MarkerSize',20,'LineWidth',1)
+    else
+        errorbar(i,mean(vmr(i,:)),std(vmr(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',20,'LineWidth',1)
+        
+        errorbar(i+n,mean(mr(i,:)),std(mr(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',20,'LineWidth',1)
+    end
 end
-axis([0.5 8.5 -.1 0.65])
+axis([0.5 12.5 -.1 0.7])
 set(gca,'Xtick',[],'TickDir','out')
 ylabel('Cross-axis scaling')
 yticks(-1:0.2:1)
 
 subplot(2,1,2); hold on
 plot([-1 10],[0 0],'--k','LineWidth',1)
-plot([1 4],vmr([1 4],:),'k','Color',[0 0 0 0.5])
-plot([5 8],mr([1 4],:),'k','Color',[0 0 0 0.5])
-for i = [1 4]
-    scatter(repelem(i,Nsubj),vmr(i,:),10,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
+plot([1 6],vmr([1 6],:),'k','Color',[0 0 0 0.5])
+plot([7 12],mr([1 6],:),'k','Color',[0 0 0 0.5])
+for i = [1 6]
     errorbar(i,mean(vmr(i,:)),std(vmr(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',20,'LineWidth',1)
     
-    scatter(repelem(i+n,Nsubj),mr(i,:),10,col(idx(i),:),'filled','MarkerFaceAlpha',0.5)
     errorbar(i+n,mean(mr(i,:)),std(mr(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',20,'LineWidth',1)
 end
-axis([0.5 8.5 -.1 0.65])
+axis([0.5 12.5 -.1 0.7])
 set(gca,'Xtick',[],'TickDir','out')
 yticks(-1:0.2:1)
 
@@ -203,9 +207,10 @@ for j = 1:4
 end
 
 %% plot mirror-reversal compensation perpendicular to mirroring axis
-gblocks = [1 2 5 6];
+gblocks = 1:6;
 colors = lines;
 colors = colors(1:7,:);
+idx = [1 2 0 0 3 4];
 
 R = rotz(-45);
 R = R(1:2,1:2);
@@ -224,30 +229,38 @@ figure(3); clf
 subplot(1,2,1); hold on
 plot(theta_opt(gblocks,:),'Color',[0 0 0 0.5])
 for i = 1:length(gblocks)
-    errorbar(i,thetaBar(gblocks(i)),thetaSE(gblocks(i)),'-o','Color',colors(i,:),'MarkerFaceColor',colors(i,:),'MarkerEdgeColor','none','LineWidth',1)
+    if i == 3 || i == 4
+        errorbar(i,thetaBar(gblocks(i)),thetaSE(gblocks(i)),'-ko','MarkerFaceColor',[0 0 0],'MarkerEdgeColor','none','LineWidth',1)
+    else
+        errorbar(i,thetaBar(gblocks(i)),thetaSE(gblocks(i)),'-o','Color',colors(idx(i),:),'MarkerFaceColor',colors(idx(i),:),'MarkerEdgeColor','none','LineWidth',1)
+    end
 end
-plot([0 5],[0 0],'k','LineWidth',1)
-plot([0 5],[90 90],'--k','LineWidth',1)
+plot([0 7],[0 0],'k','LineWidth',1)
+plot([0 7],[90 90],'--k','LineWidth',1)
 title('Rotation')
-xticks(1:4)
+xticks(1:6)
 xticklabels(graph_name(gblocks))
 yticks(0:30:90)
 ylabel(['Angle (' char(176) ')'])
-axis([0.5 4.5 -10 90])
+axis([0.5 6.5 -10 100])
 
 subplot(1,2,2); hold on
 plot(comp(gblocks,:),'Color',[0 0 0 0.5])
 for i = 1:length(gblocks)
-    errorbar(i,compBar(gblocks(i)),compSE(gblocks(i)),'-o','Color',colors(i,:),'MarkerFaceColor',colors(i,:),'MarkerEdgeColor','none','LineWidth',1)
+    if i == 3 || i == 4
+        errorbar(i,compBar(gblocks(i)),compSE(gblocks(i)),'-ko','MarkerFaceColor',[0 0 0],'MarkerEdgeColor','none','LineWidth',1)
+    else
+        errorbar(i,compBar(gblocks(i)),compSE(gblocks(i)),'-o','Color',colors(idx(i),:),'MarkerFaceColor',colors(idx(i),:),'MarkerEdgeColor','none','LineWidth',1)
+    end
 end
-plot([0 5],[1 1],'k','LineWidth',1)
-plot([0 5],[-1 -1],'--k','LineWidth',1)
+plot([0 7],[1 1],'k','LineWidth',1)
+plot([0 7],[-1 -1],'--k','LineWidth',1)
 title('Mirror-Reversal')
-xticks(1:4)
+xticks(1:6)
 xticklabels(graph_name(gblocks))
 yticks(-1:0.5:1)
 ylabel('Scaling (orthogonal to mirror axis)')
-xlim([0.5 4.5])
+xlim([0.5 6.5])
 
 %%
 function e = sim_error(params,hand,target,delay)
