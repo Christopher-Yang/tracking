@@ -1,5 +1,4 @@
 output = 'Rhand';
-groups = {'rot','mir'};
 names = {'x_x_all','x_y_all','y_x_all','y_y_all'};
 Nblock = length(block_name);
 Nsubj = length(data)-1;
