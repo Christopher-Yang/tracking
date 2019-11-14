@@ -1,12 +1,22 @@
 clear all;
 
+% subj 1: me
+% subj 2: Martina
+% subj 3: me
+% subj 4: Kahori
+% subj 5: Yue
+% subj 6: Alex
+% subj 7: Tim
+
 folder = 'Data/baseline_learning/';
 time = 60; %in seconds
-block_name = {'left1','left4','right1','right4'};
-graph_name = {'Left Early','Left Late','Right Early','Right Late'};
-subj_name = {'subj1'};
+% block_name = {'right1','right2','right3','right4','right5'};
+% graph_name = {'Right 1','Right 2','Right 3','Right 4','Right 5'};
+block_name = {'right1','F1_1','F3_1','F4_1'};
+graph_name = block_name;
+subj_name = {'subj3'};
 d = load_data(subj_name,block_name,folder,time);
-data = analyze_data(d,block_name,0);
+data = analyze_data(d,block_name,0,0);
 
 % save dat data;
 disp('Done')
