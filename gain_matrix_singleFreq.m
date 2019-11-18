@@ -1,4 +1,4 @@
-output = 'Rhand';
+output = 'Lhand';
 names = {'x_x_all','x_y_all','y_x_all','y_y_all'};
 Nblock = length(block_name);
 Nsubj = length(data)-1;
@@ -9,7 +9,7 @@ idx = find(contains(graph_name,'('));
 
 % set remove = 1 if you want to remove special blocks
 index = 1:Nblock;
-remove = 1;
+remove = 0;
 if remove
     index(idx) = [];
 end
@@ -116,7 +116,7 @@ for i = 1:4
 end
 
 %% plot vectors and gain matrices
-gblocks = [1 5 10 15 20];
+gblocks = 1:3;
 figure(2); clf
 for k = 1:length(gblocks)
     subplot(1,length(gblocks),k); hold on
@@ -138,7 +138,7 @@ for i = 1:Nfreq
     subplot(1,Nfreq,i)
     imagesc(mat(:,index,i),clims)
     colormap(map)
-    set(gca,'TickDir','out','Xtick',[],'Ytick',[])
+    set(gca,'Xtick',[],'Ytick',[])
     if i == 1
         title('Low freq')
         yticks(1:4)
@@ -148,6 +148,25 @@ for i = 1:Nfreq
         if remove == 0
             xticks(idx)
             xticklabels(graph_name(idx))
+        end
+    end
+end
+%%
+subj = 1;
+rMat = rotMat(:,:,:,:,subj);
+
+% rMat = mean(rotMat,5);
+
+figure(4); clf
+for i = 1:Nfreq
+    for k = 1:length(index)
+        subplot(Nfreq,length(index),(i-1)*length(index)+k)
+        imagesc(rMat(:,:,i,k),clims)
+        colormap(map)
+        pbaspect([1 1 1])
+        set(gca,'Xtick',[],'Ytick',[])
+        if i == 1
+            title(graph_name(k))
         end
     end
 end
