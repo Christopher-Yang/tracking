@@ -145,8 +145,44 @@ plot(effectMu_norm)
 workTotal = squeeze(sum(abs(thetaOpt(workspace,:,:,:)),1));
 nullTotal = squeeze(sum(abs(thetaOpt(nullspace,:,:,:)),1));
 total = workTotal+nullTotal;
+workProp = workTotal./total;
 
+baseline_blocks = 1:2;
+workBase = squeeze(sum(abs(thetaOpt([1 4],baseline_blocks,:,:)),1));
+nullBase = squeeze(sum(abs(thetaOpt([2 3],baseline_blocks,:,:)),1));
+totalBase = workBase + nullBase;
+baseProp = workBase./totalBase;
 
+workProp(baseline_blocks,:,:) = baseProp;
+workPropMu = mean(workProp,3);
+
+figure(9); clf
+for k = 1:Nfreq
+    subplot(2,Nfreq,k); hold on
+    plot(workPropMu(normal,k),'LineWidth',2)
+    for i = 1:Nsubj
+        plot(workProp(normal,k,i),'Color',[col(1,:) 0.6])
+    end
+    if k == 1
+        title('Normal blocks')
+        ylabel('Proportion of movements in workspace')
+    end
+    axis([1 length(normal) 0 1])
+
+    subplot(2,Nfreq,Nfreq+k); hold on
+    plot(workPropMu(special,k),'LineWidth',2)
+    for i = 1:Nsubj
+        plot(workProp(special,k,i),'Color',[col(1,:) 0.6])
+    end
+    if k == 1
+        title('Special blocks')
+        xlabel('Low Freq')
+        ylabel('Proportion of movements in workspace')
+    elseif k == Nfreq
+        xlabel('High freq')
+    end
+    axis([1 length(normal) 0 1])
+end
 %% plot vectors and gain matrices
 gblocks = 1:3;
 figure(2); clf
