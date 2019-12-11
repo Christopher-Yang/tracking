@@ -84,105 +84,6 @@ col1 = [128 0 128]/255;
 col2 = [230 230 250]/255;
 map2 = [linspace(col1(1),col2(1),Nfreq)', linspace(col1(2),col2(2),Nfreq)', linspace(col1(3),col2(3),Nfreq)'];
 
-%% plot effect of dual task
-effect = thetaOpt(:,normal,:,:) - thetaOpt(:,special,:,:);
-effectMu = mean(effect,4);
-
-ymin = min(min(min(effectMu)));
-ymax = max(max(max(effectMu)));
-
-figure(7); clf
-for k = 1:Nfreq
-    subplot(2,Nfreq,k); hold on
-    plot(effectMu(workspace,:,k)','LineWidth',2)
-    for i = 1:Nsubj
-        for j = 1:2
-            plot(effect(workspace(j),:,k,i),'Color',[col(j,:) 0.6])
-        end
-    end
-    plot([0 Nblock+1],[0 0],'--k','LineWidth',1)
-    axis([1 length(normal) ymin ymax])
-    xticks([])
-    if k == 1
-        title('Normal blocks')
-        ylabel('Gain (workspace)')
-        xlabel('Low freq')
-    elseif k == Nfreq
-        xlabel('High freq')
-        legend(labels(workspace))
-    end
-    
-    subplot(2,Nfreq,k+Nfreq); hold on
-    set(gca,'ColorOrderIndex',3)
-    plot(effectMu(nullspace,:,k)','LineWidth',2)
-    for i = 1:Nsubj
-        for j = 1:2
-            plot(effect(nullspace(j),:,k,i),'Color',[col(j+2,:) 0.6])
-        end
-    end
-    plot([0 Nblock+1],[0 0],'--k','LineWidth',1)
-    axis([1 length(normal) ymin ymax])
-    xticks([])
-    if k == 1
-        ylabel('Gain (null space)')
-        xlabel('Low freq')
-    elseif k == Nfreq
-        xlabel('High freq')
-        legend(labels(nullspace))
-    end
-end
-
-%%
-normalized = (thetaOpt([1 4 response],normal,:,:) - thetaOpt([1 4 response],special,:,:))./thetaOpt([1 4 response],normal,:,:);
-baseline = mean(normalized(1:2,:,:,:),1);
-effect_norm = squeeze([baseline(:,1,:,:) normalized(3,2:end,:,:)]);
-effectMu_norm = mean(effect_norm,3);
-
-figure(8); clf
-plot(effectMu_norm)
-
-%%
-workTotal = squeeze(sum(abs(thetaOpt(workspace,:,:,:)),1));
-nullTotal = squeeze(sum(abs(thetaOpt(nullspace,:,:,:)),1));
-total = workTotal+nullTotal;
-workProp = workTotal./total;
-
-baseline_blocks = 1:2;
-workBase = squeeze(sum(abs(thetaOpt([1 4],baseline_blocks,:,:)),1));
-nullBase = squeeze(sum(abs(thetaOpt([2 3],baseline_blocks,:,:)),1));
-totalBase = workBase + nullBase;
-baseProp = workBase./totalBase;
-
-workProp(baseline_blocks,:,:) = baseProp;
-workPropMu = mean(workProp,3);
-
-figure(9); clf
-for k = 1:Nfreq
-    subplot(2,Nfreq,k); hold on
-    plot(workPropMu(normal,k),'LineWidth',2)
-    for i = 1:Nsubj
-        plot(workProp(normal,k,i),'Color',[col(1,:) 0.6])
-    end
-    if k == 1
-        title('Normal blocks')
-        ylabel('Proportion of movements in workspace')
-    end
-    axis([1 length(normal) 0 1])
-
-    subplot(2,Nfreq,Nfreq+k); hold on
-    plot(workPropMu(special,k),'LineWidth',2)
-    for i = 1:Nsubj
-        plot(workProp(special,k,i),'Color',[col(1,:) 0.6])
-    end
-    if k == 1
-        title('Special blocks')
-        xlabel('Low Freq')
-        ylabel('Proportion of movements in workspace')
-    elseif k == Nfreq
-        xlabel('High freq')
-    end
-    axis([1 length(normal) 0 1])
-end
 %% plot vectors and gain matrices
 gblocks = 1:3;
 figure(2); clf
@@ -220,7 +121,7 @@ for i = 1:Nfreq
     end
 end
 %% plot gain matrices as 2x2
-subj = 1;
+subj = 3;
 rMat = rotMat(:,:,:,:,subj);
 
 % rMat = mean(rotMat,5);
@@ -323,6 +224,188 @@ for k = 1:Nfreq
         xlabel('High freq')
         legend(labels(nullspace))
     end
+end
+
+figure(7); clf
+for k = 1:Nfreq
+    subplot(2,Nfreq,k); hold on
+    plot(mat(workspace,:,k)','LineWidth',2)
+    for i = 1:Nsubj
+        for j = 1:2
+            plot(thetaOpt(workspace(j),:,k,i),'Color',[col(j,:) 0.6])
+        end
+    end
+    plot([0 Nblock+1],[0 0],'--k','LineWidth',1)
+    axis([1 size(mat,2) ymin ymax])
+    xticks([])
+    if k == 1
+        title('All blocks')
+        ylabel('Gain (workspace)')
+        xlabel('Low freq')
+    elseif k == Nfreq
+        xlabel('High freq')
+        legend(labels(workspace))
+    end
+    
+    subplot(2,Nfreq,k+Nfreq); hold on
+    set(gca,'ColorOrderIndex',3)
+    plot(mat(nullspace,:,k)','LineWidth',2)
+    for i = 1:Nsubj
+        for j = 1:2
+            plot(thetaOpt(nullspace(j),:,k,i),'Color',[col(j+2,:) 0.6])
+        end
+    end
+    plot([0 Nblock+1],[0 0],'--k','LineWidth',1)
+    axis([1 size(mat,2) ymin ymax])
+    xticks([])
+    if k == 1
+        ylabel('Gain (null space)')
+        xlabel('Low freq')
+    elseif k == Nfreq
+        xlabel('High freq')
+        legend(labels(nullspace))
+    end
+end
+
+%% plot habit
+figure(8); clf
+for k = 1:Nfreq
+    subplot(1,Nfreq,k); hold on
+    plot(1:length(normal),mat(2,normal,k)','LineWidth',2,'Color',col(1,:))
+    plot(length(normal)+1:length(normal)+length(special),mat(2,special,k)','LineWidth',2,'Color',col(1,:))
+    for i = 1:Nsubj
+        plot(1:length(normal),thetaOpt(2,normal,k,i),'Color',[col(1,:) 0.6])
+        plot(length(normal)+1:length(normal)+length(special),thetaOpt(2,special,k,i),'Color',[col(1,:) 0.6])
+    end
+    plot([0 Nblock+1],[0 0],'--k','LineWidth',1)
+    axis([1 size(mat,2) -0.7 1])
+    xticks([])
+    yticks(-0.6:0.3:0.9)
+    if k == 1
+        title('All blocks')
+        ylabel('Gain (response axis)')
+        xlabel('Low freq')
+    elseif k == Nfreq
+        xlabel('High freq')
+    end
+end
+
+figure(9); clf
+subplot(1,2,1); hold on
+plot([1 Nfreq],[0 0],'--k','LineWidth',1)
+plot(permute(mat(2,5,:),[3 2 1]),'LineWidth',2)
+for i = 1:Nsubj
+    plot(permute(thetaOpt(2,5,:,i),[3 2 1]),'Color',col(1,:));
+end
+ylim([-0.7 0.9])
+
+subplot(1,2,2); hold on
+plot([1 Nfreq],[0 0],'--k','LineWidth',1)
+plot(permute(mat(2,6,:),[3 2 1]),'LineWidth',2)
+for i = 1:Nsubj
+    plot(permute(thetaOpt(2,6,:,i),[3 2 1]),'Color',col(1,:));
+end
+ylim([-0.7 0.9])
+
+
+%% plot effect of dual task
+effect = thetaOpt(:,normal,:,:) - thetaOpt(:,special,:,:);
+effectMu = mean(effect,4);
+
+ymin = min(min(min(effectMu)));
+ymax = max(max(max(effectMu)));
+
+figure(9); clf
+for k = 1:Nfreq
+    subplot(2,Nfreq,k); hold on
+    plot(effectMu(workspace,:,k)','LineWidth',2)
+    for i = 1:Nsubj
+        for j = 1:2
+            plot(effect(workspace(j),:,k,i),'Color',[col(j,:) 0.6])
+        end
+    end
+    plot([0 Nblock+1],[0 0],'--k','LineWidth',1)
+    axis([1 length(normal) ymin ymax])
+    xticks([])
+    if k == 1
+        title('Normal blocks')
+        ylabel('Gain (workspace)')
+        xlabel('Low freq')
+    elseif k == Nfreq
+        xlabel('High freq')
+        legend(labels(workspace))
+    end
+    
+    subplot(2,Nfreq,k+Nfreq); hold on
+    set(gca,'ColorOrderIndex',3)
+    plot(effectMu(nullspace,:,k)','LineWidth',2)
+    for i = 1:Nsubj
+        for j = 1:2
+            plot(effect(nullspace(j),:,k,i),'Color',[col(j+2,:) 0.6])
+        end
+    end
+    plot([0 Nblock+1],[0 0],'--k','LineWidth',1)
+    axis([1 length(normal) ymin ymax])
+    xticks([])
+    if k == 1
+        ylabel('Gain (null space)')
+        xlabel('Low freq')
+    elseif k == Nfreq
+        xlabel('High freq')
+        legend(labels(nullspace))
+    end
+end
+
+%%
+normalized = (thetaOpt([1 4 response],normal,:,:) - thetaOpt([1 4 response],special,:,:))./thetaOpt([1 4 response],normal,:,:);
+baseline = mean(normalized(1:2,:,:,:),1);
+effect_norm = squeeze([baseline(:,1,:,:) normalized(3,2:end,:,:)]);
+effectMu_norm = mean(effect_norm,3);
+
+figure(10); clf
+plot(effectMu_norm)
+
+%% plot proportion of movement in workspace vs null space
+workTotal = squeeze(sum(abs(thetaOpt(workspace,:,:,:)),1));
+nullTotal = squeeze(sum(abs(thetaOpt(nullspace,:,:,:)),1));
+total = workTotal+nullTotal;
+workProp = workTotal./total;
+
+baseline_blocks = 1:2;
+workBase = squeeze(sum(abs(thetaOpt([1 4],baseline_blocks,:,:)),1));
+nullBase = squeeze(sum(abs(thetaOpt([2 3],baseline_blocks,:,:)),1));
+totalBase = workBase + nullBase;
+baseProp = workBase./totalBase;
+
+workProp(baseline_blocks,:,:) = baseProp;
+workPropMu = mean(workProp,3);
+
+figure(11); clf
+for k = 1:Nfreq
+    subplot(2,Nfreq,k); hold on
+    plot(workPropMu(normal,k),'LineWidth',2)
+    for i = 1:Nsubj
+        plot(workProp(normal,k,i),'Color',[col(1,:) 0.6])
+    end
+    if k == 1
+        title('Normal blocks')
+        ylabel('Proportion of movements in workspace')
+    end
+    axis([1 length(normal) 0 1])
+
+    subplot(2,Nfreq,Nfreq+k); hold on
+    plot(workPropMu(special,k),'LineWidth',2)
+    for i = 1:Nsubj
+        plot(workProp(special,k,i),'Color',[col(1,:) 0.6])
+    end
+    if k == 1
+        title('Special blocks')
+        xlabel('Low Freq')
+        ylabel('Proportion of movements in workspace')
+    elseif k == Nfreq
+        xlabel('High freq')
+    end
+    axis([1 length(normal) 0 1])
 end
 
 %% display results of fitting process

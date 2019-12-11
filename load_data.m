@@ -6,7 +6,11 @@ function output = load_data(subj_name, block_name, folder,time)
     for i = 1:length(subj_name)
         disp(['   Subject ' num2str(i)]);
         for j = 1:length(block_name)
-            path = [folder,subj_name{i},'/',block_name{j}];
+            if strcmp(subj_name{i},'subj14') && strcmp(block_name{j},'B24')
+                path = [folder,subj_name{i},'/B23'];
+            else
+                path = [folder,subj_name{i},'/',block_name{j}];
+            end
             tFile = dlmread([path,'/tFile.tgt']);
             Tb = 1/(tFile(1)/2);
             Ncycles = floor(time/Tb);
