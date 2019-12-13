@@ -121,10 +121,10 @@ for i = 1:Nfreq
     end
 end
 %% plot gain matrices as 2x2
-subj = 3;
-rMat = rotMat(:,:,:,:,subj);
+% subj = 5;
+% rMat = rotMat(:,:,:,:,subj);
 
-% rMat = mean(rotMat,5);
+rMat = mean(rotMat,5);
 
 figure(4); clf
 for i = 1:Nfreq
@@ -136,6 +136,11 @@ for i = 1:Nfreq
         set(gca,'Xtick',[],'Ytick',[])
         if i == 1
             title(graph_name(k))
+        end
+        if k == 1 && i == 1
+            ylabel('Low freq')
+        elseif k == 1 && i == Nfreq
+            ylabel('High freq')
         end
     end
 end
@@ -268,45 +273,60 @@ for k = 1:Nfreq
 end
 
 %% plot habit
+se = squeeze(std(thetaOpt(2,:,:,:),[],4))/sqrt(Nsubj);
+n = length(normal);
+s = length(special);
 figure(8); clf
 for k = 1:Nfreq
     subplot(1,Nfreq,k); hold on
-    plot(1:length(normal),mat(2,normal,k)','LineWidth',2,'Color',col(1,:))
-    plot(length(normal)+1:length(normal)+length(special),mat(2,special,k)','LineWidth',2,'Color',col(1,:))
+    errorbar(1:n,mat(2,normal,k)',se(1:n,k),'-ko','LineWidth',2,'MarkerFaceColor','k')
+    errorbar(n+1:n+s,mat(2,special,k)',se(n+1:end,k),'-ko','LineWidth',2,'MarkerFaceColor','k')
+%     plot(1:length(normal),mat(2,normal,k)','-ko','LineWidth',2,'MarkerFaceColor','k')
+%     plot(length(normal)+1:length(normal)+length(special),mat(2,special,k)','-ko','LineWidth',2,'MarkerFaceColor','k')
     for i = 1:Nsubj
-        plot(1:length(normal),thetaOpt(2,normal,k,i),'Color',[col(1,:) 0.6])
-        plot(length(normal)+1:length(normal)+length(special),thetaOpt(2,special,k,i),'Color',[col(1,:) 0.6])
+        plot(1:length(normal),thetaOpt(2,normal,k,i),'Color',[0 0 0 0.6])
+        plot(length(normal)+1:length(normal)+length(special),thetaOpt(2,special,k,i),'Color',[0 0 0 0.6])
     end
     plot([0 Nblock+1],[0 0],'--k','LineWidth',1)
     axis([1 size(mat,2) -0.7 1])
     xticks([])
     yticks(-0.6:0.3:0.9)
     if k == 1
-        title('All blocks')
+        title('Low freq')
+        xlabel('Blocks')
         ylabel('Gain (response axis)')
-        xlabel('Low freq')
     elseif k == Nfreq
-        xlabel('High freq')
+        title('High freq')
     end
 end
 
 figure(9); clf
 subplot(1,2,1); hold on
 plot([1 Nfreq],[0 0],'--k','LineWidth',1)
-plot(permute(mat(2,5,:),[3 2 1]),'LineWidth',2)
+errorbar(squeeze(mat(2,5,:)),se(5,:),'-ko','LineWidth',2,'MarkerFaceColor','k')
+% plot(squeeze(mat(2,5,:)),'-ko','LineWidth',2,'MarkerFaceColor','k')
 for i = 1:Nsubj
-    plot(permute(thetaOpt(2,5,:,i),[3 2 1]),'Color',col(1,:));
+    plot(squeeze(thetaOpt(2,5,:,i)),'Color',[0 0 0 0.6])
 end
-ylim([-0.7 0.9])
+xticks([1 6])
+xticklabels({'Low Freq','High Freq'})
+yticks(-0.9:0.3:0.9)
+ylabel('Gain (response axis)')
+axis([1 6 -0.7 0.9])
+title('Before flip')
 
 subplot(1,2,2); hold on
 plot([1 Nfreq],[0 0],'--k','LineWidth',1)
-plot(permute(mat(2,6,:),[3 2 1]),'LineWidth',2)
+errorbar(squeeze(mat(2,6,:)),se(6,:),'-ko','LineWidth',2,'MarkerFaceColor','k')
+% plot(squeeze(mat(2,6,:)),'-ko','LineWidth',2,'MarkerFaceColor','k')
 for i = 1:Nsubj
-    plot(permute(thetaOpt(2,6,:,i),[3 2 1]),'Color',col(1,:));
+    plot(squeeze(thetaOpt(2,6,:,i)),'Color',[0 0 0 0.6])
 end
-ylim([-0.7 0.9])
-
+xticks([1 6])
+xticklabels({'Low Freq','High Freq'})
+yticks(-0.9:0.3:0.9)
+axis([1 6 -0.7 0.9])
+title('After flip')
 
 %% plot effect of dual task
 effect = thetaOpt(:,normal,:,:) - thetaOpt(:,special,:,:);
