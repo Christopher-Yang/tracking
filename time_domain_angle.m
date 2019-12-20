@@ -102,29 +102,57 @@ for i = 1:4
     axis square
 end
 
+col1 = [0 128 0]/255;
+col2 = [128 0 128]/255;
+
+gblocks = [1 2 5 6];
+for i = 1:4
+    x(:,:,i,1) = cov(squeeze(rotMat_vmr(1,1,gblocks(i),:)),squeeze(rotMat_vmr(2,1,gblocks(i),:)));
+    y(:,:,i,1) = cov(squeeze(rotMat_vmr(1,2,gblocks(i),:)),squeeze(rotMat_vmr(2,2,gblocks(i),:)));
+    x(:,:,i,2) = cov(squeeze(rotMat_mr(1,1,gblocks(i),:)),squeeze(rotMat_mr(2,1,gblocks(i),:)));
+    y(:,:,i,2) = cov(squeeze(rotMat_mr(1,2,gblocks(i),:)),squeeze(rotMat_mr(2,2,gblocks(i),:)));
+end
+
 figure(2); clf
 for i = 1:4
     subplot(2,4,i); hold on
     plot([0 1],[0 0],'k')
     plot([0 0],[0 1],'k')
-    plot([0 mat1(1,1,gblocks(i))],[0 mat1(2,1,gblocks(i))],'LineWidth',1.5)
-    plot([0 mat1(1,2,gblocks(i))],[0 mat1(2,2,gblocks(i))],'LineWidth',1.5)
-    axis([-0.65 1 -0.65 1])
+    a = error_ellipse(x(:,:,i,1),mat1(:,1,gblocks(i)),'color',col1,'conf',0.95);
+    b = error_ellipse(y(:,:,i,1),mat1(:,2,gblocks(i)),'color',col2,'conf',0.95);
+    patch(a.XData,a.YData,col1,'FaceAlpha',0.2)
+    patch(b.XData,b.YData,col2,'FaceAlpha',0.2)
+    plot([0 mat1(1,1,gblocks(i))],[0 mat1(2,1,gblocks(i))],'Color',col1,'LineWidth',1.5)
+    plot([0 mat1(1,2,gblocks(i))],[0 mat1(2,2,gblocks(i))],'Color',col2,'LineWidth',1.5)
+    axis([-0.9 1.2 -0.9 1.2])
     axis square
     if i == 1
+        title('Baseline')
         ylabel('Rotation')
+    elseif i == 2
+        title('Early')
+    elseif i == 3
+        title('Late')
+    elseif i == 4
+        title('Post')
     end
+    set(gcf,'Renderer','painters')
     
     subplot(2,4,i+4); hold on
     plot([0 1],[0 0],'k')
     plot([0 0],[0 1],'k')
-    plot([0 mat2(1,1,gblocks(i))],[0 mat2(2,1,gblocks(i))],'LineWidth',1.5)
-    plot([0 mat2(1,2,gblocks(i))],[0 mat2(2,2,gblocks(i))],'LineWidth',1.5)
-    axis([-0.65 1 -0.65 1])
+    a = error_ellipse(x(:,:,i,1),mat2(:,1,gblocks(i)),'color',col1,'conf',0.95);
+    b = error_ellipse(y(:,:,i,1),mat2(:,2,gblocks(i)),'color',col2,'conf',0.95);
+    patch(a.XData,a.YData,col1,'FaceAlpha',0.2)
+    patch(b.XData,b.YData,col2,'FaceAlpha',0.2)
+    plot([0 mat2(1,1,gblocks(i))],[0 mat2(2,1,gblocks(i))],'Color',col1,'LineWidth',1.5)
+    plot([0 mat2(1,2,gblocks(i))],[0 mat2(2,2,gblocks(i))],'Color',col2,'LineWidth',1.5)
+    axis([-0.9 1.2 -0.9 1.2])
     axis square
     if i == 1
         ylabel('Mirror-Reversal')
     end
+    set(gcf,'Renderer','painters')
 end
 
 %% plot aftereffects

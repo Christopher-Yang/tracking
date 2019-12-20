@@ -33,17 +33,18 @@ for q = 1:2
         
         ph = abs(phasor(:,p,q));
         lambda = mean(ph);
+        rotMat(:,:,:,p,q) = rotMat(:,:,:,p,q).*lambda;
         
         if q == 1
-            vmrBase(:,:,p) = rotMat(:,:,1,p,q).*lambda;
-            vmrEarly(:,:,p) = rotMat(:,:,2,p,q).*lambda;
-            vmrLate(:,:,p) = rotMat(:,:,5,p,q).*lambda;
-            vmrAfter(:,:,p) = rotMat(:,:,6,p,q).*lambda;
+            vmrBase(:,:,p) = rotMat(:,:,1,p,q);
+            vmrEarly(:,:,p) = rotMat(:,:,2,p,q);
+            vmrLate(:,:,p) = rotMat(:,:,5,p,q);
+            vmrAfter(:,:,p) = rotMat(:,:,6,p,q);
         else
-            mrBase(:,:,p) = rotMat(:,:,1,p,q).*lambda;
-            mrEarly(:,:,p) = rotMat(:,:,2,p,q).*lambda;
-            mrLate(:,:,p) = rotMat(:,:,5,p,q).*lambda;
-            mrAfter(:,:,p) = rotMat(:,:,6,p,q).*lambda;
+            mrBase(:,:,p) = rotMat(:,:,1,p,q);
+            mrEarly(:,:,p) = rotMat(:,:,2,p,q);
+            mrLate(:,:,p) = rotMat(:,:,5,p,q);
+            mrAfter(:,:,p) = rotMat(:,:,6,p,q);
         end
     end
 end
@@ -158,86 +159,62 @@ xticklabels({'Rotation','Mirror-Reversal'})
 % mrAfterMu = mrAfter(:,:,subj);
 
 % for averaging across subjects
-vmrBaseMu = mean(vmrBase,3);
-vmrEarlyMu = mean(vmrEarly,3);
-vmrLateMu = mean(vmrLate,3);
-vmrAfterMu = mean(vmrAfter,3);
+% vmrBaseMu = mean(vmrBase,3);
+% vmrEarlyMu = mean(vmrEarly,3);
+% vmrLateMu = mean(vmrLate,3);
+% vmrAfterMu = mean(vmrAfter,3);
+% 
+% mrBaseMu = mean(mrBase,3);
+% mrEarlyMu = mean(mrEarly,3);
+% mrLateMu = mean(mrLate,3);
+% mrAfterMu = mean(mrAfter,3);
 
-mrBaseMu = mean(mrBase,3);
-mrEarlyMu = mean(mrEarly,3);
-mrLateMu = mean(mrLate,3);
-mrAfterMu = mean(mrAfter,3);
+rotMat_mu = squeeze(mean(rotMat,4));
+
+col1 = [0 128 0]/255;
+col2 = [128 0 128]/255;
+
+gblocks = [1 2 5 6];
+for k = 1:2
+    for i = 1:4
+        x(:,:,i,k) = cov(squeeze(rotMat(1,1,gblocks(i),:,k)),squeeze(rotMat(2,1,gblocks(i),:,k)));
+        y(:,:,i,k) = cov(squeeze(rotMat(1,2,gblocks(i),:,k)),squeeze(rotMat(2,2,gblocks(i),:,k)));
+    end
+end
 
 figure(1); clf
-subplot(2,4,1); hold on
-plot([0 vmrBaseMu(1,1)],[0 vmrBaseMu(2,1)],'LineWidth',1.5)
-plot([0 vmrBaseMu(1,2)],[0 vmrBaseMu(2,2)],'LineWidth',1.5)
-plot([0 1],[0 0],'k')
-plot([0 0],[0 1],'k')
-title('Baseline')
-ylabel('Rotation')
-axis([-0.45 1 -0.45 1])
-axis square
-
-subplot(2,4,2); hold on
-plot([0 vmrEarlyMu(1,1)],[0 vmrEarlyMu(2,1)],'LineWidth',1.5)
-plot([0 vmrEarlyMu(1,2)],[0 vmrEarlyMu(2,2)],'LineWidth',1.5)
-plot([0 1],[0 0],'k')
-plot([0 0],[0 1],'k')
-title('Early')
-axis([-0.45 1 -0.45 1])
-axis square
-
-subplot(2,4,3); hold on
-plot([0 vmrLateMu(1,1)],[0 vmrLateMu(2,1)],'LineWidth',1.5)
-plot([0 vmrLateMu(1,2)],[0 vmrLateMu(2,2)],'LineWidth',1.5)
-plot([0 1],[0 0],'k')
-plot([0 0],[0 1],'k')
-title('Late')
-axis([-0.45 1 -0.45 1])
-axis square
-
-subplot(2,4,4); hold on
-plot([0 vmrAfterMu(1,1)],[0 vmrAfterMu(2,1)],'LineWidth',1.5)
-plot([0 vmrAfterMu(1,2)],[0 vmrAfterMu(2,2)],'LineWidth',1.5)
-plot([0 1],[0 0],'k')
-plot([0 0],[0 1],'k')
-title('Post')
-axis([-0.45 1 -0.45 1])
-axis square
-
-subplot(2,4,5); hold on
-plot([0 mrBaseMu(1,1)],[0 mrBaseMu(2,1)],'LineWidth',1.5)
-plot([0 mrBaseMu(1,2)],[0 mrBaseMu(2,2)],'LineWidth',1.5)
-plot([0 1],[0 0],'k')
-plot([0 0],[0 1],'k')
-ylabel('Mirror Reversal')
-axis([-0.45 1 -0.45 1])
-axis square
-
-subplot(2,4,6); hold on
-plot([0 mrEarlyMu(1,1)],[0 mrEarlyMu(2,1)],'LineWidth',1.5)
-plot([0 mrEarlyMu(1,2)],[0 mrEarlyMu(2,2)],'LineWidth',1.5)
-plot([0 1],[0 0],'k')
-plot([0 0],[0 1],'k')
-axis([-0.45 1 -0.45 1])
-axis square
-
-subplot(2,4,7); hold on
-plot([0 mrLateMu(1,1)],[0 mrLateMu(2,1)],'LineWidth',1.5)
-plot([0 mrLateMu(1,2)],[0 mrLateMu(2,2)],'LineWidth',1.5)
-plot([0 1],[0 0],'k')
-plot([0 0],[0 1],'k')
-axis([-0.45 1 -0.45 1])
-axis square
-
-subplot(2,4,8); hold on
-plot([0 mrAfterMu(1,1)],[0 mrAfterMu(2,1)],'LineWidth',1.5)
-plot([0 mrAfterMu(1,2)],[0 mrAfterMu(2,2)],'LineWidth',1.5)
-plot([0 1],[0 0],'k')
-plot([0 0],[0 1],'k')
-axis([-0.45 1 -0.45 1])
-axis square
+for k = 1:2
+    for i = 1:4
+        subplot(2,4,(k-1)*4+i); hold on
+        plot([0 1],[0 0],'k')
+        plot([0 0],[0 1],'k')
+        a = error_ellipse(x(:,:,i,k),rotMat_mu(:,1,gblocks(i),k),'color',col1,'conf',0.95);
+        b = error_ellipse(y(:,:,i,k),rotMat_mu(:,2,gblocks(i),k),'color',col2,'conf',0.95);
+        patch(a.XData,a.YData,col1,'FaceAlpha',0.2)
+        patch(b.XData,b.YData,col2,'FaceAlpha',0.2)
+        plot([0 rotMat_mu(1,1,gblocks(i),k)],[0 rotMat_mu(2,1,gblocks(i),k)],'Color',col1,'LineWidth',1.5)
+        plot([0 rotMat_mu(1,2,gblocks(i),k)],[0 rotMat_mu(2,2,gblocks(i),k)],'Color',col2,'LineWidth',1.5)
+        if k == 1
+            if i == 1
+                title('Baseline')
+                ylabel('Rotation')
+            elseif i == 2
+                title('Early')
+            elseif i == 3
+                title('Late')
+            elseif i == 4
+                title('Post')
+            end
+        else
+            if i == 1
+                ylabel('Mirror Reversal')
+            end
+        end
+        axis([-0.75 1.25 -0.75 1.25])
+        axis square
+        set(gcf,'Renderer','painters')
+    end
+end
 
 %% fitted phasors for individual subjects
 group = 2;
