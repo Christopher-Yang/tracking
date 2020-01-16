@@ -68,7 +68,9 @@ for j = 1:2
     subplot(2,2,j); hold on
     for i = 1:length(gblocks)
 %         plot(f_x,SR.x(gblocks(i),:,j),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
-        errorbar(f_x,SR.x(gblocks(i),:,j),SR.xSE(gblocks(i),:,j),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+%         errorbar(f_x,SR.x(gblocks(i),:,j),SR.xSE(gblocks(i),:,j),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+        s = shadedErrorBar(f_x,SR.x(gblocks(i),:,j),SR.xSE(gblocks(i),:,j),'lineProps','-o');
+        editErrorBar(s,col(i,:),1);
     end
     if j == 1
         title('Rotation')
@@ -82,7 +84,9 @@ for j = 1:2
     subplot(2,2,j+2); hold on
     for i = 1:length(gblocks)
 %         plot(f_y,SR.y(gblocks(i),:,j),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
-        errorbar(f_y,SR.y(gblocks(i),:,j),SR.ySE(gblocks(i),:,j),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+%         errorbar(f_y,SR.y(gblocks(i),:,j),SR.ySE(gblocks(i),:,j),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+        s = shadedErrorBar(f_y,SR.y(gblocks(i),:,j),SR.ySE(gblocks(i),:,j),'lineProps','-o');
+        editErrorBar(s,col(i,:),1);
     end
     xlabel('Frequency (Hz)')
     ylabel([output,' SR_Y coherence'])
@@ -96,7 +100,9 @@ for j = 1:2
     subplot(2,2,j); hold on
     for i = 1:length(gblocks)
 %         plot(f_x,RR.x(gblocks(i),:,j),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
-        errorbar(f_x,RR.x(gblocks(i),:,j),RR.xSE(gblocks(i),:,j),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+%         errorbar(f_x,RR.x(gblocks(i),:,j),RR.xSE(gblocks(i),:,j),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+        s = shadedErrorBar(f_x,RR.x(gblocks(i),:,j),RR.xSE(gblocks(i),:,j),'lineProps','-o');
+        editErrorBar(s,col(i,:),1);
     end
     if j == 1
         title('Rotation')
@@ -110,7 +116,9 @@ for j = 1:2
     subplot(2,2,j+2); hold on
     for i = 1:length(gblocks)
 %         plot(f_y,RR.y(gblocks(i),:,j),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
-        errorbar(f_y,RR.y(gblocks(i),:,j),RR.ySE(gblocks(i),:,j),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+%         errorbar(f_y,RR.y(gblocks(i),:,j),RR.ySE(gblocks(i),:,j),'-o','MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
+        s = shadedErrorBar(f_y,RR.y(gblocks(i),:,j),RR.ySE(gblocks(i),:,j),'lineProps','-o');
+        editErrorBar(s,col(i,:),1);
     end
     ylabel([output,' RR_Y coherence'])
     xlabel('Frequency (Hz)')
