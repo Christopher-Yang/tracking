@@ -170,38 +170,70 @@ n = size(vmr,1);
 idx = [1 2 0 0 3 4];
 
 figure(3); clf
-subplot(2,1,1); hold on
-plot([0 13],[0 0],'--k','LineWidth',1)
-plot(1:6,vmr,'k','Color',[0 0 0 0.5])
-plot(7:12,mr,'k','Color',[0 0 0 0.5])
-for i = 1:6
-    if i == 3 || i == 4
-        errorbar(i,mean(vmr(i,:)),std(vmr(i,:))/sqrt(Nsubj),'.k','MarkerSize',20,'LineWidth',1)
-        
-        errorbar(i+n,mean(mr(i,:)),std(mr(i,:))/sqrt(Nsubj),'.k','MarkerSize',20,'LineWidth',1)
+for k = 1:2
+    subplot(2,2,k); hold on
+    plot([0 7],[0 0],'--k','LineWidth',1)
+    if k == 1
+        plot(1:6,vmr,'k','Color',[0 0 0 0.5])
     else
-        errorbar(i,mean(vmr(i,:)),std(vmr(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',20,'LineWidth',1)
-        
-        errorbar(i+n,mean(mr(i,:)),std(mr(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',20,'LineWidth',1)
+        plot(1:6,mr,'k','Color',[0 0 0 0.5])
     end
+    for i = 1:6
+        if i == 3 || i == 4
+%             if k == 1
+%                 errorbar(i,mean(vmr(i,:)),std(vmr(i,:))/sqrt(Nsubj),'.k','MarkerSize',15,'LineWidth',1)
+%             else
+%                 errorbar(i,mean(mr(i,:)),std(mr(i,:))/sqrt(Nsubj),'.k','MarkerSize',15,'LineWidth',1)
+%             end
+            if k == 1
+                plot(i,mean(vmr(i,:)),'.k','MarkerSize',24,'LineWidth',1)
+            else
+                plot(i,mean(mr(i,:)),'.k','MarkerSize',24,'LineWidth',1)
+            end
+        else
+%             if k == 1
+%                 errorbar(i,mean(vmr(i,:)),std(vmr(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',15,'LineWidth',1)
+%             else
+%                 errorbar(i,mean(mr(i,:)),std(mr(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',15,'LineWidth',1)
+%             end
+            if k == 1
+                plot(i,mean(vmr(i,:)),'.','Color',col(idx(i),:),'MarkerSize',24,'LineWidth',1)
+            else
+                plot(i,mean(mr(i,:)),'.','Color',col(idx(i),:),'MarkerSize',24,'LineWidth',1)
+            end
+        end
+    end
+    axis([0.5 6.5 -.1 0.7])
+    set(gca,'Xtick',[],'TickDir','out')
+    ylabel('Cross-axis scaling')
+    yticks(-1:0.2:1)
 end
-axis([0.5 12.5 -.1 0.7])
-set(gca,'Xtick',[],'TickDir','out')
-ylabel('Cross-axis scaling')
-yticks(-1:0.2:1)
 
-subplot(2,1,2); hold on
-plot([-1 10],[0 0],'--k','LineWidth',1)
-plot([1 6],vmr([1 6],:),'k','Color',[0 0 0 0.5])
-plot([7 12],mr([1 6],:),'k','Color',[0 0 0 0.5])
-for i = [1 6]
-    errorbar(i,mean(vmr(i,:)),std(vmr(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',20,'LineWidth',1)
-    
-    errorbar(i+n,mean(mr(i,:)),std(mr(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',20,'LineWidth',1)
+for k = 3:4
+    subplot(2,2,k); hold on
+    plot([0 7],[0 0],'--k','LineWidth',1)
+    if k == 3
+        plot([1 6],vmr([1 6],:),'k','Color',[0 0 0 0.5])
+    else
+        plot([1 6],mr([1 6],:),'k','Color',[0 0 0 0.5])
+    end
+    for i = [1 6]
+%         if k == 3
+%             errorbar(i,mean(vmr(i,:)),std(vmr(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',15,'LineWidth',1)
+%         else
+%             errorbar(i,mean(mr(i,:)),std(mr(i,:))/sqrt(Nsubj),'.','Color',col(idx(i),:),'MarkerSize',15,'LineWidth',1)
+%         end
+        if k == 3
+            plot(i,mean(vmr(i,:)),'.','Color',col(idx(i),:),'MarkerSize',24,'LineWidth',1)
+        else
+            plot(i,mean(mr(i,:)),'.','Color',col(idx(i),:),'MarkerSize',24,'LineWidth',1)
+        end
+    end
+    axis([0.5 6.5 -.1 0.7])
+    set(gca,'Xtick',[],'TickDir','out')
+    ylabel('Cross-axis scaling')
+    yticks(-1:0.2:1)
 end
-axis([0.5 12.5 -.1 0.7])
-set(gca,'Xtick',[],'TickDir','out')
-yticks(-1:0.2:1)
 
 %% plot hand and target trajectories before and after optimization
 
@@ -254,17 +286,23 @@ compBar = mean(comp,2);
 compSE = std(comp,[],2)/sqrt(Nsubj);
 
 figure(3); clf
-subplot(1,2,1); hold on
+subplot(2,2,1); hold on
+plot([0 7],[0 0],'--k','LineWidth',1)
+plot([0 7],[90 90],'--k','LineWidth',1)
 plot(theta_opt(gblocks,:),'Color',[0 0 0 0.5])
 for i = 1:length(gblocks)
+%     if i == 3 || i == 4
+%         errorbar(i,thetaBar(gblocks(i)),thetaSE(gblocks(i)),'-ko','MarkerFaceColor',[0 0 0],'MarkerEdgeColor','none','LineWidth',1)
+%     else
+%         errorbar(i,thetaBar(gblocks(i)),thetaSE(gblocks(i)),'-o','Color',colors(idx(i),:),'MarkerFaceColor',colors(idx(i),:),'MarkerEdgeColor','none','LineWidth',1)
+%     end
     if i == 3 || i == 4
-        errorbar(i,thetaBar(gblocks(i)),thetaSE(gblocks(i)),'-ko','MarkerFaceColor',[0 0 0],'MarkerEdgeColor','none','LineWidth',1)
+        plot(i,thetaBar(gblocks(i)),'.','Color',[0 0 0],'MarkerSize',24,'LineWidth',1)
     else
-        errorbar(i,thetaBar(gblocks(i)),thetaSE(gblocks(i)),'-o','Color',colors(idx(i),:),'MarkerFaceColor',colors(idx(i),:),'MarkerEdgeColor','none','LineWidth',1)
+        plot(i,thetaBar(gblocks(i)),'.','Color',colors(idx(i),:),'MarkerSize',24,'LineWidth',1)
     end
 end
-plot([0 7],[0 0],'k','LineWidth',1)
-plot([0 7],[90 90],'--k','LineWidth',1)
+set(gca,'Xcolor','none')
 title('Rotation')
 xticks(1:6)
 xticklabels(graph_name(gblocks))
@@ -272,17 +310,24 @@ yticks(0:30:90)
 ylabel(['Angle (' char(176) ')'])
 axis([0.5 6.5 -10 100])
 
-subplot(1,2,2); hold on
+subplot(2,2,2); hold on
+plot([0 7],[1 1],'--k','LineWidth',1)
+plot([0 7],[-1 -1],'--k','LineWidth',1)
+plot([0 7],[0 0],'k','LineWidth',1)
 plot(comp(gblocks,:),'Color',[0 0 0 0.5])
 for i = 1:length(gblocks)
+%     if i == 3 || i == 4
+%         errorbar(i,compBar(gblocks(i)),compSE(gblocks(i)),'-ko','MarkerFaceColor',[0 0 0],'MarkerEdgeColor','none','LineWidth',1)
+%     else
+%         errorbar(i,compBar(gblocks(i)),compSE(gblocks(i)),'-o','Color',colors(idx(i),:),'MarkerFaceColor',colors(idx(i),:),'MarkerEdgeColor','none','LineWidth',1)
+%     end
     if i == 3 || i == 4
-        errorbar(i,compBar(gblocks(i)),compSE(gblocks(i)),'-ko','MarkerFaceColor',[0 0 0],'MarkerEdgeColor','none','LineWidth',1)
+        plot(i,compBar(gblocks(i)),'.','Color',[0 0 0],'MarkerSize',24,'LineWidth',1)
     else
-        errorbar(i,compBar(gblocks(i)),compSE(gblocks(i)),'-o','Color',colors(idx(i),:),'MarkerFaceColor',colors(idx(i),:),'MarkerEdgeColor','none','LineWidth',1)
+        plot(i,compBar(gblocks(i)),'.','Color',colors(idx(i),:),'MarkerSize',24,'LineWidth',1)
     end
 end
-plot([0 7],[1 1],'k','LineWidth',1)
-plot([0 7],[-1 -1],'--k','LineWidth',1)
+set(gca,'Xcolor','none')
 title('Mirror-Reversal')
 xticks(1:6)
 xticklabels(graph_name(gblocks))
