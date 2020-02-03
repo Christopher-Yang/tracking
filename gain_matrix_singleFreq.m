@@ -121,10 +121,10 @@ for i = 1:Nfreq
     end
 end
 %% plot gain matrices as 2x2
-% subj = 5;
-% rMat = rotMat(:,:,:,:,subj);
+subj = 6;
+rMat = rotMat(:,:,:,:,subj);
 
-rMat = mean(rotMat,5);
+% rMat = mean(rotMat,5);
 
 figure(4); clf
 for i = 1:Nfreq
@@ -303,10 +303,10 @@ end
 figure(9); clf
 subplot(1,2,1); hold on
 plot([1 Nfreq],[0 0],'--k','LineWidth',1)
-errorbar(squeeze(mat(2,5,:)),se(5,:),'-ko','LineWidth',2,'MarkerFaceColor','k')
+errorbar(squeeze(mat(2,6,:)),se(6,:),'-ko','LineWidth',2,'MarkerFaceColor','k')
 % plot(squeeze(mat(2,5,:)),'-ko','LineWidth',2,'MarkerFaceColor','k')
 for i = 1:Nsubj
-    plot(squeeze(thetaOpt(2,5,:,i)),'Color',[0 0 0 0.6])
+    plot(squeeze(thetaOpt(2,6,:,i)),'Color',[0 0 0 0.6])
 end
 xticks([1 6])
 xticklabels({'Low Freq','High Freq'})
@@ -317,10 +317,10 @@ title('Before flip')
 
 subplot(1,2,2); hold on
 plot([1 Nfreq],[0 0],'--k','LineWidth',1)
-errorbar(squeeze(mat(2,6,:)),se(6,:),'-ko','LineWidth',2,'MarkerFaceColor','k')
+errorbar(squeeze(mat(2,7,:)),se(7,:),'-ko','LineWidth',2,'MarkerFaceColor','k')
 % plot(squeeze(mat(2,6,:)),'-ko','LineWidth',2,'MarkerFaceColor','k')
 for i = 1:Nsubj
-    plot(squeeze(thetaOpt(2,6,:,i)),'Color',[0 0 0 0.6])
+    plot(squeeze(thetaOpt(2,7,:,i)),'Color',[0 0 0 0.6])
 end
 xticks([1 6])
 xticklabels({'Low Freq','High Freq'})
