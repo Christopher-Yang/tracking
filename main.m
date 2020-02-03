@@ -1,6 +1,6 @@
 clear all;
 
-folder = 'Data/denovo/';
+folder = 'Data/denovo_5day/';
 
 % time = 40; %in seconds
 % block_name = {'B1','B2','B3','B4','B5','B6','B7','B8','B9','B10','B11','B12','B13','B14','B15','B16','B17','B18','B19','B21','B22_habit','B23','B24'};
@@ -75,17 +75,24 @@ folder = 'Data/denovo/';
 % rotate = 0;
 % data = analyze_data(d,block_name,0,rotate);
 
-% received the normal bimanual mapping
-folder = 'Data/denovo_10day/';
+% folder = 'Data/denovo_10day/';
+% time = 60; %in seconds
+% % block_name = {'B1_baseline','B3','B20','B35','B49','B51_habit','B52_habit','B53_habitDark'};
+% % graph_name = {'Baseline','Early','Day 4','Day 7','Day 10','Flip 1','Flip 2','Flip (dark)'};
+% block_name = {'B6_dark','B11_dark','B16_dark','B21_dark','B26_dark','B31_dark','B36_dark','B41_dark','B46_dark','B50_dark','B53_habitDark'};
+% graph_name = {'B6','B11','B16','B21','B26','B31','B36','B41','B46','B50','Flip (dark)'};
+% subj_name = {'subj1'};
+% d = load_data(subj_name,block_name,folder,time);
+% rotate = 0;
+% data = analyze_data(d,block_name,0,rotate);
+
+folder = 'Data/denovo_2day/';
 time = 60; %in seconds
-% block_name = {'B1_baseline','B2_dark','B3','B4','B5','B6_dark','B7','B8','B9','B10','B11_dark','B12','B13','B14','B15','B16_dark','B17','B18','B19','B20','B21_dark','B22','B23','B24','B25_dark','B26_habit','B27_habit'};
-% graph_name = {'B1','B2 (D)','B3','B4','B5','B6 (D)','B7','B8','B9','B10','B11 (D)','B12','B13','B14','B15','B16(D)','B17','B18','B19','B20','B21 (D)','B22','B23','B24','B25 (D)','B26 (H)','B27 (H)'};
-% block_name = {'B1_baseline','B3','B20','B35','B49','B51_habit','B52_habit','B53_habitDark'};
-% graph_name = {'Baseline','Early','Day 4','Day 7','Day 10','Flip 1','Flip 2','Flip (dark)'};
-block_name = {'B6_dark','B11_dark','B16_dark','B21_dark','B26_dark','B31_dark','B36_dark','B41_dark','B46_dark','B50_dark','B53_habitDark'};
-graph_name = {'B6','B11','B16','B21','B26','B31','B36','B41','B46','B50','Flip (dark)'};
-subj_name = {'subj1'};
-% subj_name = {'subj13','subj15','subj16','subj17','subj18','subj19','subj20'};
+block_name = {'B1_baseline','B3','B5','B9','B11_habit','B12_habit','B13_habitDark'};
+graph_name = {'Baseline','Early','Day 1','Day 2','Flip 1','Flip 2','Flip (dark)'};
+% block_name = {'B2_darkBaseline','B6_dark','B10_dark'};
+% graph_name = {'Baseline','Day 1','Day 2'};
+subj_name = {'subj1','subj2','subj3','subj4','subj5','subj6','subj7'};
 d = load_data(subj_name,block_name,folder,time);
 rotate = 0;
 data = analyze_data(d,block_name,0,rotate);
