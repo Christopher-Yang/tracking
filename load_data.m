@@ -1,7 +1,7 @@
-function output = load_data(subj_rot, subj_rot_i, block_name, folder,time)
+function output = load_data(subj_rot, subj_rot_i, block_name, folder)
     
     disp('Loading...');
-    
+    time = 40; % seconds of data to be analyzed per trial; can be 20 or 40 secs
     for p = 1:2
         if p == 1
             subj_name = subj_rot;
