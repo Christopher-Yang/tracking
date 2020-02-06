@@ -1,23 +1,13 @@
 function [processed, raw_fft] = fourier(output_traj,input_traj,Nfreq)
 
     switch nargin
-        case 1 %calculate DFT
+        case 1 % calculate DFT 
             raw_fft = fft(output_traj-mean(output_traj,1));
             n = size(raw_fft,1);
             processed = raw_fft(1:floor(n/2)+1,:)/n;
             processed(2:end-1,:) = 2*processed(2:end-1,:);
-%             amp = output.fft(1:floor(n/2)+1,:);
-%             pow = (1/(130.004*length(output.fft)))*abs(amp).^2;
-%             amp = abs(amp/n);
-%             amp(2:end-1,:) = 2*amp(2:end-1,:);
-%             pow(2:end-1) = 2*pow(2:end-1);
-%             output.amplitude = amp;
-%             output.power = pow;
-%             output.amplitude = abs(output.fft/length(output.fft));
-%             output.amplitude = output.amplitude(1:floor(length(output.fft)/2)+1);
-%             output.amplitude(2:end-1) = 2*output.amplitude(2:end-1);
-        case 3
-            output_fft = NaN(size(output_traj));
+        case 3 % calculate DFT at certain frequencies
+            output_fft = NaN(size(output_traj)); 
             input_fft = NaN(size(input_traj));
             for i = 1:size(output_traj,2)
                 output_fft(:,i) = fft(output_traj(:,i)-mean(output_traj(:,i)));

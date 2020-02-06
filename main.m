@@ -5,8 +5,8 @@
 % 
 % Parts 1-2 of the script (lines 19-65) analyzes and makes figures for the 
 % data from the main experiment. Parts 3-4 (lines 66-87) analyzes and 
-% makes figures for the second experiment. Analyses and figures can be run
-% independently of one another.
+% makes figures for the second experiment. Analysis and plotting code 
+% can be run independently of one another.
 % 
 % To generate all figures, run the entire script, which should take 
 % between 5-10 minutes. If only certain figures are needed, first run the 
@@ -47,7 +47,7 @@ graph_MSE(data1);
 graph_transformMat(data1);
 
 % Figures 4A, S1A, and S2A: amplitude spectra
-graph_amp_avg(data1);
+graph_ampSpectra(data1);
 
 % Figures 4B and S1B: coherence
 graph_coherence(data1);

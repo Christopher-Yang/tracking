@@ -1,4 +1,4 @@
-function graph_amp_avg(data)
+function graph_ampSpectra(data)
 
 % set variables for plotting
 output = 'Rhand';
