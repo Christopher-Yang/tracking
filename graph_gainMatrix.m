@@ -37,8 +37,14 @@ for q = 1:Ngroup % loop over groups
     end
 end
 
-thetaOpt = [reshape(opt1,[2 Nblock Nfreq Nsubj Ngroup]); reshape(opt2,[2 Nblock Nfreq Nsubj Ngroup])]; % combine opt1 and opt2
-gainMat = reshape(thetaOpt,[2 2 Nblock Nfreq Nsubj Ngroup]); % shape thetaOpt into gain matrix format
+% combine opt1 and opt2
+thetaOpt = [reshape(opt1,[2 Nblock Nfreq Nsubj Ngroup]); reshape(opt2,[2 Nblock Nfreq Nsubj Ngroup])]; 
+
+% shape thetaOpt into gain matrix format: the first and second dimensions
+% of gainMat correspond to the gain matrix for a given frequency (third 
+% dimension), block (fourth dimension), subject (fifth dimension), and 
+% group (sixth dimension)
+gainMat = reshape(thetaOpt,[2 2 Nblock Nfreq Nsubj Ngroup]); 
 gainMat = permute(gainMat,[1 2 4 3 5 6]);
 
 % fit theta to rotation matrices
@@ -70,6 +76,15 @@ for k = 1:Nsubj
         end
     end
 end
+
+% This section generates "gain_matrix.csv" which contains the relevant
+% values of the gain matrices for statistical analysis in R.
+% mat2 = thetaOpt;
+% mat2(3,:,:,:,1) = -mat2(3,:,:,:,1);
+% mat2 = mean(mat2(2:3,[1 5 6],:,:,:),1);
+% offAll = permute(mat2,[4 3 2 5 1]);
+% z = reshape(offAll,[420 1]);
+% dlmwrite('gain_matrix.csv',z);
 
 %% plot vectors from gain matrices (Figure 5A, S2B, and S5B)
 % generate color maps

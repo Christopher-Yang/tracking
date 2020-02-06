@@ -1,4 +1,4 @@
-function data = analyze_data(d, subj_name, block_name, uw)
+function data = analyze_data(d, subj_name, block_name)
 
     disp('Analyzing...');
     rng(3);

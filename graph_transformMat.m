@@ -30,7 +30,9 @@ for l = 1:Ngroup
                 idx = 1;
             end
             
-            % store fitted matrices
+            % store fitted matrices: the first and second dimensions of
+            % each transformMat_* correspond to the transformation matrix
+            % for the jth block and the ith subject
             if l == 1
                 transformMat_vmr(:,:,j,i) = transformMat(:,:,idx);
             else
@@ -67,6 +69,16 @@ for k = 1:Nsubj
 end
 
 bestDelay = delay(idx).*(1/130.004); % store the delay which minimizes MSE
+
+% This section generates "transformation_matrix.csv" which contains the 
+% relevant values of the transformation matrices for statistical analysis 
+% in R.
+% vmr = cat(3,squeeze(-rotMat_vmr(1,2,[1 5 6],:)),squeeze(rotMat_vmr(2,1,[1 5 6],:)));
+% mr = cat(3,squeeze(rotMat_mr(1,2,[1 5 6],:)),squeeze(rotMat_mr(2,1,[1 5 6],:)));
+% vmr = reshape(mean(vmr,3)',[30 1]);
+% mr = reshape(mean(mr,3)',[30 1]);
+% z = [vmr; mr];
+% dlmwrite('transformation_matrix.csv',z);
 
 %% generate Figure 3A
 % make color maps

@@ -3,8 +3,8 @@
 % main.m generates all figures related to the sum-of-sinusoids tracking 
 % task. 
 % 
-% Parts 1-2 of the script (lines 19-65) analyzes and makes figures for the 
-% data from the main experiment. Parts 3-4 (lines 66-87) analyzes and 
+% Parts 1-2 of the script (lines 19-67) analyzes and makes figures for the 
+% data from the main experiment. Parts 3-4 (lines 68-90) analyzes and 
 % makes figures for the second experiment. Analysis and plotting code 
 % can be run independently of one another.
 % 
@@ -21,15 +21,17 @@ clear all;
 
 % set variables for analysis
 experiment = 1; % 1: main experiment with point-to-point practice; 2: second experiment with minimal point-to-point
-folder = 'Data/VMR90_vs_MR/'; % set path to data
-block_name = {'baseline','pert1','pert2','pert3','pert4','post'}; % names of directories containing data
+folder = 'Data/vmr90_vs_mr/'; % set path to data
+% names of blocks: pert1=Early, pert4=Late, pert2 and pert3 are the
+% tracking blacks that occurred between Early and Late
+block_name = {'baseline','pert1','pert2','pert3','pert4','post'}; 
 subj_rot = {'subj17','subj18','subj21','subj22','subj24','subj25','subj28','subj31','subj32','subj33'}; % rotation subjects
 subj_mir = {'subj14','subj15','subj16','subj19','subj23','subj26','subj27','subj29','subj30','subj34'}; % mirror-reversal subjects
 
 % analysis
 d = load_data(subj_rot,subj_mir,block_name,folder); % extract raw data and store in d
-data1.rot = analyze_data(d.rot,subj_rot,block_name,1); % analyze rotation group's data and store output in the variable data
-data1.mir = analyze_data(d.mir,subj_mir,block_name,2); % analyze mirror-reversal group's data
+data1.rot = analyze_data(d.rot,subj_rot,block_name); % analyze rotation group's data and store output in the variable data
+data1.mir = analyze_data(d.mir,subj_mir,block_name); % analyze mirror-reversal group's data
 
 % save dat1 data1; % save data structure
 disp('Done')
@@ -66,16 +68,17 @@ graph_phasor(data1.mir{9}.pert4.phasors.Rhand,25) % late learning
 %% PART 3: ANALYSIS FOR SECOND EXPERIMENT
 % set variables for analysis
 experiment = 2;
-folder = 'Data/no_P2P/'; % set path to data
-time = 40; % seconds of data to be analyzed per trial; can be 20 or 40 secs
-block_name = {'baseline','pert1','pert2','pert3','pert4','post'}; % names of directories containing data
+folder = 'Data/no_p2p/'; % set path to data
+% names of blocks: pert1=Early, pert4=Late, pert2 and pert3 are the
+% tracking blacks that occurred between Early and Late
+block_name = {'baseline','pert1','pert2','pert3','pert4','post'};
 subj_rot = {'subj2','subj5','subj7','subj8','subj9','subj10','subj13','subj15','subj17','subj19'}; % rotation subjects
 subj_mir = {'subj1','subj3','subj4','subj6','subj11','subj12','subj14','subj16','subj18','subj20'}; % mirror-reversal subjects
 
 % analysis
 d = load_data(subj_rot,subj_mir,block_name,folder); % extract raw data and store in d
-data2.rot = analyze_data(d.rot,subj_rot,block_name,1); % analyze rotation group's data and store output in the variable data
-data2.mir = analyze_data(d.mir,subj_mir,block_name,2); % analyze mirror-reversal group's data
+data2.rot = analyze_data(d.rot,subj_rot,block_name); % analyze rotation group's data and store output in the variable data
+data2.mir = analyze_data(d.mir,subj_mir,block_name); % analyze mirror-reversal group's data
 
 % save dat2 data2; % save data structure
 disp('Done')
