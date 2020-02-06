@@ -73,8 +73,8 @@ bestDelay = delay(idx).*(1/130.004); % store the delay which minimizes MSE
 % This section generates "transformation_matrix.csv" which contains the 
 % relevant values of the transformation matrices for statistical analysis 
 % in R.
-% vmr = cat(3,squeeze(-rotMat_vmr(1,2,[1 5 6],:)),squeeze(rotMat_vmr(2,1,[1 5 6],:)));
-% mr = cat(3,squeeze(rotMat_mr(1,2,[1 5 6],:)),squeeze(rotMat_mr(2,1,[1 5 6],:)));
+% vmr = cat(3,squeeze(-transformMat_vmr(1,2,[1 5 6],:)),squeeze(transformMat_vmr(2,1,[1 5 6],:)));
+% mr = cat(3,squeeze(transformMat_mr(1,2,[1 5 6],:)),squeeze(transformMat_mr(2,1,[1 5 6],:)));
 % vmr = reshape(mean(vmr,3)',[30 1]);
 % mr = reshape(mean(mr,3)',[30 1]);
 % z = [vmr; mr];
