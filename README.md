@@ -17,8 +17,18 @@ name correspond to the following:
     pert4: fourth block "..."
     post: tracking without the perturbations to assess aftereffects
 
-Data from each trial is stored as a separate data file within each
-block folder. Also stored is a "tFile" which defines the frequencies,
+Data from each trial is stored as a separate .dat file within each
+block folder, labeled as "Data*.dat". The columns in each .dat file
+correspond to the following:
+
+    columns 1-2: target x/y position
+    columns 3-4: left hand x/y position (not used for this paper)
+    columns 5-6: right hand x/y position
+    columns 7-8: cursor x/y position
+    columns 9-10: information not used for this paper
+    column 11: timestamp of data collection
+
+Also stored is a "tFile" which defines the frequencies,
 amplitudes, and phases used to generate the target's sum-of-sinusoids
 trajectory. The values in the tFile can be read as follows:
 

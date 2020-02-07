@@ -1,4 +1,5 @@
 function graph_MSE(data)
+% plots the mean-squared error of every tracking trial
 
 % set variables for plotting
 groups = {'rot','mir'};
@@ -15,7 +16,7 @@ col2 = [160 82 45
     65 105 225]./255;
 
 % store data in new variables
-for i = 1:length(groups)
+for i = 1:length(groups) % iterate over groups of subjects
     % preallocate variables
     MSE_subj = NaN(Nblocks, Nsubj);
     MSE_full = NaN(Nblocks*Ntrials, Nsubj);

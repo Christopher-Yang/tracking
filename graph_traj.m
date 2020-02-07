@@ -1,20 +1,29 @@
 function graph_traj(data)
+% plots raw cursor and target trajectories
 
 % set variables for plotting
 gblocks = [1:2 5:6];
 block_name = {'baseline','pert1','pert2','pert3','pert4','post'}; 
 graph_name = {'Baseline','Early','Late','Post'};
 col = [166 124 82]./255;
+Nblock = length(gblocks);
 
 % plot rotation data
 subj = 3;
 trial = 3;
 a = data.rot{subj};
 figure(1); clf
-for i = 1:4
+for i = 1:Nblock % iterate over blocks
     subplot(2,4,i); hold on
-    plot(a.(block_name{gblocks(i)}).target.x_pos_all(1:650,trial),a.(block_name{gblocks(i)}).target.y_pos_all(1:650,trial),'k'); % plot target
-    plot(a.(block_name{gblocks(i)}).cursor.x_pos_all(1:650,trial),a.(block_name{gblocks(i)}).cursor.y_pos_all(1:650,trial),'Color',col); % plot cursor
+    
+    % plot target
+    plot(a.(block_name{gblocks(i)}).target.x_pos(1:650,trial),a ...
+        .(block_name{gblocks(i)}).target.y_pos(1:650,trial),'k');
+    
+    % plot cursor
+    plot(a.(block_name{gblocks(i)}).cursor.x_pos(1:650,trial),a ...
+        .(block_name{gblocks(i)}).cursor.y_pos(1:650,trial),'Color',col);
+    
     pbaspect([1 1 1])
     axis([-.14 .14 -.14 .14])
     title(graph_name(i))
@@ -29,10 +38,17 @@ end
 subj = 7;
 trial = 5;
 a = data.mir{subj};
-for i = 1:4
+for i = 1:Nblock % iterate over blocks
     subplot(2,4,i+4); hold on
-    plot(a.(block_name{gblocks(i)}).target.x_pos_all(1:650,trial),a.(block_name{gblocks(i)}).target.y_pos_all(1:650,trial),'k'); % plot target
-    plot(a.(block_name{gblocks(i)}).cursor.x_pos_all(1:650,trial),a.(block_name{gblocks(i)}).cursor.y_pos_all(1:650,trial),'Color',col); % plot cursor
+    
+    % plot target
+    plot(a.(block_name{gblocks(i)}).target.x_pos(1:650,trial),a ...
+        .(block_name{gblocks(i)}).target.y_pos(1:650,trial),'k');
+
+    % plot cursor
+    plot(a.(block_name{gblocks(i)}).cursor.x_posll(1:650,trial),a ...
+        .(block_name{gblocks(i)}).cursor.y_pos(1:650,trial),'Color',col);
+    
     pbaspect([1 1 1])
     axis([-.14 .14 -.14 .14])
     if i == 1

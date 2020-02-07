@@ -1,13 +1,14 @@
 function graph_gainMatrix(data,experiment)
+% perform the analysis and make figures for the gain matrices
 
 % set variables for analysis
 groups = {'rot','mir'};
 blocks = {'baseline','pert1','pert2','pert3','pert4','post'};
 graph_name = {'Baseline','Early','Train2','Train3','Late','Post'};
-names = {'x_x_all','x_y_all','y_x_all','y_y_all'};
+names = {'x_x','x_y','y_x','y_y'};
 Nblock = length(blocks);
 Nsubj = length(data.rot)-1;
-Nfreq = length(data.rot{end}.freqX);
+Nfreq = length(data.rot{1}.(blocks{1}).freqX);
 Ngroup = length(groups);
 
 paramsInit = zeros([2*Nblock 1]); % initialize parameters
@@ -16,29 +17,41 @@ paramsInit = zeros([2*Nblock 1]); % initialize parameters
 for q = 1:Ngroup % loop over groups
     for p = 1:Nsubj % loop over subjects
         for k = 1:Nblock % loop over blocks
-            for i = 1:4 % loop over combinations of target and hand movement axes
-                % i=1: x-target to x-hand
-                % i=2: x-target to y-hand
-                % i=3: y-target to x-hand
-                % i=4: y-target to y-hand
-                cplx(:,i,k,p,q) = mean(data.(groups{q}){p}.(blocks{k}).phasors.Rhand.(names{i}).ratio,2); % put all complex ratios in cplx
+            % loop over combinations of target and hand axes
+            % i=1: x-target to x-hand
+            % i=2: x-target to y-hand
+            % i=3: y-target to x-hand
+            % i=4: y-target to y-hand
+            for i = 1:4 
+                % average complex ratios
+                cplx(:,i,k,p,q) = mean(data.(groups{q}){p}.(blocks{k})...
+                    .Rhand.phasors.(names{i}).ratio,2);
             end
         end
         
         for i = 1:Nfreq
-            x = cos(angle(cplx(i,[1 4],1,p,q))); % x-component of xx and yy baseline phasors
-            y = sin(angle(cplx(i,[1 4],1,p,q))); % y-component of xx and yy baseline phasors
-            template(:,i,p,q) = [(x(1)+y(1)*1j); (x(2)+y(2)*1j)]; % generate template of gain = 1 and phase same as baseline
+            % x-component of xx and yy baseline phasors
+            x = cos(angle(cplx(i,[1 4],1,p,q))); 
+            % y-component of xx and yy baseline phasors
+            y = sin(angle(cplx(i,[1 4],1,p,q))); 
+            
+            % generate template of gain = 1 and phase same as baseline
+            template(:,i,p,q) = [(x(1)+y(1)*1j); (x(2)+y(2)*1j)]; 
+            
+            % fit gains for x frequencies
             error = @(params) scale(params,cplx(i,[1 2],:,p,q),template(1,i,p,q));
-            opt1(:,i,p,q) = fmincon(error,paramsInit); % fit gains for x frequencies
+            opt1(:,i,p,q) = fmincon(error,paramsInit); 
+            
+            % fit gains for y frequencies
             error = @(params) scale(params,cplx(i,[3 4],:,p,q),template(2,i,p,q));
-            opt2(:,i,p,q) = fmincon(error,paramsInit); % fit gains for y frequencies
+            opt2(:,i,p,q) = fmincon(error,paramsInit); 
         end
     end
 end
 
 % combine opt1 and opt2
-thetaOpt = [reshape(opt1,[2 Nblock Nfreq Nsubj Ngroup]); reshape(opt2,[2 Nblock Nfreq Nsubj Ngroup])]; 
+thetaOpt = [reshape(opt1,[2 Nblock Nfreq Nsubj Ngroup]); reshape(opt2...
+    ,[2 Nblock Nfreq Nsubj Ngroup])]; 
 
 % shape thetaOpt into gain matrix format: the first and second dimensions
 % of gainMat correspond to the gain matrix for a given frequency (third 
@@ -90,32 +103,36 @@ end
 % generate color maps
 col1 = [0 128 0]/255;
 col2 = [152 251 152]/255;
-map1 = [linspace(col1(1),col2(1),Nfreq)', linspace(col1(2),col2(2),Nfreq)', linspace(col1(3),col2(3),Nfreq)'];
+map1 = [linspace(col1(1),col2(1),Nfreq)', linspace(col1(2),col2(2)...
+    ,Nfreq)', linspace(col1(3),col2(3),Nfreq)'];
 
 col1 = [128 0 128]/255;
 col2 = [230 230 250]/255;
-map2 = [linspace(col1(1),col2(1),Nfreq)', linspace(col1(2),col2(2),Nfreq)', linspace(col1(3),col2(3),Nfreq)'];
+map2 = [linspace(col1(1),col2(1),Nfreq)', linspace(col1(2),col2(2)...
+    ,Nfreq)', linspace(col1(3),col2(3),Nfreq)'];
 
 gblocks = [1 2 5 6]; % blocks to plot
 
 if experiment == 1 % figures for main experiment (5A and S2B)
-% This loop makes two figures. p=1 generates Figure 5A for and p=2 generates
-% Figure S2B.
+% This loop makes two figures. p=1 generates Figure 5A for and p=2
+% generates Figure S2B.
     for p = 1:2
         figure(p+15); clf
-        if p == 1
-            mat = squeeze(mean(thetaOpt,4)); % make plot for average of both rotation and mirror-reversal groups
+        if p == 1 % average data within group
+            mat = squeeze(mean(thetaOpt,4));
         end
-        for i = 1:length(gblocks) % iterate of the blocks to plot
-            if p == 2
-                mat = squeeze(thetaOpt(:,:,:,4,:)); % make plot for rotation group subj4
+        for i = 1:length(gblocks) % iterate over the blocks to plot
+            if p == 2 % make plot for rotation group subj4
+                mat = squeeze(thetaOpt(:,:,:,4,:)); 
             end
             subplot(2,length(gblocks),i); hold on
             plot([0 1],[0 0],'k') % unit x vector
             plot([0 0],[0 1],'k') % unit y vector
             for k = 1:Nfreq
-                plot([0 mat(1,gblocks(i),k,1)],[0 mat(2,gblocks(i),k,1)],'LineWidth',1,'Color',map1(k,:)) % plot green vectors
-                plot([0 mat(3,gblocks(i),k,1)],[0 mat(4,gblocks(i),k,1)],'LineWidth',1,'Color',map2(k,:)) % plot purple vectors
+                plot([0 mat(1,gblocks(i),k,1)],[0 mat(2,gblocks(i),k,1)]...
+                    ,'LineWidth',1,'Color',map1(k,:)) % plot green vectors
+                plot([0 mat(3,gblocks(i),k,1)],[0 mat(4,gblocks(i),k,1)]...
+                    ,'LineWidth',1,'Color',map2(k,:)) % plot purple vectors
             end
             axis([-0.75 1 -0.75 1])
             axis square
@@ -124,15 +141,17 @@ if experiment == 1 % figures for main experiment (5A and S2B)
                 ylabel('Rotation')
             end
 
-            if p == 2
-                mat = squeeze(thetaOpt(:,:,:,9,:)); % make plot for mirror-reversal group subj9
+            if p == 2 % make plot for mirror-reversal group subj9
+                mat = squeeze(thetaOpt(:,:,:,9,:)); 
             end
             subplot(2,length(gblocks),i+length(gblocks)); hold on
             plot([0 1],[0 0],'k') % unit x vector
             plot([0 0],[0 1],'k') % unit y vector
             for k = 1:Nfreq
-                plot([0 mat(1,gblocks(i),k,2)],[0 mat(2,gblocks(i),k,2)],'LineWidth',1,'Color',map1(k,:)) % plot green vectors
-                plot([0 mat(3,gblocks(i),k,2)],[0 mat(4,gblocks(i),k,2)],'LineWidth',1,'Color',map2(k,:)) % plot purple vectors
+                plot([0 mat(1,gblocks(i),k,2)],[0 mat(2,gblocks(i),k,2)]...
+                    ,'LineWidth',1,'Color',map1(k,:)) % plot green vectors
+                plot([0 mat(3,gblocks(i),k,2)],[0 mat(4,gblocks(i),k,2)]...
+                    ,'LineWidth',1,'Color',map2(k,:)) % plot purple vectors
             end
             axis([-0.75 1 -0.75 1])
             axis square
@@ -143,14 +162,17 @@ if experiment == 1 % figures for main experiment (5A and S2B)
     end
 else % figures for second experiment (S5B)
     figure(26); clf 
-    mat = squeeze(mean(thetaOpt,4)); % make plot for average of both rotation and mirror-reversal groups
-    for i = 1:length(gblocks) % iterate of the blocks to plot
+    % average data within group
+    mat = squeeze(mean(thetaOpt,4)); 
+    for i = 1:length(gblocks) % iterate over the blocks to plot
         subplot(2,length(gblocks),i); hold on
         plot([0 1],[0 0],'k') % unit x vector
         plot([0 0],[0 1],'k') % unit y vector
         for k = 1:Nfreq
-            plot([0 mat(1,gblocks(i),k,1)],[0 mat(2,gblocks(i),k,1)],'LineWidth',1,'Color',map1(k,:)) % plot green vectors
-            plot([0 mat(3,gblocks(i),k,1)],[0 mat(4,gblocks(i),k,1)],'LineWidth',1,'Color',map2(k,:)) % plot purple vectors
+            plot([0 mat(1,gblocks(i),k,1)],[0 mat(2,gblocks(i),k,1)]...
+                ,'LineWidth',1,'Color',map1(k,:)) % plot green vectors
+            plot([0 mat(3,gblocks(i),k,1)],[0 mat(4,gblocks(i),k,1)]...
+                ,'LineWidth',1,'Color',map2(k,:)) % plot purple vectors
         end
         axis([-0.75 1 -0.75 1])
         axis square
@@ -163,8 +185,10 @@ else % figures for second experiment (S5B)
         plot([0 1],[0 0],'k') % unit x vector
         plot([0 0],[0 1],'k') % unit y vector
         for k = 1:Nfreq
-            plot([0 mat(1,gblocks(i),k,2)],[0 mat(2,gblocks(i),k,2)],'LineWidth',1,'Color',map1(k,:)) % plot green vectors
-            plot([0 mat(3,gblocks(i),k,2)],[0 mat(4,gblocks(i),k,2)],'LineWidth',1,'Color',map2(k,:)) % plot purple vectors
+            plot([0 mat(1,gblocks(i),k,2)],[0 mat(2,gblocks(i),k,2)]...
+                ,'LineWidth',1,'Color',map1(k,:)) % plot green vectors
+            plot([0 mat(3,gblocks(i),k,2)],[0 mat(4,gblocks(i),k,2)]...
+                ,'LineWidth',1,'Color',map2(k,:)) % plot purple vectors
         end
         axis([-0.75 1 -0.75 1])
         axis square
@@ -202,7 +226,9 @@ figure(f); clf
 for i = 1:Nfreq
     subplot(1,2,1); hold on % rotation group
     plot([1 length(gblocks)],[0 0],'--k','LineWidth',1)
-    errorbar(off(gblocks,i,1),offSE(gblocks,i,1),'-o','Color',colors(i,:),'LineWidth',1,'MarkerFaceColor',colors(i,:),'MarkerEdgeColor','none')
+    errorbar(off(gblocks,i,1),offSE(gblocks,i,1),'-o','Color'...
+        ,colors(i,:),'LineWidth',1,'MarkerFaceColor',colors(i,:)...
+        ,'MarkerEdgeColor','none')
     axis([1 6 -0.1 0.75])
     yticks(0:0.3:0.6)
     xticks([1 2 5 6])
@@ -215,7 +241,9 @@ for i = 1:Nfreq
     
     subplot(1,2,2); hold on % mirror-reversal group
     plot([1 length(gblocks)],[0 0],'--k','LineWidth',1)
-    errorbar(off(gblocks,i,2),offSE(gblocks,i,2),'-o','Color',colors(i,:),'LineWidth',1,'MarkerFaceColor',colors(i,:),'MarkerEdgeColor','none')
+    errorbar(off(gblocks,i,2),offSE(gblocks,i,2),'-o','Color',...
+        colors(i,:),'LineWidth',1,'MarkerFaceColor',colors(i,:)...
+        ,'MarkerEdgeColor','none')
     axis([1 6 -0.1 0.75])
     yticks(0:0.3:0.6)
     xticks([1 2 5 6])
@@ -245,7 +273,9 @@ subplot(1,2,1); hold on
 plot([1 Nfreq],[0 0],'k','LineWidth',1) % ideal baseline response
 plot([1 Nfreq],[90 90],'--k','LineWidth',1) % ideal compensation
 for i = 1:length(gblocks)
-    errorbar(thetaFitMu(:,gblocks(i)),thetaFitSE(:,gblocks(i)),'-o','MarkerFaceColor',colors(i,:),'MarkerEdgeColor','none','LineWidth',1)
+    errorbar(thetaFitMu(:,gblocks(i)),thetaFitSE(:,gblocks(i)),'-o'...
+        ,'MarkerFaceColor',colors(i,:),'MarkerEdgeColor','none'...
+        ,'LineWidth',1)
 end
 title('Rotation')
 xticks([1 Nfreq])
@@ -259,7 +289,9 @@ plot([1 Nfreq],[1 1],'k','LineWidth',1,'HandleVisibility','off') % ideal baselin
 plot([1 Nfreq],[-1 -1],'--k','LineWidth',1,'HandleVisibility','off') % ideal compensation
 plot([1 Nfreq],[0 0],'k','HandleVisibility','off')
 for i = 1:length(gblocks)
-    errorbar(gainOrthMu(:,gblocks(i)),gainOrthSE(:,gblocks(i)),'-o','MarkerFaceColor',colors(i,:),'MarkerEdgeColor','none','LineWidth',1)
+    errorbar(gainOrthMu(:,gblocks(i)),gainOrthSE(:,gblocks(i)),'-o'...
+        ,'MarkerFaceColor',colors(i,:),'MarkerEdgeColor','none'...
+        ,'LineWidth',1)
 end
 title('Mirror-Reversal')
 xticks([1 Nfreq])
@@ -275,11 +307,13 @@ if experiment == 1
     col1 = [1 0 0];
     col2 = [1 1 1];
     Nstep = 100;
-    map1 = [linspace(col1(1),col2(1),Nstep)', linspace(col1(2),col2(2),Nstep)', linspace(col1(3),col2(3),Nstep)'];
+    map1 = [linspace(col1(1),col2(1),Nstep)', linspace(col1(2),col2(2)...
+        ,Nstep)', linspace(col1(3),col2(3),Nstep)'];
     
     col1 = [1 1 1];
     col2 = [0 0 1];
-    map2 = [linspace(col1(1),col2(1),Nstep)', linspace(col1(2),col2(2),Nstep)', linspace(col1(3),col2(3),Nstep)'];
+    map2 = [linspace(col1(1),col2(1),Nstep)', linspace(col1(2),col2(2)...
+        ,Nstep)', linspace(col1(3),col2(3),Nstep)'];
     
     map = [map1; map2];
     clims = [-1 1];
@@ -328,7 +362,7 @@ if experiment == 1
     end
 end
 
-%%
+% fit gains to the data
 function e = scale(params,cplx_data,template)
     theta = reshape(params,[2 length(params)/2]);
     phasors = theta*template;
@@ -339,6 +373,7 @@ function e = scale(params,cplx_data,template)
     e = sum(sum(e));
 end
 
+% fit rotation matrix to a gain matrix
 function e = fit_rotMat(theta,rotMat_opt)
     rot = rotz(theta);
     rot = rot(1:2,1:2);
