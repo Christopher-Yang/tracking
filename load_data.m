@@ -14,7 +14,7 @@ for p = 1:2 % iterate over groups of subjects
         subj_name = subj_mir;
     end
     for i = 1:length(subj_name) % iterate over subjects
-        disp(['   Subject ' num2str(i)]);
+        disp(['   ' subj_name{i}]);
         for j = 1:length(block_name) % iterate over blocks
             path = [folder,subj_name{i},'/',block_name{j}]; % set file path
             Nsamples = round(time*130.004); % number of samples to analyze
