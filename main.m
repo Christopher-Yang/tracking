@@ -78,8 +78,8 @@ graph_gainMatrix(data1,experiment);
 graph_phasor(data1.rot{4}.baseline.Rhand.phasors,22) % baseline
 graph_phasor(data1.rot{4}.pert4.Rhand.phasors,23) % late learning
 % mirror-reversal group
-graph_phasor(data1.mir{9}.baseline.phasors.Rhand,24) % baseline
-graph_phasor(data1.mir{9}.pert4.phasors.Rhand,25) % late learning
+graph_phasor(data1.mir{9}.baseline.Rhand.phasors,24) % baseline
+graph_phasor(data1.mir{9}.pert4.Rhand.phasors,25) % late learning
 
 %% PART 3: ANALYSIS FOR SECOND EXPERIMENT
 % set variables for second experiment

@@ -46,7 +46,7 @@ for i = 1:Nblock % iterate over blocks
         .(block_name{gblocks(i)}).target.y_pos(1:650,trial),'k');
 
     % plot cursor
-    plot(a.(block_name{gblocks(i)}).cursor.x_posll(1:650,trial),a ...
+    plot(a.(block_name{gblocks(i)}).cursor.x_pos(1:650,trial),a ...
         .(block_name{gblocks(i)}).cursor.y_pos(1:650,trial),'Color',col);
     
     pbaspect([1 1 1])
