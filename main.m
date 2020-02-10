@@ -3,10 +3,10 @@
 % main.m generates all figures related to the sum-of-sinusoids tracking 
 % task. 
 % 
-% Parts 1-2 of the script (lines 19-67) analyzes and makes figures for the 
-% data from the main experiment. Parts 3-4 (lines 68-90) analyzes and 
-% makes figures for the second experiment. Analysis and plotting code 
-% can be run independently of one another.
+% Parts 1-2 of the script (lines 19-83) analyzes and makes figures for the 
+% data from the main experiment (Figures 2B-5 and S1-S4). Parts 3-4 (lines 
+% 84-111) analyzes and makes figures for the second experiment (Figure S5). 
+% Analysis and plotting code can be run independently of one another.
 % 
 % To generate all figures, run the entire script, which should take 
 % between 5-10 minutes. If only certain figures are needed, first run the 

@@ -4,7 +4,7 @@ This collection is associated with the article "De novo learning
 versus adaptation of continuous control in a manual tracking task."
 This code generates all figures related to the sum-of-sinusoids
 tracking task. Raw data is contained in the folder "Data." Data from
-the main experiment (used to generate Figures 1-5 and S1-S4) is
+the main experiment (used to generate Figures 2B-5 and S1-S4) is
 contained in "Data/vmr90_vs_mr" while data from the second experiment
 (used to generate Figure S5) is contained in "Data/no_p2p." Each
 experiment's data is first organized by subject, then block. The block
