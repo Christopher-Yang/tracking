@@ -7,7 +7,7 @@ blocks = {'baseline','pert1','pert2','pert3','pert4','post'};
 graph_name = {'Baseline','Early','Train2','Train3','Late','Post'};
 names = {'x_x','x_y','y_x','y_y'};
 Nblock = length(blocks);
-Nsubj = length(data.rot)-1;
+Nsubj = length(data.rot);
 Nfreq = length(data.rot{1}.(blocks{1}).freqX);
 Ngroup = length(groups);
 

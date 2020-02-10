@@ -16,7 +16,7 @@ names = {' (Rotation)',' (Mirror Reversal)'};
 for k = 1:length(groups)
     % set more variables for plotting
     d = data.(groups{k}); % put data into d
-    Nsubj = length(d)-1; % number of subjects
+    Nsubj = length(d); % number of subjects
     freqsX = d{1}.(block_name{1}).freqX; % x frequencies
     freqsY = d{1}.(block_name{1}).freqY; % y frequencies
     ampX = d{1}.(block_name{1}).ampX; % x amplitudes

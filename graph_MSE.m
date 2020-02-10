@@ -4,7 +4,7 @@ function graph_MSE(data)
 % set variables for plotting
 groups = {'rot','mir'};
 block_name = {'baseline','pert1','pert2','pert3','pert4','post'};
-Nsubj = length(data.(groups{1}))-1;
+Nsubj = length(data.(groups{1}));
 Nblocks = length(block_name);
 Ntrials = length(data.(groups{1}){1}.(block_name{1}).MSE);
 
