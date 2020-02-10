@@ -1,9 +1,9 @@
 clear all;
 
-folder = 'Data/VMR90_vs_MR/';
+folder = 'Data/vmr90_vs_mr/';
 time = 40; %in seconds
 groups = {'rot','mir'};
-block_name = {'no_rot1','rot1','rot2','rot3','rot4','no_rot2'};
+block_name = {'baseline','pert1','pert2','pert3','pert4','post'};
 graph_name = {'Baseline','Early','Train2','Train3','Late','Post'};
 subj_rot = {'subj17','subj18','subj21','subj22','subj24','subj25','subj28','subj31','subj32','subj33'};
 subj_mir = {'subj14','subj15','subj16','subj19','subj23','subj26','subj27','subj29','subj30','subj34'};
