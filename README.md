@@ -56,7 +56,14 @@ following:
     graph_traj.m: plots target and cursor trajectories
     graph_transformMat.m: plots transformation matrices
     load_data.m: extracts raw data from data files
-    shadedErrorBar.m plots lines with shaded error bars
+    shadedErrorBar.m: plots lines with shaded error bars
+
+This code requires the following MATLAB Toolboxes:
+
+    Optimization Toolbox
+    DSP System Toolbox
+    Signal Processing Toolbox
+    Phased Array System Toolbox
 
 Two scripts included here were created by other individuals,
 shadedErrorBar.m and error_ellipse.m. The associated licenses for each
