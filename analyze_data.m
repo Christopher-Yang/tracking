@@ -10,7 +10,6 @@ function data = analyze_data(d, block_name, uw, rotate)
     end
     Nsubj = length(d);
     Nblocks = length(block_name);
-    Nreps = size(d{1}.(block_name{1}).traj,3);
     names = {'x_x','y_y','x_y','y_x'};
     names2 = {'x_x_all','y_y_all','x_y_all','y_x_all'};
     outputs = {'cursor','Rhand','Lhand'};
@@ -18,6 +17,7 @@ function data = analyze_data(d, block_name, uw, rotate)
     for i = 1:Nsubj
         disp(['   Subject ' num2str(i)]);
         for j = 1:Nblocks
+            Nreps = size(d{i}.(block_name{j}).traj,3);
             output = d{i}.(block_name{j}).traj;
             input = d{i}.(block_name{j}).tFile;
             num = length(input)/6;

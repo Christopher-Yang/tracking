@@ -1,4 +1,4 @@
-function output = load_data(subj_name, block_name, folder,time)
+function output = load_data(subj_name, block_name, folder, time, remove)
     
     disp('Loading...');
     most_freq = 0;
@@ -13,12 +13,9 @@ function output = load_data(subj_name, block_name, folder,time)
             end
             tFile = dlmread([path,'/tFile.tgt']);
             Tb = 1/(tFile(1)/2);
-            Ncycles = floor(time/Tb);
-            trial_time = Tb*Ncycles;
-            Nsamples = round(trial_time*130.004);
+            Nsamples = round(time*130.004);
             fnames = dir(path);
             full = [];
-            N = Nsamples/Ncycles;
             
             for k = 1:length(fnames(not([fnames.isdir])))-1
                 name = ['traj',num2str(k)];
@@ -38,7 +35,15 @@ function output = load_data(subj_name, block_name, folder,time)
 %             bName = regexprep(block_name{j},'^...','');
             bName = block_name{j};
             
-            output{i}.(bName).traj = full;
+            if remove == 1
+                if i == 4 && j == 1
+                    output{i}.(bName).traj = full(:,:,2:5);
+                else
+                    output{i}.(bName).traj = full;
+                end
+            else
+                output{i}.(bName).traj = full;
+            end
             output{i}.(bName).tFile = tFile;
         end
     end
