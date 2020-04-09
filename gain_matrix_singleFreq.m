@@ -50,7 +50,7 @@ end
 
 % combine opt1 and opt2
 thetaOpt = [reshape(opt1,[2 Nblock Nfreq Nsubj Ngroups]); reshape(opt2,[2 Nblock Nfreq Nsubj Ngroups])];
-thetaOpt(:,:,:,4) = -thetaOpt(:,:,:,4); % use for flips
+thetaOpt(:,:,:,4:end) = -thetaOpt(:,:,:,4:end); % use for flips
 
 % shape thetaOpt into gain matrix format
 rotMat = reshape(thetaOpt,[2 2 Nblock Nfreq Nsubj Ngroups]);
@@ -277,20 +277,21 @@ end
 colors = lines;
 colors = colors(1:7,:);
 se = squeeze(std(thetaOpt(2,:,:,:),[],4))/sqrt(Nsubj);
-normal = 2:11;
+normal = 2:6;
 n = length(normal);
 s = length(special);
+s = 6;
 figure(8); clf
 for k = 1:Nfreq
     subplot(1,Nfreq,k); hold on
     plot([0 Nblock],[0 0],'k','LineWidth',1)
-    plot([1 n],[mat(4,1,k) mat(4,1,k)],'--k')
+%     plot([1 n],[mat(4,1,k) mat(4,1,k)],'--k')
 %     errorbar(n+1:n+s,mat(2,special,k)',se(n+1:end,k),'-ko','LineWidth',2,'MarkerFaceColor','k')
 %     plot(1:length(normal),mat(2,normal,k)','-ko','LineWidth',2,'MarkerFaceColor','k')
 %     plot(length(normal)+1:length(normal)+length(special),mat(2,special,k)','-ko','LineWidth',2,'MarkerFaceColor','k')
     for i = 1:Nsubj
         plot(1:length(normal),thetaOpt(2,normal,k,i),'Color',[colors(1,:) 0.6])
-%         plot(length(normal)+1:length(normal)+length(special),thetaOpt(2,special,k,i),'Color',[0 0 0 0.6])
+        plot(length(normal)+1:length(normal)+length(special),thetaOpt(2,special,k,i),'Color',[0 0 0 0.6])
     end
     plot(1:n,mat(2,normal,k)','-o','Color',colors(1,:),'LineWidth',2,'MarkerFaceColor',colors(1,:))
     axis([1 n -0.15 1])
