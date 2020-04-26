@@ -1,12 +1,11 @@
-function output = fourier(output_traj,input_traj,Nfreq)
+function [processed, raw_fft] = fourier(output_traj,input_traj,Nfreq)
 
-    output = struct;
     switch nargin
         case 1 %calculate DFT
             raw_fft = fft(output_traj-mean(output_traj,1));
             n = size(raw_fft,1);
-            output = raw_fft(1:floor(n/2)+1,:)/n;
-            output(2:end-1,:) = 2*output(2:end-1,:);
+            processed = raw_fft(1:floor(n/2)+1,:)/n;
+            processed(2:end-1,:) = 2*processed(2:end-1,:);
         case 3
             output_fft = NaN(size(output_traj));
             input_fft = NaN(size(input_traj));
@@ -19,9 +18,9 @@ function output = fourier(output_traj,input_traj,Nfreq)
                 error(['Number of frequencies found (',num2str(length(idx)/2),') does not match the number of input frequencies (',num2str(Nfreq),')'])
             end
             idx = idx(1:Nfreq);
-            output.ratio = output_fft(idx,:)./input_fft(idx,:);
-            output.gain = abs(output.ratio);
-            output.phase = angle(output.ratio);
-            output.index = idx;
+            processed.ratio = output_fft(idx,:)./input_fft(idx,:);
+            processed.gain = abs(processed.ratio);
+            processed.phase = angle(processed.ratio);
+            processed.index = idx;
     end
 end

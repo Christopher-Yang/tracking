@@ -1,23 +1,15 @@
 output = 'Lhand';
-names = {'x_x_all','x_y_all','y_x_all','y_y_all'};
-Nblock = length(block_name);
-Nsubj = length(data)-1;
-Nfreq = length(data{end}.freqX);
-Ngroups = 1;
-paramsInit = zeros([2 Nblock]);
-special = find(contains(graph_name,'('));
-
-% set remove = 1 to remove special blocks
-index = 1:Nblock;
-normal = index;
-normal(special) = [];
-remove = 0;
-if remove
-    index = normal;
-end
+groups = {'day2','day5','day10'};
+names = {'x_x','x_y','y_x','y_y'};
+Ngroup = length(groups);
+maxNormal = 0;
+counterbalance{1} = 8:13;
+counterbalance{2} = 9:15;
+counterbalance{3} = 4:5;
 
 if strcmp(output,'cursor')
     labels = {'X_{T}X_{O} (response)','X_{T}Y_{O}','Y_{T}X_{O}','Y_{T}Y_{O} (response)'};
+    workspace = 1:4;
 elseif strcmp(output,'Rhand')
     labels = {'X_{T}X_{O}','X_{T}Y_{O}','Y_{T}X_{O} (response)','Y_{T}Y_{O}'};
     workspace = [1 3];
@@ -30,34 +22,62 @@ elseif strcmp(output,'Lhand')
     response = 2;
 end
 
-for p = 1:Nsubj % loop over subjects
-    for k = 1:Nblock
-        for i = 1:4
-            cplx(:,i,k,p) = mean(data{p}.(block_name{k}).phasors.(output).(names{i}).ratio,2); % put all complex ratios in cplx
+for q = 1:Ngroup % loop over groups
+    clear opt1 opt2 template
+    Nsubj = length(data.(groups{q}));
+    blk = block_name.(groups{q});
+    Nblock = length(blk);
+    Nfreq = length(data.(groups{q}){1}.(blk{1}).freqX);
+    paramsInit = zeros([2 Nblock]);
+    
+    dark{q} = find(contains(graph_name.(groups{q}),'(D)'));
+    flip{q} = find(contains(graph_name.(groups{q}),'(F)'));
+    special{q} = find(contains(graph_name.(groups{q}),'('));
+    normal{q} = 1:Nblock;
+    normal{q}(special{q}) = [];
+    
+    if maxNormal < length(normal{q})
+        maxNormal = length(normal{q});
+    end
+    
+%     set remove = 1 to remove special blocks
+%     remove = 0;
+%     if remove
+%         index = normal;
+%     end
+    
+    for p = 1:Nsubj % loop over subjects
+        for k = 1:Nblock % loop over block
+            for i = 1:4 % loop over all combinations of hand/target axes
+                cplx{q}(:,i,k,p) = mean(data.(groups{q}){p}.(blk{k}).(output).phasors.(names{i}).ratio,2); % put all complex ratios in cplx
+            end
+        end
+        
+        for i = 1:Nfreq
+            x = cos(angle(cplx{q}(i,[1 4],1,p)));
+            y = sin(angle(cplx{q}(i,[1 4],1,p)));
+            template(:,i,p) = x+y*1j; % generate template of gain = 1 and phase same as baseline
+            error = @(params) scale(params,cplx{q}(i,[1 2],:,p),template(1,i,p));
+            opt1(:,:,i,p) = fmincon(error,paramsInit); % fit gains for x frequencies
+            error = @(params) scale(params,cplx{q}(i,[3 4],:,p),template(2,i,p));
+            opt2(:,:,i,p) = fmincon(error,paramsInit); % fit gains for y frequencies
         end
     end
     
-    for i = 1:Nfreq
-        x = cos(angle(cplx(i,[1 4],1,p)));
-        y = sin(angle(cplx(i,[1 4],1,p)));
-        template(:,i,p) = x+y*1j; % generate template of gain = 1 and phase same as baseline
-        error = @(params) scale(params,cplx(i,[1 2],:,p),template(1,i,p));
-        opt1(:,:,i,p) = fmincon(error,paramsInit); % fit gains for x frequencies
-        error = @(params) scale(params,cplx(i,[3 4],:,p),template(2,i,p));
-        opt2(:,:,i,p) = fmincon(error,paramsInit); % fit gains for y frequencies
-    end
+    % combine opt1 and opt2
+    thetaOpt{q} = [reshape(opt1,[2 Nblock Nfreq Nsubj]); reshape(opt2,[2 Nblock Nfreq Nsubj])];
+
+    % flip sign of counterbalanced subjects
+    thetaOpt{q}(workspace,2:end,:,counterbalance{q}) = -thetaOpt{q}(workspace,2:end,:,counterbalance{q});
+%     thetaOpt{q}(:,2:end,:,counterbalance{q}) = -thetaOpt{q}(:,2:end,:,counterbalance{q});
+
+    % shape thetaOpt into gain matrix format
+    rotMat{q} = reshape(thetaOpt{q},[2 2 Nblock Nfreq Nsubj]);
+    rotMat{q} = permute(rotMat{q},[1 2 4 3 5 6]);
+    
+    % for averaging across subjects
+    mat{q} = squeeze(mean(thetaOpt{q},4));
 end
-
-% combine opt1 and opt2
-thetaOpt = [reshape(opt1,[2 Nblock Nfreq Nsubj Ngroups]); reshape(opt2,[2 Nblock Nfreq Nsubj Ngroups])];
-thetaOpt(:,:,:,4:end) = -thetaOpt(:,:,:,4:end); % use for flips
-
-% shape thetaOpt into gain matrix format
-rotMat = reshape(thetaOpt,[2 2 Nblock Nfreq Nsubj Ngroups]);
-rotMat = permute(rotMat,[1 2 4 3 5 6]);
-
-% for averaging across subjects
-mat = squeeze(mean(thetaOpt,4));
 
 % for plotting lines
 col = lines;
@@ -85,82 +105,51 @@ col1 = [128 0 128]/255;
 col2 = [230 230 250]/255;
 map2 = [linspace(col1(1),col2(1),Nfreq)', linspace(col1(2),col2(2),Nfreq)', linspace(col1(3),col2(3),Nfreq)'];
 
-%% plot vectors and gain matrices
-gblocks = 1:3;
+%% plot vectors
+
+figure(1); clf
+for q = 1:Ngroup
+    for k = 1:length(normal{q})+1
+        subplot(Ngroup,maxNormal+1,(q-1)*(maxNormal+1)+k); hold on
+        plot([0 1],[0 0],'k')
+        plot([0 0],[0 1],'k')
+        for i = 1:Nfreq
+            if k == length(normal{q})+1
+                plot([0 mat{q}(1,flip{q},i)],[0 mat{q}(2,flip{q},i)],'LineWidth',1.5,'Color',map1(i,:))
+                plot([0 mat{q}(3,flip{q},i)],[0 mat{q}(4,flip{q},i)],'LineWidth',1.5,'Color',map1(i,:))
+            else
+                plot([0 mat{q}(1,normal{q}(k),i)],[0 mat{q}(2,normal{q}(k),i)],'LineWidth',1.5,'Color',map1(i,:))
+                plot([0 mat{q}(3,normal{q}(k),i)],[0 mat{q}(4,normal{q}(k),i)],'LineWidth',1.5,'Color',map2(i,:))
+            end
+            axis([-0.45 1.2 -0.45 1.2])
+            axis square
+        end
+        xticks([])
+        yticks([])
+        if k == length(normal{q})+1
+            title('Flip')
+        else
+            title(graph_name.(groups{q})(normal{q}(k)))
+        end
+    end
+end
+
+%% plot matrices as lines (normal blocks)
+ymin = -.5;
+ymax = 1;
+
 figure(2); clf
-for k = 1:length(gblocks)
-    subplot(1,length(gblocks),k); hold on
-    plot([0 1],[0 0],'k')
-    plot([0 0],[0 1],'k')
-    for i = 1:Nfreq
-        plot([0 mat(1,gblocks(k),i)],[0 mat(2,gblocks(k),i)],'LineWidth',1.5,'Color',map1(i,:))
-        plot([0 mat(3,gblocks(k),i)],[0 mat(4,gblocks(k),i)],'LineWidth',1.5,'Color',map2(i,:))
-        axis([-0.45 1.2 -0.45 1.2])
-        axis square
-    end
-    title(graph_name{gblocks(k)})
-end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% gain matrices
-figure(3); clf
-for i = 1:Nfreq
-    subplot(1,Nfreq,i)
-    imagesc(mat(:,index,i),clims)
-    colormap(map)
-    set(gca,'Xtick',[],'Ytick',[])
-    if i == 1
-        title('Low freq')
-        yticks(1:4)
-        yticklabels(labels)
-    elseif i == Nfreq
-        title('High freq')
-        if remove == 0
-            xticks(special)
-            xticklabels(graph_name(special))
-        end
-    end
-end
-%% plot gain matrices as 2x2
-subj = 6;
-rMat = rotMat(:,:,:,:,subj);
-
-% rMat = mean(rotMat,5);
-
-figure(4); clf
-for i = 1:Nfreq
-    for k = 1:length(index)
-        subplot(Nfreq,length(index),(i-1)*length(index)+k)
-        imagesc(rMat(:,:,i,k),clims)
-        colormap(map)
-        pbaspect([1 1 1])
-        set(gca,'Xtick',[],'Ytick',[])
-        if i == 1
-            title(graph_name(k))
-        end
-        if k == 1 && i == 1
-            ylabel('Low freq')
-        elseif k == 1 && i == Nfreq
-            ylabel('High freq')
-        end
-    end
-end
-
-%% plot matrices as lines
-ymin = min(min(min(mat)));
-ymax = max(max(max(mat)));
-
-figure(5); clf
 for k = 1:Nfreq
-    subplot(2,Nfreq,k); hold on
-    plot(mat(workspace,normal,k)','LineWidth',2)
-    for i = 1:Nsubj
+    for q = 1:Ngroup
+        subplot(2,Nfreq,k); hold on
+        plot([0 Nblock+1],[0 0],'k','LineWidth',1,'HandleVisibility','off')
         for j = 1:2
-            plot(thetaOpt(workspace(j),normal,k,i),'Color',[col(j,:) 0.6])
+            plot(squeeze(thetaOpt{q}(workspace(j),normal{q},k,:)),'Color',[col(j,:) 0.6],'HandleVisibility','off')
         end
+        set(gca,'ColorOrderIndex',1)
+        plot(1:length(normal{q}),mat{q}(workspace,normal{q},k)','LineWidth',2)
     end
-    plot([0 Nblock+1],[0 0],'--k','LineWidth',1)
-    axis([1 length(normal) ymin ymax])
+    axis([1 length(normal{q}) ymin ymax])
     xticks([])
     if k == 1
         title('Normal blocks')
@@ -170,17 +159,17 @@ for k = 1:Nfreq
         xlabel('High freq')
         legend(labels(workspace))
     end
-    
-    subplot(2,Nfreq,k+Nfreq); hold on
-    set(gca,'ColorOrderIndex',3)
-    plot(mat(nullspace,normal,k)','LineWidth',2)
-    for i = 1:Nsubj
+        
+    for q = 1:Ngroup
+        subplot(2,Nfreq,k+Nfreq); hold on
+        plot([0 Nblock+1],[0 0],'k','LineWidth',1,'HandleVisibility','off')
         for j = 1:2
-            plot(thetaOpt(nullspace(j),normal,k,i),'Color',[col(j+2,:) 0.6])
+            plot(squeeze(thetaOpt{q}(nullspace(j),normal{q},k,:)),'Color',[col(j+2,:) 0.6],'HandleVisibility','off')
         end
+        set(gca,'ColorOrderIndex',3)
+        plot(1:length(normal{q}),mat{q}(nullspace,normal{q},k)','LineWidth',2)
     end
-    plot([0 Nblock+1],[0 0],'--k','LineWidth',1)
-    axis([1 length(normal) ymin ymax])
+    axis([1 length(normal{q}) ymin ymax])
     xticks([])
     if k == 1
         ylabel('Gain (null space)')
@@ -191,61 +180,45 @@ for k = 1:Nfreq
     end
 end
 
-figure(6); clf
+c = [0 0 0
+    1 0 0
+    0 0 1];
+figure(3); clf
 for k = 1:Nfreq
-    subplot(2,Nfreq,k); hold on
-    plot(mat(workspace,special,k)','LineWidth',2)
-    for i = 1:Nsubj
-        for j = 1:2
-            plot(thetaOpt(workspace(j),special,k,i),'Color',[col(j,:) 0.6])
-        end
+    subplot(1,Nfreq,k); hold on
+    plot([0 Nblock+1],[0 0],'k','LineWidth',1,'HandleVisibility','off')
+    for q = 1:Ngroup
+        plot(squeeze(thetaOpt{Ngroup-(q-1)}(response,normal{Ngroup-(q-1)},k,:)),'Color',[c(Ngroup-(q-1),:) 0.6],'HandleVisibility','off')
+        plot(mat{Ngroup-(q-1)}(response,normal{Ngroup-(q-1)},k),'Color',c(Ngroup-(q-1),:),'LineWidth',2)
     end
-    plot([0 Nblock+1],[0 0],'--k','LineWidth',1)
-    axis([1 length(special) ymin ymax])
+    axis([1 length(normal{q}) -0.5 1])
     xticks([])
     if k == 1
-        title('Special blocks')
+        title('Normal blocks')
         ylabel('Gain (workspace)')
         xlabel('Low freq')
     elseif k == Nfreq
         xlabel('High freq')
-        legend(labels(workspace))
-    end
-    
-    subplot(2,Nfreq,k+Nfreq); hold on
-    set(gca,'ColorOrderIndex',3)
-    plot(mat(nullspace,special,k)','LineWidth',2)
-    for i = 1:Nsubj
-        for j = 1:2
-            plot(thetaOpt(nullspace(j),special,k,i),'Color',[col(j+2,:) 0.6])
-        end
-    end
-    plot([0 Nblock+1],[0 0],'--k','LineWidth',1)
-    axis([1 length(special) ymin ymax])
-    xticks([])
-    if k == 1
-        ylabel('Gain (null space)')
-        xlabel('Low freq')
-    elseif k == Nfreq
-        xlabel('High freq')
-        legend(labels(nullspace))
+        legend({'10 day','5 day','2 day'})
     end
 end
 
-figure(7); clf
+%% plot matrices as lines (dark blocks)
+figure(4); clf
 for k = 1:Nfreq
-    subplot(2,Nfreq,k); hold on
-    plot(mat(workspace,:,k)','LineWidth',2)
-    for i = 1:Nsubj
+    for q = 1:Ngroup
+        subplot(2,Nfreq,k); hold on
+        plot([0 Nblock+1],[0 0],'k','LineWidth',1,'HandleVisibility','off')
         for j = 1:2
-            plot(thetaOpt(workspace(j),:,k,i),'Color',[col(j,:) 0.6])
+            plot(squeeze(thetaOpt{q}(workspace(j),dark{q},k,:)),'Color',[col(j,:) 0.6],'HandleVisibility','off')
         end
+        set(gca,'ColorOrderIndex',1)
+        plot(mat{q}(workspace,dark{q},k)','LineWidth',2)
     end
-    plot([0 Nblock+1],[0 0],'--k','LineWidth',1)
-    axis([1 size(mat,2) ymin ymax])
+    axis([1 length(dark{q}) ymin ymax])
     xticks([])
     if k == 1
-        title('All blocks')
+        title('Dark blocks')
         ylabel('Gain (workspace)')
         xlabel('Low freq')
     elseif k == Nfreq
@@ -253,16 +226,16 @@ for k = 1:Nfreq
         legend(labels(workspace))
     end
     
-    subplot(2,Nfreq,k+Nfreq); hold on
-    set(gca,'ColorOrderIndex',3)
-    plot(mat(nullspace,:,k)','LineWidth',2)
-    for i = 1:Nsubj
+    for q = 1:Ngroup
+        subplot(2,Nfreq,k+Nfreq); hold on
+        plot([0 Nblock+1],[0 0],'k','LineWidth',1,'HandleVisibility','off')
         for j = 1:2
-            plot(thetaOpt(nullspace(j),:,k,i),'Color',[col(j+2,:) 0.6])
+            plot(squeeze(thetaOpt{q}(nullspace(j),dark{q},k,:)),'Color',[col(j+2,:) 0.6],'HandleVisibility','off')
         end
+        set(gca,'ColorOrderIndex',3)
+        plot(mat{q}(nullspace,dark{q},k)','LineWidth',2)
     end
-    plot([0 Nblock+1],[0 0],'--k','LineWidth',1)
-    axis([1 size(mat,2) ymin ymax])
+    axis([1 length(dark{q}) ymin ymax])
     xticks([])
     if k == 1
         ylabel('Gain (null space)')
@@ -274,123 +247,115 @@ for k = 1:Nfreq
 end
 
 %% plot habit
-colors = lines;
-colors = colors(1:7,:);
-se = squeeze(std(thetaOpt(2,:,:,:),[],4))/sqrt(Nsubj);
-normal = 2:6;
-n = length(normal);
-s = length(special);
-s = 6;
-figure(8); clf
-for k = 1:Nfreq
-    subplot(1,Nfreq,k); hold on
-    plot([0 Nblock],[0 0],'k','LineWidth',1)
-%     plot([1 n],[mat(4,1,k) mat(4,1,k)],'--k')
-%     errorbar(n+1:n+s,mat(2,special,k)',se(n+1:end,k),'-ko','LineWidth',2,'MarkerFaceColor','k')
-%     plot(1:length(normal),mat(2,normal,k)','-ko','LineWidth',2,'MarkerFaceColor','k')
-%     plot(length(normal)+1:length(normal)+length(special),mat(2,special,k)','-ko','LineWidth',2,'MarkerFaceColor','k')
-    for i = 1:Nsubj
-        plot(1:length(normal),thetaOpt(2,normal,k,i),'Color',[colors(1,:) 0.6])
-        plot(length(normal)+1:length(normal)+length(special),thetaOpt(2,special,k,i),'Color',[0 0 0 0.6])
-    end
-    plot(1:n,mat(2,normal,k)','-o','Color',colors(1,:),'LineWidth',2,'MarkerFaceColor',colors(1,:))
-    axis([1 n -0.15 1])
-    xticks([])
-    yticks([])
-    if k == 1
-        title('Low freq')
-        xlabel('Blocks')
-        ylabel('Gain (response axis)')
-        yticks(-0.6:0.2:1)
-    elseif k == Nfreq
-        title('High freq')
-    end
-end
-
-figure(9); clf
-subplot(1,2,1); hold on
-plot([1 Nfreq],[0 0],'--k','LineWidth',1)
-errorbar(squeeze(mat(2,6,:)),se(6,:),'-ko','LineWidth',2,'MarkerFaceColor','k')
-% plot(squeeze(mat(2,5,:)),'-ko','LineWidth',2,'MarkerFaceColor','k')
-for i = 1:Nsubj
-    plot(squeeze(thetaOpt(2,6,:,i)),'Color',[0 0 0 0.6])
-end
-xticks([1 6])
-xticklabels({'Low Freq','High Freq'})
-yticks(-0.9:0.3:0.9)
-ylabel('Gain (response axis)')
-axis([1 6 -0.7 0.9])
-title('Before flip')
-
-subplot(1,2,2); hold on
-plot([1 Nfreq],[0 0],'--k','LineWidth',1)
-errorbar(squeeze(mat(2,7,:)),se(7,:),'-ko','LineWidth',2,'MarkerFaceColor','k')
-% plot(squeeze(mat(2,6,:)),'-ko','LineWidth',2,'MarkerFaceColor','k')
-for i = 1:Nsubj
-    plot(squeeze(thetaOpt(2,7,:,i)),'Color',[0 0 0 0.6])
-end
-xticks([1 6])
-xticklabels({'Low Freq','High Freq'})
-yticks(-0.9:0.3:0.9)
-axis([1 6 -0.7 0.9])
-title('After flip')
-
-%% plot effect of dual task
-effect = thetaOpt(:,normal,:,:) - thetaOpt(:,special,:,:);
-effectMu = mean(effect,4);
-
-ymin = min(min(min(effectMu)));
-ymax = max(max(max(effectMu)));
-
-figure(9); clf
-for k = 1:Nfreq
-    subplot(2,Nfreq,k); hold on
-    plot(effectMu(workspace,:,k)','LineWidth',2)
-    for i = 1:Nsubj
-        for j = 1:2
-            plot(effect(workspace(j),:,k,i),'Color',[col(j,:) 0.6])
+figure(5); clf
+for q = 1:Ngroup
+    n = length(normal{q});
+    f = length(flip{q});
+    for k = 1:Nfreq
+        subplot(3,Nfreq,(q-1)*6+k); hold on
+        plot([0 Nblock],[0 0],'k','LineWidth',1)
+        plot(1:n,squeeze(thetaOpt{q}(response,normal{q},k,:)),'Color',[0 0 0 0.6])
+        plot(n+1:n+f,squeeze(thetaOpt{q}(response,flip{q},k,:)),'.','Color',[0 0 0 0.6],'MarkerSize',15)
+        plot(1:n,mat{q}(response,normal{q},k)','Color',col(2,:),'LineWidth',3)
+        plot(n+1:n+f,mat{q}(response,flip{q},k)','.','Color',col(2,:),'MarkerSize',30)
+        axis([1 maxNormal+1 -0.6 1])
+        xticks([])
+        yticks([])
+        if k == 1
+            title('Low freq')
+            xlabel('Blocks')
+            ylabel('Gain (response axis)')
+            yticks(-0.6:0.2:1)
+        elseif k == Nfreq
+            title('High freq')
         end
     end
-    plot([0 Nblock+1],[0 0],'--k','LineWidth',1)
-    axis([1 length(normal) ymin ymax])
-    xticks([])
-    if k == 1
-        title('Normal blocks')
-        ylabel('Gain (workspace)')
-        xlabel('Low freq')
-    elseif k == Nfreq
-        xlabel('High freq')
-        legend(labels(workspace))
+end
+
+figure(6); clf
+for q = 1:Ngroup
+    subplot(2,3,q); hold on
+    plot([1 Nfreq],[0 0],'k','LineWidth',1)
+    plot(squeeze(thetaOpt{q}(response,normal{q}(end),:,:)),'Color',[0 0 0 0.6])
+    plot(squeeze(mat{q}(response,normal{q}(end),:)),'Color',col(2,:),'LineWidth',3)
+    xticks([1 6])
+    xticklabels({'Low Freq','High Freq'})
+    yticks(-0.9:0.3:0.9)
+    if q == 1
+        ylabel('Gain (before flip; response axis)')
     end
+    axis([1 6 -0.7 0.9])
+    title('Before flip')
     
-    subplot(2,Nfreq,k+Nfreq); hold on
-    set(gca,'ColorOrderIndex',3)
-    plot(effectMu(nullspace,:,k)','LineWidth',2)
-    for i = 1:Nsubj
-        for j = 1:2
-            plot(effect(nullspace(j),:,k,i),'Color',[col(j+2,:) 0.6])
-        end
+    subplot(2,3,q+3); hold on
+    plot([1 Nfreq],[0 0],'k','LineWidth',1)
+    plot(squeeze(thetaOpt{q}(response,flip{q},:,:)),'Color',[0 0 0 0.6])
+    plot(squeeze(mat{q}(response,flip{q},:)),'Color',col(2,:),'LineWidth',3)
+    xticks([1 6])
+    xticklabels({'Low Freq','High Freq'})
+    yticks(-0.9:0.3:0.9)
+    if q == 1
+        ylabel('Gain (after flip; response axis)')
     end
-    plot([0 Nblock+1],[0 0],'--k','LineWidth',1)
-    axis([1 length(normal) ymin ymax])
-    xticks([])
-    if k == 1
-        ylabel('Gain (null space)')
-        xlabel('Low freq')
-    elseif k == Nfreq
-        xlabel('High freq')
-        legend(labels(nullspace))
+    axis([1 6 -0.7 0.9])
+end
+
+%% plot strength of habit within subject
+figure(7); clf
+for q = 1:Ngroup
+    for i = 1:Nfreq
+        habit = squeeze([thetaOpt{q}(response,normal{q}(end),i,:) thetaOpt{q}(response,flip{q},i,:)]);
+        subplot(Ngroup,Nfreq,(q-1)*Nfreq+i); hold on
+        plot([1 2],[0 0],'k')
+        plot(habit,'Color',[0 0 0 0.6])
+        plot(mean(habit,2),'.k','MarkerSize',30)
+        xticks([])
+        ylim([-0.5 1])
+        if q == 1
+            if i == 1
+                ylabel('Gain (2 day)')
+                title('Low frequency')
+            elseif i == 6
+                title('High frequency')
+            end
+        elseif q == 2 && i == 1
+            ylabel('Gain (5 day)')
+        elseif q == 3
+            xticks([1 2])
+            xticklabels({'Before flip','After flip'})
+            if i == 1
+                ylabel('Gain (10 day)')
+            end
+        end
     end
 end
 
-%%
-normalized = (thetaOpt([1 4 response],normal,:,:) - thetaOpt([1 4 response],special,:,:))./thetaOpt([1 4 response],normal,:,:);
-baseline = mean(normalized(1:2,:,:,:),1);
-effect_norm = squeeze([baseline(:,1,:,:) normalized(3,2:end,:,:)]);
-effectMu_norm = mean(effect_norm,3);
+%% compare habit across groups
+figure(8); clf
+for i = 1:Nfreq
+    subplot(1,6,i); hold on
+    plot([1 3],[0 0],'k')
+    for q = 1:Ngroup
+        plot(q,squeeze(thetaOpt{q}(response,flip{q},i,:)),'.k','MarkerSize',15)
+        plot(q,mean(thetaOpt{q}(response,flip{q},i,:),4),'.','Color',col(2,:),'MarkerSize',30)
+    end
+    xticks(1:3)
+    xticklabels({'2 day','5 day','10 day'})
+    ylim([-0.6 0.6])
+end
 
-figure(10); clf
-plot(effectMu_norm)
+%% compare habit to baseline
+figure(9); clf
+for q = 1:Ngroup
+    for i = 1:Nfreq
+        habit = squeeze([thetaOpt{q}(response,normal{q}(1),i,:) thetaOpt{q}(response,flip{q},i,:)]);
+        subplot(Ngroup,Nfreq,(q-1)*Nfreq+i); hold on
+        plot([1 2],[0 0],'k')
+        plot(habit,'Color',[0 0 0 0.6])
+        plot(mean(habit,2),'.','Color',col(2,:),'MarkerSize',30)
+        ylim([-.8 .8])
+    end
+end
 
 %% plot proportion of movement in workspace vs null space
 workTotal = squeeze(sum(abs(thetaOpt(workspace,:,:,:)),1));
@@ -433,6 +398,50 @@ for k = 1:Nfreq
         xlabel('High freq')
     end
     axis([1 length(normal) 0 1])
+end
+
+%% gain matrices
+figure(3); clf
+for i = 1:Nfreq
+    subplot(1,Nfreq,i)
+    imagesc(mat(:,index,i),clims)
+    colormap(map)
+    set(gca,'Xtick',[],'Ytick',[])
+    if i == 1
+        title('Low freq')
+        yticks(1:4)
+        yticklabels(labels)
+    elseif i == Nfreq
+        title('High freq')
+        if remove == 0
+            xticks(special)
+            xticklabels(graph_name(special))
+        end
+    end
+end
+%% plot gain matrices as 2x2
+subj = 6;
+rMat = rotMat(:,:,:,:,subj);
+
+% rMat = mean(rotMat,5);
+
+figure(4); clf
+for i = 1:Nfreq
+    for k = 1:length(index)
+        subplot(Nfreq,length(index),(i-1)*length(index)+k)
+        imagesc(rMat(:,:,i,k),clims)
+        colormap(map)
+        pbaspect([1 1 1])
+        set(gca,'Xtick',[],'Ytick',[])
+        if i == 1
+            title(graph_name(k))
+        end
+        if k == 1 && i == 1
+            ylabel('Low freq')
+        elseif k == 1 && i == Nfreq
+            ylabel('High freq')
+        end
+    end
 end
 
 %% display results of fitting process
@@ -481,7 +490,7 @@ end
 %% graph average fitted phasors across subjects
 col1 = [1 0.9 0.3];
 col2 = [1 0 0];
-colors = [linspace(col1(1),col2(1),Nfreq)', linspace(col1(2),col2(2),Nfreq)', linspace(col1(3),col2(3),Nfreq)'];
+col = [linspace(col1(1),col2(1),Nfreq)', linspace(col1(2),col2(2),Nfreq)', linspace(col1(3),col2(3),Nfreq)'];
 gblocks = [1 3 2 4];
 
 group = 1;
@@ -498,9 +507,9 @@ figure(6); clf
 for k = 1:4
     subplot(2,2,gblocks(k)); hold on
     for i = 1:Nfreq
-        plot(dat_all(:,i,k),'.','Color',colors(i,:),'MarkerSize',10)
+        plot(dat_all(:,i,k),'.','Color',col(i,:),'MarkerSize',10)
         if i > 1
-            plot(dat(i-1:i,k),'-o','Color',colors(i,:),'LineWidth',1,'MarkerFaceColor',colors(i-1,:),'MarkerEdgeColor','none')
+            plot(dat(i-1:i,k),'-o','Color',col(i,:),'LineWidth',1,'MarkerFaceColor',col(i-1,:),'MarkerEdgeColor','none')
         end
     end
     plot(phasorLines(:,k),'-ok','LineWidth',2,'MarkerFaceColor',[0 0 0],'MarkerEdgeColor','none')
