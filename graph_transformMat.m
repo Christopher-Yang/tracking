@@ -54,20 +54,13 @@ for l = 1:Ngroup
             else
                 transformMat_mr(:,:,j,i) = transformMat(:,:,idx);
             end
-            
-            if l == 1
-                thetaInit = 0;
-                err2 = @(theta) fit_rotMat(theta,transformMat_vmr...
-                    (:,:,j,i));
-                theta_opt(j,i) = fmincon(err2,thetaInit);
-            end
         end
     end
 end
 
 % estimate rotation angle for the VMR group
-for k = 1:Nsubj
-    for p = 1:Nblock
+for i = 1:Nsubj
+    for j = 1:Nblock
         thetaInit = 0;
         err2 = @(theta) fit_rotMat(theta,transformMat_vmr(:,:,j,i));
         theta_opt(j,i) = fmincon(err2,thetaInit);
@@ -79,9 +72,9 @@ R = rotz(-45); % 45 degree clockwise rotation matrix
 R = R(1:2,1:2);
 perpAxis = R*[1 0]';
 
-for k = 1:Nsubj
-    for p = 1:Nblock
-        scaleOrth(p,k) = perpAxis'*transformMat_mr(:,:,p,k)*perpAxis;
+for i = 1:Nsubj
+    for j = 1:Nblock
+        scaleOrth(j,i) = perpAxis'*transformMat_mr(:,:,j,i)*perpAxis;
     end
 end
 
@@ -286,10 +279,10 @@ for k = 3:4
     for i = [1 6]
         if k == 3
             plot(i,mean(vmr(i,:)),'.','Color',col(idx(i),:)...
-                ,'MarkerSize',24,'LineWidth',1)
+                ,'MarkerSize',24)
         else
             plot(i,mean(mr(i,:)),'.','Color',col(idx(i),:)...
-                ,'MarkerSize',24,'LineWidth',1)
+                ,'MarkerSize',24)
         end
     end
     axis([0.5 6.5 -.1 0.7])
