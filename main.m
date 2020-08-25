@@ -95,11 +95,11 @@ subj_mir = {'subj1','subj3','subj4','subj6','subj11','subj12','subj14',...
     'subj16','subj18','subj20'}; % mirror-reversal subjects
 
 % extract raw data; this performs the same function as load_data in Part 1
-d = load_data(subj_rot,subj_mir,block_name,folder); 
+d = load_data(subj_rot,subj_mir,block_name,folder);
 
 % analyze data; this performs the same function as analyze_data in Part 1
-data2.rot = analyze_data(d.rot,subj_rot,block_name); 
-data2.mir = analyze_data(d.mir,subj_mir,block_name); 
+data2.rot = analyze_data(d.rot,subj_rot,block_name);
+data2.mir = analyze_data(d.mir,subj_mir,block_name);
 
 % save dat2 data2; % save data structure
 disp('Done')

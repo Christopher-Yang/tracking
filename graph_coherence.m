@@ -10,13 +10,17 @@ graph_name = {'Baseline','Early','Train2','Train3','Late','Post'};
 Nsubj = length(data.(groups{1}));
 Ntrials = length(data.(groups{1}){1}.(block_name{1}).MSE);
 Nblock = length(block_name);
+Nfreq = length(data.(groups{1}){1}.(block_name{1}).freqX);
 f_x = data.(groups{1}){1}.(block_name{1}).freqX;
 f_y = data.(groups{1}){1}.(block_name{1}).freqY;
 sorted_freqs = sort([f_x f_y]);
 
 % set line colors
-col = lines;
-col = col(1:7,:);
+% col = lines;
+% col = col(1:7,:);
+
+col = copper;
+col = col(floor((size(col,1)/(Nfreq))*(1:Nfreq)),:);
 
 % compute target-hand coherence (SR: stimulus-response)
 for p = 1:length(groups)
@@ -42,48 +46,59 @@ for p = 1:length(groups)
             end
             
             % average across trials
-            SR.x_all(j,:,i,p) = mean(cohxx(:,1:2:end)); 
-            SR.y_all(j,:,i,p) = mean(cohyy(:,2:2:end));
+            SR.x_all(:,:,j,i,p) = cohxx(:,1:2:end); 
+            SR.y_all(:,:,j,i,p) = cohyy(:,2:2:end);
         end
     end
 end
 
 % average coherence across subjects
-SR.x = squeeze(mean(SR.x_all,3));
-SR.y = squeeze(mean(SR.y_all,3));
+SR.x = squeeze(mean(SR.x_all,4));
+SR.y = squeeze(mean(SR.y_all,4));
 
 % standard error of coherence across subjects
-SR.xSE = squeeze(std(SR.x_all,[],3)/sqrt(Nsubj)); 
-SR.ySE = squeeze(std(SR.y_all,[],3)/sqrt(Nsubj));
+SR.xSE = squeeze(std(SR.x_all,[],4)/sqrt(Nsubj)); 
+SR.ySE = squeeze(std(SR.y_all,[],4)/sqrt(Nsubj));
 
 % generate Figure 4B and S2B
 figure(15); clf
 for j = 1:2
     subplot(2,2,j); hold on
-    for i = 1:length(gblocks)
-        s = shadedErrorBar(f_x,SR.x(gblocks(i),:,j)...
-            ,SR.xSE(gblocks(i),:,j),'lineProps','-o');
-        editErrorBar(s,col(i,:),1);
+    rectangle('Position',[Ntrials+1 -0.5 4*Ntrials-1 2],'FaceColor',...
+            [0 0 0 0.1],'EdgeColor','none');
+    for i = 1:Nblock
+        for k = 1:Nfreq
+            plotIdx = Ntrials*(i-1)+1:Ntrials*(i-1)+Ntrials;
+            s = shadedErrorBar(plotIdx,SR.x(:,k,i,j),SR.xSE(:,k,i,j));
+            editErrorBar(s,col(k,:),1.5);
+        end
     end
     if j == 1
         title('Rotation')
     else
         title('Mirror-Reversal')
     end
+    set(gca,'TickDir','out')
     ylabel([output,' SR_X coherence'])
-    yticks(0:0.2:1)
-    axis([0 2.3 0 1])
+    xticks(1:8:41)
+    yticks(0:0.25:1)
+    axis([1 Ntrials*Nblock 0 1])
     
     subplot(2,2,j+2); hold on
-    for i = 1:length(gblocks)
-        s = shadedErrorBar(f_y,SR.y(gblocks(i),:,j)...
-            ,SR.ySE(gblocks(i),:,j),'lineProps','-o');
-        editErrorBar(s,col(i,:),1);
+    rectangle('Position',[Ntrials+1 -0.5 4*Ntrials-1 2],'FaceColor',...
+            [0 0 0 0.1],'EdgeColor','none');
+    for i = 1:Nblock
+        for k = 1:Nfreq
+            plotIdx = Ntrials*(i-1)+1:Ntrials*(i-1)+Ntrials;
+            s = shadedErrorBar(plotIdx,SR.y(:,k,i,j),SR.ySE(:,k,i,j));
+            editErrorBar(s,col(k,:),1.5);
+        end
     end
-    xlabel('Frequency (Hz)')
+    set(gca,'TickDir','out')
+    xlabel('Trial Number')
     ylabel([output,' SR_Y coherence'])
-    yticks(0:0.2:1)
-    axis([0 2.3 0 1])
+    xticks(1:8:41) 
+    yticks(0:0.25:1)
+    axis([1 Ntrials*Nblock 0 1])
 end
-legend(graph_name(gblocks),'Location','southeast')
 end
