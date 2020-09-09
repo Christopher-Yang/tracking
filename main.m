@@ -6,8 +6,8 @@ folder = 'Data/online/';
 % graph_name = {'Baseline','Cursor Sines'};
 subj_name = {'Chris'};
 remove = 0;
-d = load_data(subj_name,folder,time,remove);
-% data = analyze_data(d);
+d = load_data(subj_name,folder,time);
+data = analyze_data(d);
 
 % save dat data;
 disp('Done')

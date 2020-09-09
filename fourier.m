@@ -1,27 +1,112 @@
-function [processed, raw_fft] = fourier(output_traj,input_traj,cursorPerturb)
+function [processed, raw_fft, processed_fft] = fourier(trajs, input, x_axis, trialType)
 
-    switch nargin
-        case 1 %calculate DFT
-            raw_fft = fft(output_traj-mean(output_traj,1));
-            n = size(raw_fft,1);
-            processed = raw_fft(1:floor(n/2)+1,:)/n;
-            processed(2:end-1,:) = 2*processed(2:end-1,:);
-        case 3
-            
-            output_fft = NaN(size(output_traj));
-            input_fft = NaN(size(input_traj));
-            for i = 1:size(output_traj,2)
-                output_fft(:,i) = fft(output_traj(:,i)-mean(output_traj(:,i)));
-                input_fft(:,i) = fft(input_traj(:,i)-mean(input_traj(:,i)));
-            end
-            idx = find(abs(input_fft(:,1))>25);
-            if length(idx) ~= Nfreq
-                error(['Number of frequencies found (',num2str(length(idx)),') does not match the number of input frequencies (',num2str(Nfreq),')'])
-            end
-            idx = idx(1:Nfreq);
-            processed.ratio = output_fft(idx,:)./input_fft(idx,:);
-            processed.gain = abs(processed.ratio);
-            processed.phase = angle(processed.ratio);
-            processed.index = idx;
+% compute the raw ffts
+cursorHand.xFFT = fft(trajs.cursorHand.x - repmat(mean(trajs.cursorHand.x,1), [size(trajs.cursorHand.x,1) 1])); % hand input to cursor
+cursorHand.yFFT = fft(trajs.cursorHand.y - repmat(mean(trajs.cursorHand.y,1), [size(trajs.cursorHand.y,1) 1]));
+cursorInput.xFFT = fft(trajs.cursorInput.x - repmat(mean(trajs.cursorInput.x,1), [size(trajs.cursorInput.x,1) 1])); % sinusoidal perturbation of cursor
+cursorInput.yFFT = fft(trajs.cursorInput.y - repmat(mean(trajs.cursorInput.y,1), [size(trajs.cursorInput.y,1) 1]));
+target.xFFT = fft(trajs.target.x - repmat(mean(trajs.target.x,1), [size(trajs.target.x,1) 1])); % target sines
+target.yFFT = fft(trajs.target.y - repmat(mean(trajs.target.y,1), [size(trajs.target.y,1) 1]));
+
+% set variables for analysis
+Ntrials = length(trialType); % number of trials
+indices = findMin(x_axis,input); % indices of the desired frequencies
+
+% determine how to analyze raw ffts based on trial type
+for i = 1:Ntrials
+    
+    % analysis for trials with target sines
+    if trialType(i) == 1 || trialType(i) >= 3
+        in.x = target.xFFT(:,i); % input trajectory
+        in.y = target.yFFT(:,i);
+        out.x = cursorHand.xFFT(:,i); % output trajectory
+        out.y = cursorHand.yFFT(:,i);
+        
+        % compute complex ratios
+        processed.xTarg_x{i} = evaluateFFT(in.x, out.x, indices.tX_freq{i});
+        processed.xTarg_y{i} = evaluateFFT(in.x, out.y, indices.tX_freq{i});
+        processed.yTarg_x{i} = evaluateFFT(in.y, out.x, indices.tY_freq{i});
+        processed.yTarg_y{i} = evaluateFFT(in.y, out.y, indices.tY_freq{i});
+
+    % if no target sines, set cell array to NaN
+    else
+        processed.xTarg_x{i} = NaN;
+        processed.xTarg_y{i} = NaN;
+        processed.yTarg_x{i} = NaN;
+        processed.yTarg_y{i} = NaN;
     end
+    
+    % analysis for trials with cursor sines
+    if trialType(i) >= 2
+        in.x = cursorInput.xFFT(:,i);
+        in.y = cursorInput.yFFT(:,i);
+        out.x = cursorHand.xFFT(:,i);
+        out.y = cursorHand.yFFT(:,i);
+        
+        % compute complex ratios
+        processed.xCurs_x{i} = evaluateFFT(in.x, out.x, indices.cX_freq{i});
+        processed.xCurs_y{i} = evaluateFFT(in.x, out.y, indices.cX_freq{i});
+        processed.yCurs_x{i} = evaluateFFT(in.y, out.x, indices.cY_freq{i});
+        processed.yCurs_y{i} = evaluateFFT(in.y, out.y, indices.cY_freq{i});
+        
+    % if no cursor sines, set cell array to NaN
+    else
+        processed.xCurs_x{i} = NaN;
+        processed.xCurs_y{i} = NaN;
+        processed.yCurs_x{i} = NaN;
+        processed.yCurs_y{i} = NaN;
+    end
+end
+
+% store raw ffts
+raw_fft.cursorHand = cursorHand;
+raw_fft.cursorInput = cursorInput;
+raw_fft.target = target;
+
+% set variables for analysis
+n = size(cursorHand.xFFT,1); % number of frequencies
+fields = {'xFFT','yFFT'}; % fields in data structure to analyze
+
+% compute amplitude spectra
+for i = 1:length(fields)
+    cursorHand.(fields{i}) = ampSpectra(cursorHand.(fields{i}),n);
+    cursorInput.(fields{i}) = ampSpectra(cursorInput.(fields{i}),n);
+    target.(fields{i}) = ampSpectra(target.(fields{i}),n);
+end
+
+% store amplitude spectra
+processed_fft.cursorHand = cursorHand;
+processed_fft.cursorInput = cursorInput;
+processed_fft.target = target;
+end
+
+% finds the index of the desired frequency 
+function output = findMin(x_axis, input)
+fields = {'tX_freq','tY_freq','cX_freq','cY_freq'};
+Ntrials = length(input.tX_freq);
+Nfields = length(fields);
+for k = 1:Nfields
+    for j = 1:Ntrials
+        in = input.(fields{k}){j};
+        indices = NaN(size(in));
+        for i = 1:length(in)
+            [m, idx] = min(abs(in(i) - x_axis));
+            indices(i) = idx;
+        end
+        output.(fields{k}){j} = indices;
+    end
+end
+end
+
+% compute complex ratio, gain, and phase
+function output = evaluateFFT(in, out, idx)
+output.ratio = out(idx)./in(idx);
+output.gain = abs(output.ratio);
+output.phase = angle(output.ratio);
+end
+
+% compute amplitude spectra
+function output = ampSpectra(spectrum, n)
+output = spectrum(1:floor(n/2)+1,:)/n;
+output(2:end-1,:) = 2*output(2:end-1,:);
 end
