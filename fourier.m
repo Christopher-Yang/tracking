@@ -1,4 +1,4 @@
-function [processed, raw_fft, processed_fft] = fourier(trajs, input, x_axis, trialType)
+function [phasors, raw_fft, processed_fft] = fourier(trajs, input, x_axis, trialType)
 
 % compute the raw ffts
 cursorHand.xFFT = fft(trajs.cursorHand.x - repmat(mean(trajs.cursorHand.x,1), [size(trajs.cursorHand.x,1) 1])); % hand input to cursor
@@ -10,7 +10,7 @@ target.yFFT = fft(trajs.target.y - repmat(mean(trajs.target.y,1), [size(trajs.ta
 
 % set variables for analysis
 Ntrials = length(trialType); % number of trials
-indices = findMin(x_axis,input); % indices of the desired frequencies
+index = findMin(x_axis,input); % indices of the desired frequencies
 
 % determine how to analyze raw ffts based on trial type
 for i = 1:Ntrials
@@ -23,17 +23,17 @@ for i = 1:Ntrials
         out.y = cursorHand.yFFT(:,i);
         
         % compute complex ratios
-        processed.xTarg_x{i} = evaluateFFT(in.x, out.x, indices.tX_freq{i});
-        processed.xTarg_y{i} = evaluateFFT(in.x, out.y, indices.tX_freq{i});
-        processed.yTarg_x{i} = evaluateFFT(in.y, out.x, indices.tY_freq{i});
-        processed.yTarg_y{i} = evaluateFFT(in.y, out.y, indices.tY_freq{i});
+        phasors.xTarg_x{i} = evaluateFFT(in.x, out.x, index.tX_freq{i});
+        phasors.xTarg_y{i} = evaluateFFT(in.x, out.y, index.tX_freq{i});
+        phasors.yTarg_x{i} = evaluateFFT(in.y, out.x, index.tY_freq{i});
+        phasors.yTarg_y{i} = evaluateFFT(in.y, out.y, index.tY_freq{i});
 
     % if no target sines, set cell array to NaN
     else
-        processed.xTarg_x{i} = NaN;
-        processed.xTarg_y{i} = NaN;
-        processed.yTarg_x{i} = NaN;
-        processed.yTarg_y{i} = NaN;
+        phasors.xTarg_x{i} = NaN;
+        phasors.xTarg_y{i} = NaN;
+        phasors.yTarg_x{i} = NaN;
+        phasors.yTarg_y{i} = NaN;
     end
     
     % analysis for trials with cursor sines
@@ -44,19 +44,22 @@ for i = 1:Ntrials
         out.y = cursorHand.yFFT(:,i);
         
         % compute complex ratios
-        processed.xCurs_x{i} = evaluateFFT(in.x, out.x, indices.cX_freq{i});
-        processed.xCurs_y{i} = evaluateFFT(in.x, out.y, indices.cX_freq{i});
-        processed.yCurs_x{i} = evaluateFFT(in.y, out.x, indices.cY_freq{i});
-        processed.yCurs_y{i} = evaluateFFT(in.y, out.y, indices.cY_freq{i});
+        phasors.xCurs_x{i} = evaluateFFT(in.x, out.x, index.cX_freq{i});
+        phasors.xCurs_y{i} = evaluateFFT(in.x, out.y, index.cX_freq{i});
+        phasors.yCurs_x{i} = evaluateFFT(in.y, out.x, index.cY_freq{i});
+        phasors.yCurs_y{i} = evaluateFFT(in.y, out.y, index.cY_freq{i});
         
     % if no cursor sines, set cell array to NaN
     else
-        processed.xCurs_x{i} = NaN;
-        processed.xCurs_y{i} = NaN;
-        processed.yCurs_x{i} = NaN;
-        processed.yCurs_y{i} = NaN;
+        phasors.xCurs_x{i} = NaN;
+        phasors.xCurs_y{i} = NaN;
+        phasors.yCurs_x{i} = NaN;
+        phasors.yCurs_y{i} = NaN;
     end
 end
+
+% store indices of frequencies
+phasors.index = index;
 
 % store raw ffts
 raw_fft.cursorHand = cursorHand;
@@ -88,12 +91,12 @@ Nfields = length(fields);
 for k = 1:Nfields
     for j = 1:Ntrials
         in = input.(fields{k}){j};
-        indices = NaN(size(in));
+        index = NaN(size(in));
         for i = 1:length(in)
             [m, idx] = min(abs(in(i) - x_axis));
-            indices(i) = idx;
+            index(i) = idx;
         end
-        output.(fields{k}){j} = indices;
+        output.(fields{k}){j} = index;
     end
 end
 end
@@ -107,6 +110,6 @@ end
 
 % compute amplitude spectra
 function output = ampSpectra(spectrum, n)
-output = spectrum(1:floor(n/2)+1,:)/n;
+output = abs(spectrum(1:floor(n/2)+1,:)/n);
 output(2:end-1,:) = 2*output(2:end-1,:);
 end

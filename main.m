@@ -6,7 +6,7 @@ folder = 'Data/online/';
 % graph_name = {'Baseline','Cursor Sines'};
 subj_name = {'Chris'};
 remove = 0;
-d = load_data(subj_name,folder,time);
+% d = load_data(subj_name,folder,time);
 data = analyze_data(d);
 
 % save dat data;
@@ -21,9 +21,9 @@ gblocks = 1:3;
 graph_bode_simple(data, graph_name, gblocks,'cursor');
 
 %% graph performance
-gblocks = 1;
+gblocks = 1:3;
 
-graph_amp_avg(data,block_name,gblocks,graph_name,'cursor'); % amplitude spectrums
+graph_amp_avg(data,gblocks,'cursor'); % amplitude spectrums
 % graph_MSE(data, block_name, graph_name); % mean squared error
 % graph_lag(data, gblocks, graph_name,'Lhand'); % response lag
 % graph_complexError(data, graph_name, gblocks); % complex tracking error

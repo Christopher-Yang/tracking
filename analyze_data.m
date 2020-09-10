@@ -16,7 +16,7 @@ function data = analyze_data(d)
         end
         
         % simulate the cursor sinusoidal perturbations 
-        [d{i}.cSimX, d{i}.cSimY] = reconstruct_cursor(input, d{i}.time, d{i}.frameRate);
+        [d{i}.cSimX, d{i}.cSimY] = reconstruct_cursor(input, d{i}.time, d{i}.frameRate, d{i}.cmConvert);
         
         % linearly interpolate missing data
         fields3 = [fields 'cSimX' 'cSimY'];
@@ -44,14 +44,16 @@ function data = analyze_data(d)
         % store data
         data{i}.pos = trajs;
         data{i}.x_axis = x_axis;
-        data{i}.time = d{i}.time;
         data{i}.MSE = MSE;
         data{i}.sineParams = input;
+        data{i}.trialType = d{i}.trialType;
+        data{i}.time = d{i}.time;
+        
     end
 end
 
 % simulate cursor sinusoidal perturbations from sine parameters
-function [outputX, outputY] = reconstruct_cursor(input, time, frameRate)
+function [outputX, outputY] = reconstruct_cursor(input, time, frameRate, cmConvert)
     Ntrials = size(time,2);
     outputX = NaN(size(time));
     outputY = NaN(size(time));
@@ -60,8 +62,8 @@ function [outputX, outputY] = reconstruct_cursor(input, time, frameRate)
         t = 0:1/frameRate:40-(1/frameRate);
         x = repmat(input.cX_amp{i}',[1 length(t)]).*cos(2*pi*input.cX_freq{i}'*t + repmat(input.cX_phase{i}',[1 length(t)]));
         y = repmat(input.cY_amp{i}',[1 length(t)]).*cos(2*pi*input.cY_freq{i}'*t + repmat(input.cY_phase{i}',[1 length(t)]));
-        x = sum(x,1);
-        y = sum(y,1);
+        x = cmConvert .* sum(x,1);
+        y = cmConvert .* sum(y,1);
 
         idx = find(isnan(time(:,i)));
         x(idx) = NaN;
@@ -72,7 +74,8 @@ function [outputX, outputY] = reconstruct_cursor(input, time, frameRate)
     end
 end
 
-% interpolates missing data
+% interpolates missing data (note that this method may interpolate negative
+% times instead of 0 at the start of the trial)
 function output = interpolate_data(data)
     Ntrials = size(data,2);
     for k = 1:Ntrials

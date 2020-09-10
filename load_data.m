@@ -17,7 +17,7 @@ function output = load_data(subj_name, folder, time)
 %         fnames = dir(path);
         
         % read data
-        d =  readtable([path '/testing5.csv']);
+        d =  readtable([path '/testing6.csv']);
         
         % extract useful variables from the data table
         Ntrials = size(d,1);
@@ -194,5 +194,7 @@ function output = load_data(subj_name, folder, time)
         output{i}.frameDrops = frameDrops;
         output{i}.OS = d.OS{1};
         output{i}.browser = d.browser{1};
+        output{i}.cmConvert = d.cmConvert(1);
     end
 end
+
