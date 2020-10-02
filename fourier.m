@@ -21,12 +21,13 @@ for i = 1:Ntrials
         in.y = target.yFFT(:,i);
         out.x = cursorHand.xFFT(:,i); % output trajectory
         out.y = cursorHand.yFFT(:,i);
+        flip = 0;
         
         % compute complex ratios
-        phasors.xTarg_x{i} = evaluateFFT(in.x, out.x, index.tX_freq{i});
-        phasors.xTarg_y{i} = evaluateFFT(in.x, out.y, index.tX_freq{i});
-        phasors.yTarg_x{i} = evaluateFFT(in.y, out.x, index.tY_freq{i});
-        phasors.yTarg_y{i} = evaluateFFT(in.y, out.y, index.tY_freq{i});
+        phasors.xTarg_x{i} = evaluateFFT(in.x, out.x, index.tX_freq{i}, flip);
+        phasors.xTarg_y{i} = evaluateFFT(in.x, out.y, index.tX_freq{i}, flip);
+        phasors.yTarg_x{i} = evaluateFFT(in.y, out.x, index.tY_freq{i}, flip);
+        phasors.yTarg_y{i} = evaluateFFT(in.y, out.y, index.tY_freq{i}, flip);
 
     % if no target sines, set cell array to NaN
     else
@@ -42,12 +43,13 @@ for i = 1:Ntrials
         in.y = cursorInput.yFFT(:,i);
         out.x = cursorHand.xFFT(:,i);
         out.y = cursorHand.yFFT(:,i);
+        flip = 1;
         
         % compute complex ratios
-        phasors.xCurs_x{i} = evaluateFFT(in.x, out.x, index.cX_freq{i});
-        phasors.xCurs_y{i} = evaluateFFT(in.x, out.y, index.cX_freq{i});
-        phasors.yCurs_x{i} = evaluateFFT(in.y, out.x, index.cY_freq{i});
-        phasors.yCurs_y{i} = evaluateFFT(in.y, out.y, index.cY_freq{i});
+        phasors.xCurs_x{i} = evaluateFFT(in.x, out.x, index.cX_freq{i}, flip);
+        phasors.xCurs_y{i} = evaluateFFT(in.x, out.y, index.cX_freq{i}, flip);
+        phasors.yCurs_x{i} = evaluateFFT(in.y, out.x, index.cY_freq{i}, flip);
+        phasors.yCurs_y{i} = evaluateFFT(in.y, out.y, index.cY_freq{i}, flip);
         
     % if no cursor sines, set cell array to NaN
     else
@@ -102,8 +104,12 @@ end
 end
 
 % compute complex ratio, gain, and phase
-function output = evaluateFFT(in, out, idx)
-output.ratio = out(idx)./in(idx);
+function output = evaluateFFT(in, out, idx, flip)
+if flip
+    output.ratio = -(out(idx)./in(idx));
+else
+    output.ratio = out(idx)./in(idx);
+end
 output.gain = abs(output.ratio);
 output.phase = angle(output.ratio);
 end

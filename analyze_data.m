@@ -3,7 +3,8 @@ function data = analyze_data(d)
     disp('Analyzing...');
     rng(3);
     Nsubj = length(d);
-    fields = {'time','cursorX','cursorY','targetX','targetY'};
+    fields = {'time','cursorX_hand','cursorY_hand','targetX','targetY','cursorX_input','cursorY_input'};
+%     fields = {'time','cursorX','cursorY','targetX','targetY'};
     fields2 = {'tX_freq','tY_freq','tX_amp','tY_amp','tX_phase','tY_phase','cX_freq','cY_freq','cX_amp','cY_amp','cX_phase','cY_phase'};
 
     for i = 1:Nsubj
@@ -16,21 +17,27 @@ function data = analyze_data(d)
         end
         
         % simulate the cursor sinusoidal perturbations 
-        [d{i}.cSimX, d{i}.cSimY] = reconstruct_cursor(input, d{i}.time, d{i}.frameRate, d{i}.cmConvert);
+%         [d{i}.cSimX, d{i}.cSimY] = reconstruct_cursor(input, d{i}.time, d{i}.frameRate);
         
         % linearly interpolate missing data
-        fields3 = [fields 'cSimX' 'cSimY'];
-        for j = 1:length(fields3)
-            d{i}.(fields3{j}) = interpolate_data(d{i}.(fields3{j}));
-        end            
+%         fields3 = [fields 'cSimX' 'cSimY'];
+        for j = 1:length(fields)
+            d{i}.(fields{j}) = interpolate_data(d{i}.(fields{j}));
+        end
+        
+        cursorX_raw = d{i}.cursorX_hand + d{i}.cursorX_input;
+        cursorY_raw = d{i}.cursorY_hand + d{i}.cursorY_input;
         
         % compute mean-squared error
-        MSE = nanmean((d{i}.cursorX-d{i}.targetX).^2 + (d{i}.cursorY-d{i}.targetY).^2);
+        MSE = nanmean((cursorX_raw-d{i}.targetX).^2 + (cursorY_raw-d{i}.targetY).^2);
         
         % create data structures to store position data
         trajs.target = struct('x',d{i}.targetX,'y',d{i}.targetY);
-        trajs.cursorHand = struct('x',d{i}.cursorX - d{i}.cSimX,'y',d{i}.cursorY - d{i}.cSimY);
-        trajs.cursorInput = struct('x',d{i}.cSimX,'y',d{i}.cSimY);
+%         trajs.cursorHand = struct('x',d{i}.cursorX - d{i}.cSimX,'y',d{i}.cursorY - d{i}.cSimY);
+%         trajs.cursorInput = struct('x',d{i}.cSimX,'y',d{i}.cSimY);
+%         trajs.cursorHand = struct('x',d{i}.cursorX - d{i}.cursorX_input,'y',d{i}.cursorY - d{i}.cursorY_input);
+        trajs.cursorHand = struct('x',d{i}.cursorX_hand,'y',d{i}.cursorY_hand);
+        trajs.cursorInput = struct('x',d{i}.cursorX_input,'y',d{i}.cursorY_input);
         
         % calculate frequencies used for FFT
         fs = d{i}.frameRate;
@@ -39,7 +46,7 @@ function data = analyze_data(d)
         % perform FFTs and compute complex ratios
         [data{i}.phasors, data{i}.raw_fft, data{i}.processed_fft] = fourier(trajs, input, x_axis, d{i}.trialType);
         
-        trajs.rawCursor = struct('x',d{i}.cursorX,'y',d{i}.cursorY);
+        trajs.rawCursor = struct('x',cursorX_raw,'y',cursorY_raw);
         
         % store data
         data{i}.pos = trajs;
@@ -48,22 +55,24 @@ function data = analyze_data(d)
         data{i}.sineParams = input;
         data{i}.trialType = d{i}.trialType;
         data{i}.time = d{i}.time;
-        
+        data{i}.frameDrops = d{i}.frameDrops;
+        data{i}.longDrops = d{i}.longDrops;
     end
 end
 
 % simulate cursor sinusoidal perturbations from sine parameters
-function [outputX, outputY] = reconstruct_cursor(input, time, frameRate, cmConvert)
+function [outputX, outputY] = reconstruct_cursor(input, time, frameRate)
     Ntrials = size(time,2);
     outputX = NaN(size(time));
     outputY = NaN(size(time));
     
     for i = 1:Ntrials
-        t = 0:1/frameRate:40-(1/frameRate);
+        t = 0:1/frameRate:45-(1/frameRate);
+        window = 5*frameRate:45*frameRate-1;
         x = repmat(input.cX_amp{i}',[1 length(t)]).*cos(2*pi*input.cX_freq{i}'*t + repmat(input.cX_phase{i}',[1 length(t)]));
         y = repmat(input.cY_amp{i}',[1 length(t)]).*cos(2*pi*input.cY_freq{i}'*t + repmat(input.cY_phase{i}',[1 length(t)]));
-        x = cmConvert .* sum(x,1);
-        y = cmConvert .* sum(y,1);
+        x = sum(x(:,window),1);
+        y = sum(y(:,window),1);
 
         idx = find(isnan(time(:,i)));
         x(idx) = NaN;

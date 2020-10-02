@@ -1,23 +1,28 @@
-function output = load_data(subj_name, folder, time)
+function output = load_data(folder, time)
     
     % display status 
     disp('Loading...');
     
     % fields from data file to be analyzed
     fields = {'tX_freq','tY_freq','tX_amp','tY_amp','tX_phase','tY_phase','cX_freq','cY_freq','cX_amp','cY_amp','cX_phase','cY_phase'};
-    fields2 = {'time','cursorX','cursorY','targetX','targetY'};
-    fields3 = {'extraTime','extraCursorX','extraCursorY','extraTargetX','extraTargetY'};
-    
+    fields2 = {'time','cursorX_hand','cursorY_hand','targetX','targetY','cursorX_input','cursorY_input'};
+    fields3 = {'extraTime','extraCursorX_hand','extraCursorY_hand','extraTargetX','extraTargetY','extraCursorX_input','extraCursorY_input'};
+%     fields2 = {'time','cursorX','cursorY','targetX','targetY'};
+%     fields3 = {'extraTime','extraCursorX','extraCursorY','extraTargetX','extraTargetY'};
+
     allFields = [fields fields2 fields3];
+    fnames = dir(folder);
+    Nsubj = length(fnames)-2;
     
-    for i = 1:length(subj_name)
+    for i = 1:Nsubj
         disp(['   Subject ' num2str(i)]); % display progress
-        path = [folder,subj_name{i}]; % file path for data
-%         tFile = dlmread([path,'/tFile.csv']); 
-%         fnames = dir(path);
         
         % read data
-        d =  readtable([path '/testing6.csv']);
+        d = readtable([folder '/' fnames(2+i).name]);
+        
+        % only analyze tracking trials
+        tracking = strcmp(d.task,'tracking');
+        d = d(tracking,:);
         
         % extract useful variables from the data table
         Ntrials = size(d,1);
@@ -25,7 +30,7 @@ function output = load_data(subj_name, folder, time)
         
         % set variables used in the analysis
         sampleIdx = 5*frameRate:(time+5)*frameRate-1; % data samples to be analyzed
-%         Nsamples = length(sampleIdx); % number of samples to be analyzed
+        Nsamples = length(sampleIdx); % number of samples to be analyzed
         tolerance = (1/frameRate) + 0.5/frameRate; % tolerance for defining duration of one frame
         count = 1; % index for storing sine parameters in cell array
         
@@ -103,14 +108,34 @@ function output = load_data(subj_name, folder, time)
                     % missing data as specified below
                     else
                         % find the indices of NaN(s)
-                        idxRange = before-check:after+check; 
-                        missing = idxRange(isnan(trial(idxRange,1)));
+                        if before-check < 1
+                            first = 1;
+                        else
+                            first = before-check;
+                        end
+                        if after+check > Nsamples
+                            last = Nsamples;
+                        else
+                            last = after+check;
+                        end
+                        idxRange = first:last;
+                        
+                        try
+                            missing = idxRange(isnan(trial(idxRange,1)));
+                        catch
+                            error('Something went wrong')
+                        end
                         
                         % do different things based on number of NaNs found
                         switch length(missing)
                             % NaN not found
                             case 0
-                                check = check + 1; % increase search range
+                                if check > 18 % only search within 300 ms of desired data position
+                                    disp('NaN could not be found');
+                                    replace = 0;
+                                else % increase search range
+                                    check = check + 1; 
+                                end
                             
                             % one NaN found
                             case 1
@@ -147,15 +172,12 @@ function output = load_data(subj_name, folder, time)
                                         trial(missing(1)+1:missing(2),:) = chunk;
                                     end
                                 else % don't insert data if reasonable solution can't be found
-                                    disp('Could not insert extra data');
+                                    disp('Could not find reasonable place to insert data');
                                 end
                                 
                                 % end while loop
                                 replace = 0;
                         end
-                    end
-                    if check > 100
-                        disp(check);
                     end
                 end
             end
@@ -177,13 +199,23 @@ function output = load_data(subj_name, folder, time)
         
         frameDrops = sum(isnan(output{i}.time),1)./frameRate; % calculate frame drops for each trial
         
+        % adjust time so times start at 0
         firstTime = nanmean(output{i}.time(1,:));
         for j = 1:Ntrials
             if ~isnan(output{i}.time(1,j))
                 output{i}.time(:,j) = output{i}.time(:,j) - output{i}.time(1,j); % begin time at 0
-            else
+            else % this handles cases when the first element of the column is a NaN (i.e., no first time)
                 output{i}.time(:,j) = output{i}.time(:,j) - firstTime;
             end
+        end
+        
+        % calculate duration of long windows of nans (>50 ms)
+        for j = 1:Ntrials
+            nans = find(isnan(output{i}.time(:,j)));
+            span = diff(nans);
+            allOnes = span == 1;
+            len = CountOnes(allOnes);
+            longDrops{j} = len(len > 3)*(1/frameRate);
         end
         
         for j = 1:length(fields)
@@ -192,9 +224,30 @@ function output = load_data(subj_name, folder, time)
         output{i}.trialType = d.trialType;
         output{i}.frameRate = frameRate;
         output{i}.frameDrops = frameDrops;
+        output{i}.longDrops = longDrops;
         output{i}.OS = d.OS{1};
         output{i}.browser = d.browser{1};
         output{i}.cmConvert = d.cmConvert(1);
     end
 end
 
+% compute the number of consecutive ones in an input vector
+function len = CountOnes(v)
+n   = length(v);
+len = zeros(1, ceil(n/2));%, 'uint32');
+j   = 0;
+k = 1;
+while k <= n
+  if v(k)
+    a = k;
+    k = k + 1;
+    while k <= n && v(k)
+       k = k + 1;
+    end
+    j = j + 1;
+    len(j) = k - a;
+  end
+  k = k + 1;
+end
+len = len(1:j);
+end

@@ -1,151 +1,140 @@
-function graph_amp_avg(data,gblocks,output)
+function graph_amp_avg(data,gblocks,subj)
+
+col = [30 144 255
+    0 0 139
+    255 182 193]./255;
+lw = 1;
+
+Ntrials = length(gblocks);
+Nsubj = length(data);
+fields = {'tX_freq','tY_freq','cX_freq','cY_freq'};
+fields2 = {'tX_amp','tY_amp','cX_amp','cY_amp'};
+fields3 = {'tX_idx','tY_idx','cX_idx','cY_idx'};
+
+for i = 1:Ntrials
+    for j = 1:length(fields)
+        input.(fields{j}) = data{1}.sineParams.(fields{j}){gblocks(i)};
+        input.(fields2{j}) = data{1}.sineParams.(fields2{j}){gblocks(i)};
+        input.(fields3{j}) = data{1}.phasors.index.(fields{j}){gblocks(i)};
+    end
     
-    col = [30 144 255
-           0 0 139
-           255 182 193]./255;
-    lw = 1;
+    xAxis = data{1}.x_axis;
+    trialType = data{1}.trialType;
     
-%     H = gobjects(length(gblocks),1);
-%     for i = 1:length(H)
-%         H(i) = figure;
-%     end
-    Ntrials = length(gblocks);
-    Nsubj = length(data);
-    fields = {'tX_freq','tY_freq','cX_freq','cY_freq'};
-    fields2 = {'tX_amp','tY_amp','cX_amp','cY_amp'};
-    fields3 = {'tX_idx','tY_idx','cX_idx','cY_idx'};
-    
-    for i = 1:Ntrials
-        for j = 1:length(fields)
-            input.(fields{j}) = data{1}.sineParams.(fields{j}){gblocks(i)};
-            input.(fields2{j}) = data{1}.sineParams.(fields2{j}){gblocks(i)};
-            input.(fields3{j}) = data{1}.phasors.index.(fields{j}){gblocks(i)};
-        end
-        
-        xAxis = data{1}.x_axis;
-        trialType = data{1}.trialType;
-        
 %     Nsteps = length(data{1}.(block_name{1}).(output).x_pos);
     
-        g = NaN(length(xAxis),Nsubj);
-        inX = g;
-        inY = g;
-        inX2 = g;
-        inY2 = g;
-        outX = g;
-        outY = g;
-%         g2 = NaN(length(xAxis),1000,length(gblocks));
-%         amps.x = g1;
-%         amps.y = g1;
-%         a = amps;
+    g = NaN(length(xAxis),Nsubj);
+    inX = g;
+    inY = g;
+    inX2 = g;
+    inY2 = g;
+    outX = g;
+    outY = g;
     
-%     names1 = {'x','y'};
-%     names2 = {'bootx','booty'};
-%     names3 = {'errx','erry'};
-%     names4 = {'x_all','y_all'};
-    
-        for j = 1:Nsubj
-            dat = data{j}.processed_fft;
-            if trialType(gblocks(i)) == 1
-                inX(:,j) = dat.target.xFFT(:,gblocks(i));
-                inY(:,j) = dat.target.yFFT(:,gblocks(i));
-            elseif trialType(gblocks(i)) == 2
-                inX(:,j) = dat.cursorInput.xFFT(:,gblocks(i));
-                inY(:,j) = dat.cursorInput.yFFT(:,gblocks(i));
-            else
-                inX(:,j) = dat.target.xFFT(:,gblocks(i));
-                inY(:,j) = dat.target.yFFT(:,gblocks(i));
-                inX2(:,j) = dat.cursorInput.xFFT(:,gblocks(i));
-                inY2(:,j) = dat.cursorInput.yFFT(:,gblocks(i));
-            end
-            outX(:,j) = dat.cursorHand.xFFT(:,gblocks(i));
-            outY(:,j) = dat.cursorHand.yFFT(:,gblocks(i));
+    for j = 1:Nsubj
+        dat = data{j}.processed_fft;
+        if trialType(gblocks(i)) == 1
+            inX(:,j) = dat.target.xFFT(:,gblocks(i));
+            inY(:,j) = dat.target.yFFT(:,gblocks(i));
+        elseif trialType(gblocks(i)) == 2
+            inX(:,j) = dat.cursorInput.xFFT(:,gblocks(i));
+            inY(:,j) = dat.cursorInput.yFFT(:,gblocks(i));
+        else
+            inX(:,j) = dat.target.xFFT(:,gblocks(i));
+            inY(:,j) = dat.target.yFFT(:,gblocks(i));
+            inX2(:,j) = dat.cursorInput.xFFT(:,gblocks(i));
+            inY2(:,j) = dat.cursorInput.yFFT(:,gblocks(i));
         end
-        
-        
-%         for j = 1:length(gblocks)
-%             dat = data{i}.(block_name{gblocks(j)});
-%             pX = dat.(output).x_fft;
-%             pY = dat.(output).y_fft;
-%             a.x_all(:,j,i) = squeeze(abs(mean(pX,2)));
-%             a.y_all(:,j,i) = squeeze(abs(mean(pY,2)));
-%         end
+        outX(:,j) = dat.cursorHand.xFFT(:,gblocks(i));
+        outY(:,j) = dat.cursorHand.yFFT(:,gblocks(i));
+    end
     
-%     a.x = mean(a.x_all,3);
-%     a.y = mean(a.y_all,3);
-%     
-%     a.x_all = permute(a.x_all,[1 3 2]);
-%     a.y_all = permute(a.y_all,[1 3 2]);
+    if isempty(subj)
+        inX_mean = mean(inX,2);
+        inY_mean = mean(inY,2);
+        inX2_mean = mean(inX2,2);
+        inY2_mean = mean(inY2,2);
+        outX_mean = mean(outX,2);
+        outY_mean = mean(outY,2);
+    else
+        inX_mean = inX(:,subj);
+        inY_mean = inY(:,subj);
+        inX2_mean = inX2(:,subj);
+        inY2_mean = inY2(:,subj);
+        outX_mean = outX(:,subj);
+        outY_mean = outY(:,subj);
+    end
     
-    % bootstrap data
-%     for j = 1:length(names1)
-%         for i = 1:1000
-%             a.(names2{j})(:,i,:) = mean(datasample(a.(names4{j}),Nsubj,2),2);
-%         end
-%         a.(names2{j}) = sort(a.(names2{j}),2);
-%         a.(names3{j})(:,:,1) = a.(names1{j}) - squeeze(a.(names2{j})(:,26,:));
-%         a.(names3{j})(:,:,2) = squeeze(a.(names2{j})(:,975,:)) - a.(names1{j});
-%         a.(names3{j}) = permute(a.(names3{j}),[3 1 2]);
-%     end
-    inX_mean = mean(inX,2);
-    inY_mean = mean(inY,2);
-    inX2_mean = mean(inX2,2);
-    inY2_mean = mean(inY2,2);
-    outX_mean = mean(outX,2);
-    outY_mean = mean(outY,2);
-    
-%     for i = 1:length(gblocks)
-%         figure(H(i))
     if trialType(gblocks(i)) == 1
-        num = 1;
+        morePlots = 0;
+        name = 'Target sines';
         ix = input.tX_idx;
         iy = input.tY_idx;
+        fx = input.tX_freq;
+        fy = input.tY_freq;
     elseif trialType(gblocks(i)) == 2
-        num = 1;
+        morePlots = 0;
+        name = 'Cursor sines';
         ix = input.cX_idx;
         iy = input.cY_idx;
+        fx = input.cX_freq;
+        fy = input.cY_freq;
     else
-        num = 2;
+        morePlots = 1;
+        name = 'Target sines';
         ix = input.tX_idx;
         iy = input.tY_idx;
+        fx = input.tX_freq;
+        fy = input.tY_freq;
+        
+        name2 = 'Cursor sines';
         ix2 = input.cX_idx;
         iy2 = input.cY_idx;
-    end 
+        fx2 = input.cX_freq;
+        fy2 = input.cY_freq;
+    end
     
-        figure(i); clf
-        subplot(2,num,1); hold on
-%         plot(tX_freq,ampX,'ko','LineWidth',lw,'MarkerFaceColor',[0 0 0])
-%         plot(tY_freq,ampY,'ko','LineWidth',lw)
-        % plot mean with error bars; doesn't work if amplitude spectra are averaged in the complex domain
-%         s = shadedErrorBar(xAxis, a.x(:,i),a.errx(:,:,i));
-%         editErrorBar(s,col(3,:),0.25);
-        plot(xAxis,inX_mean,'k')
+    figure(i); clf
+    subplot(2,2,1); hold on
+    plot(xAxis,inX_mean,'k')
+    plot(xAxis,outX_mean,'Color',col(1,:),'LineWidth',lw)
+    plot(fx,outX_mean(ix),'ko-','LineWidth',lw,'MarkerFaceColor',[0 0 0])
+    plot(fy,outX_mean(iy),'ko-','LineWidth',lw)
+    set(gca,'box','off','TickDir','out')
+    axis([0 2 0 2])
+    ylabel('X Amplitude (m)')
+    title(name)
+    legend({'Input','Output','X freqs','Y freqs'})
+    legend boxoff
+    
+    subplot(2,2,3); hold on
+    plot(xAxis,inY_mean,'k')
+    plot(xAxis,outY_mean,'LineWidth',lw,'Color',col(1,:))
+    plot(fy,outY_mean(iy),'ko-','LineWidth',lw)
+    plot(fx,outY_mean(ix),'ko-','LineWidth',lw,'MarkerFaceColor',[0 0 0])
+    set(gca,'box','off','TickDir','out')
+    axis([0 2 0 2])
+    ylabel('Y Amplitude (m)')
+    xlabel('Frequency (Hz)')
+    
+    if morePlots
+        subplot(2,2,2); hold on
+        plot(xAxis,inX2_mean,'k')
         plot(xAxis,outX_mean,'Color',col(1,:),'LineWidth',lw)
-        plot(input.tX_freq,outX_mean(input.tX_idx),'ko-','LineWidth',lw,'MarkerFaceColor',[0 0 0])
-        plot(input.tY_freq,outX_mean(input.tY_idx),'ko-','LineWidth',lw)
-        set(gca,'Xtick',0:1:2,'Ytick',0:0.01:0.03,'box','off','LineWidth',1,'TickDir','out','XMinorTick','on')
-        ax = gca;
-        ax.XAxis.MinorTickValues = 0:0.25:2.25;
-        axis([0 2.3 0 0.025])
-        ylabel('X Amplitude (m)')
-%         title(graph_name{gblocks(i)})
-        legend({'X target','Y target','Hand'})
-        legend boxoff
+        plot(fx2,outX_mean(ix2),'ko-','LineWidth',lw,'MarkerFaceColor',[0 0 0])
+        plot(fy2,outX_mean(iy2),'ko-','LineWidth',lw)
+        set(gca,'box','off','TickDir','out')
+        axis([0 2 0 2])
+        title(name2)
         
-        subplot(2,num,2); hold on
-%         plot(tX_freq, ampX,'ko','LineWidth',lw,'MarkerFaceColor',[0 0 0])
-%         plot(tY_freq, ampY,'ko','LineWidth',lw)
-%         s = shadedErrorBar(xAxis, a.y(:,i),a.erry(:,:,i),'lineProps','-b');
-%         editErrorBar(s,col(3,:),0.25);
-        plot(xAxis,inY_mean,'k')
+        subplot(2,2,4); hold on
+        plot(xAxis,inY2_mean,'k')
         plot(xAxis,outY_mean,'LineWidth',lw,'Color',col(1,:))
-        plot(input.tY_freq,outY_mean(input.tY_idx),'ko-','LineWidth',lw)
-        plot(input.tX_freq,outY_mean(input.tX_idx),'ko-','LineWidth',lw,'MarkerFaceColor',[0 0 0])
-        set(gca,'Xtick',0:1:2,'Ytick',0:0.01:0.03,'box','off','LineWidth',1,'TickDir','out','XMinorTick','on')
-        ax = gca;
-        ax.XAxis.MinorTickValues = 0:0.25:2.25;
-        axis([0 2.3 0 0.025])
-        ylabel('Y Amplitude (m)')
+        plot(fy2,outY_mean(iy2),'ko-','LineWidth',lw)
+        plot(fx2,outY_mean(ix2),'ko-','LineWidth',lw,'MarkerFaceColor',[0 0 0])
+        set(gca,'box','off','TickDir','out')
+        axis([0 2 0 2])
         xlabel('Frequency (Hz)')
     end
+end
 end
