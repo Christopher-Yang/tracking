@@ -3,60 +3,115 @@ function data = analyze_data(d)
     disp('Analyzing...');
     rng(3);
     Nsubj = length(d);
-    fields = {'time','cursorX_hand','cursorY_hand','targetX','targetY','cursorX_input','cursorY_input'};
+    fields = {'time','cursorX','cursorY','targetX','targetY','cursorX_input','cursorY_input'};
 %     fields = {'time','cursorX','cursorY','targetX','targetY'};
     fields2 = {'tX_freq','tY_freq','tX_amp','tY_amp','tX_phase','tY_phase','cX_freq','cY_freq','cX_amp','cY_amp','cX_phase','cY_phase'};
 
     for i = 1:Nsubj
         disp(['   Subject ' num2str(i)]);
-        Ntrials = size(d{i}.time,2);
-        
-        % store sine parmaeters in "input"
-        for j = 1:length(fields2)
-            input.(fields2{j}) = d{i}.(fields2{j});
+        Nblock = length(d{i});
+        for k = 1:Nblock
+            Ntrials = size(d{i}{k}.time,2);
+            
+            % store sine parmaeters in "input"
+            for j = 1:length(fields2)
+                input.(fields2{j}) = d{i}{k}.(fields2{j});
+            end
+            
+            % simulate the cursor sinusoidal perturbations
+            %         [d{i}.cSimX, d{i}.cSimY] = reconstruct_cursor(input, d{i}.time, d{i}.frameRate);
+            
+            % linearly interpolate missing data
+            %         fields3 = [fields 'cSimX' 'cSimY'];
+            for j = 1:length(fields)
+                d{i}{k}.(fields{j}) = interpolate_data(d{i}{k}.(fields{j}));
+            end
+            
+            cursorX_raw = d{i}{k}.cursorX + d{i}{k}.cursorX;
+            cursorY_raw = d{i}{k}.cursorY + d{i}{k}.cursorY;
+            
+            % compute mean-squared error
+            MSE = nanmean((cursorX_raw-d{i}{k}.targetX).^2 + (cursorY_raw-d{i}{k}.targetY).^2);
+            
+            % create data structures to store position data
+            trajs.target = struct('x',d{i}{k}.targetX,'y',d{i}{k}.targetY);
+            %         trajs.cursorHand = struct('x',d{i}.cursorX - d{i}.cSimX,'y',d{i}.cursorY - d{i}.cSimY);
+            %         trajs.cursorInput = struct('x',d{i}.cSimX,'y',d{i}.cSimY);
+            %         trajs.cursorHand = struct('x',d{i}.cursorX - d{i}.cursorX_input,'y',d{i}.cursorY - d{i}.cursorY_input);
+            trajs.cursorHand = struct('x',d{i}{k}.cursorX,'y',d{i}{k}.cursorY);
+            trajs.cursorInput = struct('x',d{i}{k}.cursorX_input,'y',d{i}{k}.cursorY_input);
+            
+            % calculate frequencies used for FFT
+            fs = d{i}{k}.frameRate;
+            x_axis = fs*(0:length(trajs.target.x)/2)/length(trajs.target.x);
+            
+            % perform FFTs and compute complex ratios
+            [data{i}{k}.phasors, data{i}{k}.raw_fft, data{i}{k}.processed_fft] = fourier(trajs, input, x_axis, d{i}{k}.trialType);
+            
+            trajs.rawCursor = struct('x',cursorX_raw,'y',cursorY_raw);
+            
+            a = data{i}{k}.phasors;
+            b = data{i}{k}.raw_fft;
+            pAxis = fieldnames(a);
+            pAxis = pAxis(1:8);
+            names = {'x_x','x_y','y_x','y_y'};
+            Nfreq = length(d{1}{1}.tX_freq{1});
+            
+            clear Hur Hud Hur2 Hud2
+            for j = 1:4
+                Hur(j,:) = a.(pAxis{j}){1}.ratio;
+                Hud(j,:) = a.(pAxis{j+4}){2}.ratio;
+                
+                Hur2(j,:) = reshape(permute([a.(pAxis{j}){3}.ratio a.(pAxis{j}){4}.ratio],[2 1]),[Nfreq 1]);
+                Hud2(j,:) = reshape(permute([a.(pAxis{j+4}){4}.ratio a.(pAxis{j+4}){3}.ratio],[2 1]),[Nfreq 1]);
+            end
+            
+            Hur = reshape(Hur,[2 2 Nfreq]);
+            Hud = reshape(Hud,[2 2 Nfreq]);
+            Hur2 = reshape(Hur2,[2 2 Nfreq]);
+            Hud2 = reshape(Hud2,[2 2 Nfreq]);
+            
+            if k == 1
+                M = eye(2);
+            else
+                M = [0 1; 1 0];
+            end
+            
+            for j = 1:Nfreq
+                B(:,:,j) = inv(Hud(:,:,j)*M + eye(2))*-Hud(:,:,j);
+                F(:,:,j) = Hur(:,:,j) + Hur(:,:,j)*M*B(:,:,j) - B(:,:,j);
+                B2(:,:,j) = inv(Hud2(:,:,j)*M + eye(2))*-Hud2(:,:,j);
+                F2(:,:,j) = Hur2(:,:,j) + Hur2(:,:,j)*M*B2(:,:,j) - B2(:,:,j);
+            end
+            
+%             for j = 1:length(pAxis)/2
+%                 Hur = a.(pAxis{j}){1}.ratio;
+%                 Hud = a.(pAxis{j+4}){2}.ratio;
+%                 
+%                 Hur2 = reshape(permute([a.(pAxis{j}){3}.ratio a.(pAxis{j}){4}.ratio],[2 1]),[Nfreq 1]);
+%                 Hud2 = reshape(permute([a.(pAxis{j+4}){4}.ratio a.(pAxis{j+4}){3}.ratio],[2 1]),[Nfreq 1]);
+%                 
+%                 B.(names{j}) = -Hud./(1+Hud);
+%                 F.(names{j}) = (Hur + Hud)./(1 + Hud);
+%                 
+%                 B2.(names{j}) = -Hud2./(1+Hud2);
+%                 F2.(names{j}) = (Hur2 + Hud2)./(1 + Hud2);
+%             end
+            
+            % store data
+            data{i}{k}.B = B;
+            data{i}{k}.F = F;
+            data{i}{k}.B2 = B2;
+            data{i}{k}.F2 = F2;
+            data{i}{k}.pos = trajs;
+            data{i}{k}.x_axis = x_axis;
+            data{i}{k}.MSE = MSE;
+            data{i}{k}.sineParams = input;
+            data{i}{k}.trialType = d{i}{k}.trialType;
+            data{i}{k}.time = d{i}{k}.time;
+            data{i}{k}.frameDrops = d{i}{k}.frameDrops;
+            data{i}{k}.longDrops = d{i}{k}.longDrops;
         end
-        
-        % simulate the cursor sinusoidal perturbations 
-%         [d{i}.cSimX, d{i}.cSimY] = reconstruct_cursor(input, d{i}.time, d{i}.frameRate);
-        
-        % linearly interpolate missing data
-%         fields3 = [fields 'cSimX' 'cSimY'];
-        for j = 1:length(fields)
-            d{i}.(fields{j}) = interpolate_data(d{i}.(fields{j}));
-        end
-        
-        cursorX_raw = d{i}.cursorX_hand + d{i}.cursorX_input;
-        cursorY_raw = d{i}.cursorY_hand + d{i}.cursorY_input;
-        
-        % compute mean-squared error
-        MSE = nanmean((cursorX_raw-d{i}.targetX).^2 + (cursorY_raw-d{i}.targetY).^2);
-        
-        % create data structures to store position data
-        trajs.target = struct('x',d{i}.targetX,'y',d{i}.targetY);
-%         trajs.cursorHand = struct('x',d{i}.cursorX - d{i}.cSimX,'y',d{i}.cursorY - d{i}.cSimY);
-%         trajs.cursorInput = struct('x',d{i}.cSimX,'y',d{i}.cSimY);
-%         trajs.cursorHand = struct('x',d{i}.cursorX - d{i}.cursorX_input,'y',d{i}.cursorY - d{i}.cursorY_input);
-        trajs.cursorHand = struct('x',d{i}.cursorX_hand,'y',d{i}.cursorY_hand);
-        trajs.cursorInput = struct('x',d{i}.cursorX_input,'y',d{i}.cursorY_input);
-        
-        % calculate frequencies used for FFT
-        fs = d{i}.frameRate;
-        x_axis = fs*(0:length(trajs.target.x)/2)/length(trajs.target.x);
-        
-        % perform FFTs and compute complex ratios
-        [data{i}.phasors, data{i}.raw_fft, data{i}.processed_fft] = fourier(trajs, input, x_axis, d{i}.trialType);
-        
-        trajs.rawCursor = struct('x',cursorX_raw,'y',cursorY_raw);
-        
-        % store data
-        data{i}.pos = trajs;
-        data{i}.x_axis = x_axis;
-        data{i}.MSE = MSE;
-        data{i}.sineParams = input;
-        data{i}.trialType = d{i}.trialType;
-        data{i}.time = d{i}.time;
-        data{i}.frameDrops = d{i}.frameDrops;
-        data{i}.longDrops = d{i}.longDrops;
     end
 end
 
@@ -95,9 +150,27 @@ function output = interpolate_data(data)
             before = numbers(numbers < nans);
             after = numbers(numbers > nans);
             if isempty(before)
-                d(1) = d(2) - (d(3)-d(2));
+                idx = 1;
+                while isnan(d(1))
+                    num = d(idx+2)-d(idx+1);
+                    if ~isnan(num)
+                       for i = 0:idx-1
+                           d(idx-i) = d(idx-i+1) - num;
+                       end
+                    end
+                    idx = idx + 1;
+                end
             elseif isempty(after)
-                d(end) = d(end-1) - (d(end-2)-d(end-1));
+                idx = length(d);
+                while isnan(d(end))
+                    num = d(idx-2)-d(idx-1);
+                    if ~isnan(num)
+                        for i = 0:length(d)-idx
+                            d(idx+i) = d(idx+i-1) - num;
+                        end
+                    end
+                    idx = idx - 1;
+                end
             else
                 before = before(end);
                 after = after(1);

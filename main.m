@@ -1,11 +1,11 @@
-clear all;
+% clear all;
 time = 40; %in seconds
 
-folder = 'Data/online/test_data2';
+folder = 'Data/online/pilot';
 % block_name = {'baseline','cursor_sines'};
 % graph_name = {'Baseline','Cursor Sines'};
 remove = 0;
-d = load_data(folder,time);
+% d = load_data(folder,time);
 data = analyze_data(d);
 
 % save dat data;
@@ -20,10 +20,11 @@ gblocks = 1:3;
 graph_bode_simple(data, graph_name, gblocks,'cursor');
 
 %% graph performance
-gblocks = 1:8;
+gblocks = 6;
 subj = [];
 
-graph_amp_avg(data,gblocks,subj); % amplitude spectrums
+graph_amp_avg(data,gblocks,subj,1); % amplitude spectrums
+% graph_gainMatrix(data)
 % graph_MSE(data, block_name, graph_name); % mean squared error
 % graph_lag(data, gblocks, graph_name,'Lhand'); % response lag
 % graph_complexError(data, graph_name, gblocks); % complex tracking error

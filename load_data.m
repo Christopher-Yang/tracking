@@ -5,10 +5,8 @@ function output = load_data(folder, time)
     
     % fields from data file to be analyzed
     fields = {'tX_freq','tY_freq','tX_amp','tY_amp','tX_phase','tY_phase','cX_freq','cY_freq','cX_amp','cY_amp','cX_phase','cY_phase'};
-    fields2 = {'time','cursorX_hand','cursorY_hand','targetX','targetY','cursorX_input','cursorY_input'};
-    fields3 = {'extraTime','extraCursorX_hand','extraCursorY_hand','extraTargetX','extraTargetY','extraCursorX_input','extraCursorY_input'};
-%     fields2 = {'time','cursorX','cursorY','targetX','targetY'};
-%     fields3 = {'extraTime','extraCursorX','extraCursorY','extraTargetX','extraTargetY'};
+    fields2 = {'time','cursorX','cursorY','targetX','targetY','cursorX_input','cursorY_input'};
+    fields3 = {'extraTime','extraCursorX','extraCursorY','extraTargetX','extraTargetY','extraCursorX_input','extraCursorY_input'};
 
     allFields = [fields fields2 fields3];
     fnames = dir(folder);
@@ -33,11 +31,20 @@ function output = load_data(folder, time)
         Nsamples = length(sampleIdx); % number of samples to be analyzed
         tolerance = (1/frameRate) + 0.5/frameRate; % tolerance for defining duration of one frame
         count = 1; % index for storing sine parameters in cell array
+        count2 = 0; % index for arranging data into blocks
+        block = 1;
         
         % organize data into appropriate format
         for k = 1:Ntrials
             trial = [];
             extraData = [];
+            
+            if block == d.block(k)
+                count2 = count2 + 1;
+            else
+                block = d.block(k);
+                count2 = 1;
+            end
             
             % format data from strings into matrices
             for j = 1:length(allFields)
@@ -191,43 +198,47 @@ function output = load_data(folder, time)
             
             % store data in output
             for j = 1:length(fields2)
-                output{i}.(fields2{j})(:,k) = trial(:,j);
+                output{i}{d.block(k)}.(fields2{j})(:,count2) = trial(:,j);
             end
             
             count = count + 1;
         end
         
-        frameDrops = sum(isnan(output{i}.time),1)./frameRate; % calculate frame drops for each trial
+        Nblock = max(d.block);
         
-        % adjust time so times start at 0
-        firstTime = nanmean(output{i}.time(1,:));
-        for j = 1:Ntrials
-            if ~isnan(output{i}.time(1,j))
-                output{i}.time(:,j) = output{i}.time(:,j) - output{i}.time(1,j); % begin time at 0
-            else % this handles cases when the first element of the column is a NaN (i.e., no first time)
-                output{i}.time(:,j) = output{i}.time(:,j) - firstTime;
+        for k = 1:max(d.block)
+            frameDrops = sum(isnan(output{i}{k}.time),1)./frameRate; % calculate frame drops for each trial
+            
+            % adjust time so times start at 0
+            firstTime = nanmean(output{i}{k}.time(1,:));
+            for j = 1:Ntrials/Nblock
+                if ~isnan(output{i}{k}.time(1,j))
+                    output{i}{k}.time(:,j) = output{i}{k}.time(:,j) - output{i}{k}.time(1,j); % begin time at 0
+                else % this handles cases when the first element of the column is a NaN (i.e., no first time)
+                    output{i}{k}.time(:,j) = output{i}{k}.time(:,j) - firstTime;
+                end
             end
+            
+            % calculate duration of long windows of nans (>50 ms)
+            for j = 1:Ntrials/Nblock
+                nans = find(isnan(output{i}{k}.time(:,j)));
+                span = diff(nans);
+                allOnes = span == 1;
+                len = CountOnes(allOnes);
+                longDrops{j} = len(len > 3)*(1/frameRate);
+            end
+            
+            for j = 1:length(fields)
+                output{i}{k}.(fields{j}) = sineParams.(fields{j})(1:Ntrials/Nblock);
+            end
+            output{i}{k}.trialType = d.trialType(1:4);
+            output{i}{k}.frameRate = frameRate;
+            output{i}{k}.frameDrops = frameDrops;
+            output{i}{k}.longDrops = longDrops;
+            output{i}{k}.OS = d.OS{1};
+            output{i}{k}.browser = d.browser{1};
+%             output{i}.cmConvert = d.cmConvert(1);
         end
-        
-        % calculate duration of long windows of nans (>50 ms)
-        for j = 1:Ntrials
-            nans = find(isnan(output{i}.time(:,j)));
-            span = diff(nans);
-            allOnes = span == 1;
-            len = CountOnes(allOnes);
-            longDrops{j} = len(len > 3)*(1/frameRate);
-        end
-        
-        for j = 1:length(fields)
-            output{i}.(fields{j}) = sineParams.(fields{j});
-        end
-        output{i}.trialType = d.trialType;
-        output{i}.frameRate = frameRate;
-        output{i}.frameDrops = frameDrops;
-        output{i}.longDrops = longDrops;
-        output{i}.OS = d.OS{1};
-        output{i}.browser = d.browser{1};
-        output{i}.cmConvert = d.cmConvert(1);
     end
 end
 

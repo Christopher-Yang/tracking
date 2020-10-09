@@ -1,4 +1,4 @@
-function graph_amp_avg(data,gblocks,subj)
+function graph_amp_avg(data,gblocks,subj,trialType)
 
 col = [30 144 255
     0 0 139
@@ -13,13 +13,13 @@ fields3 = {'tX_idx','tY_idx','cX_idx','cY_idx'};
 
 for i = 1:Ntrials
     for j = 1:length(fields)
-        input.(fields{j}) = data{1}.sineParams.(fields{j}){gblocks(i)};
-        input.(fields2{j}) = data{1}.sineParams.(fields2{j}){gblocks(i)};
-        input.(fields3{j}) = data{1}.phasors.index.(fields{j}){gblocks(i)};
+        input.(fields{j}) = data{1}{gblocks(i)}.sineParams.(fields{j}){trialType};
+        input.(fields2{j}) = data{1}{gblocks(i)}.sineParams.(fields2{j}){trialType};
+        input.(fields3{j}) = data{1}{gblocks(i)}.phasors.index.(fields{j}){trialType};
     end
     
-    xAxis = data{1}.x_axis;
-    trialType = data{1}.trialType;
+    xAxis = data{1}{gblocks(i)}.x_axis;
+%     trialType = data{1}{gblocks(i)}.trialType;
     
 %     Nsteps = length(data{1}.(block_name{1}).(output).x_pos);
     
@@ -32,21 +32,21 @@ for i = 1:Ntrials
     outY = g;
     
     for j = 1:Nsubj
-        dat = data{j}.processed_fft;
-        if trialType(gblocks(i)) == 1
-            inX(:,j) = dat.target.xFFT(:,gblocks(i));
-            inY(:,j) = dat.target.yFFT(:,gblocks(i));
-        elseif trialType(gblocks(i)) == 2
-            inX(:,j) = dat.cursorInput.xFFT(:,gblocks(i));
-            inY(:,j) = dat.cursorInput.yFFT(:,gblocks(i));
+        dat = data{j}{gblocks(i)}.processed_fft;
+        if trialType == 1
+            inX(:,j) = dat.target.xFFT(:,trialType);
+            inY(:,j) = dat.target.yFFT(:,trialType);
+        elseif trialType == 2
+            inX(:,j) = dat.cursorInput.xFFT(:,trialType);
+            inY(:,j) = dat.cursorInput.yFFT(:,trialType);
         else
-            inX(:,j) = dat.target.xFFT(:,gblocks(i));
-            inY(:,j) = dat.target.yFFT(:,gblocks(i));
-            inX2(:,j) = dat.cursorInput.xFFT(:,gblocks(i));
+            inX(:,j) = dat.target.xFFT(:,trialType);
+            inY(:,j) = dat.target.yFFT(:,trialType);
+            inX2(:,j) = dat.cursorInput.xFFT(:,trialType);
             inY2(:,j) = dat.cursorInput.yFFT(:,gblocks(i));
         end
-        outX(:,j) = dat.cursorHand.xFFT(:,gblocks(i));
-        outY(:,j) = dat.cursorHand.yFFT(:,gblocks(i));
+        outX(:,j) = dat.cursorHand.xFFT(:,trialType);
+        outY(:,j) = dat.cursorHand.yFFT(:,trialType);
     end
     
     if isempty(subj)
@@ -65,14 +65,14 @@ for i = 1:Ntrials
         outY_mean = outY(:,subj);
     end
     
-    if trialType(gblocks(i)) == 1
+    if trialType == 1
         morePlots = 0;
         name = 'Target sines';
         ix = input.tX_idx;
         iy = input.tY_idx;
         fx = input.tX_freq;
         fy = input.tY_freq;
-    elseif trialType(gblocks(i)) == 2
+    elseif trialType == 2
         morePlots = 0;
         name = 'Cursor sines';
         ix = input.cX_idx;
