@@ -63,9 +63,11 @@ function output = load_data(folder, time)
             
             % throw out extra data that was collected during 5-second ramp
             % period
-            useSamples = find(extraData(:,1)>5);
-            extraData = extraData(useSamples,:);
-
+            if ~isempty(extraData)
+                useSamples = find(extraData(:,1)>5);
+                extraData = extraData(useSamples,:);
+            end
+            
             % insert missing data (extraData) into the the main data
             % (trial)
             for m = 1:size(extraData,1)

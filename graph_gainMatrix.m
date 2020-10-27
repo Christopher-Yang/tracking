@@ -139,7 +139,7 @@ end
 
 %% plot gain matrices as 2x2
 subj = 1;
-type = 2;
+type = 1;
 rMat = rotMat(:,:,:,:,subj,type);
 
 % rMat = mean(rotMat,5);

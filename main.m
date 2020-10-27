@@ -1,9 +1,7 @@
 % clear all;
 time = 40; %in seconds
 
-folder = 'Data/online/pilot';
-% block_name = {'baseline','cursor_sines'};
-% graph_name = {'Baseline','Cursor Sines'};
+folder = 'Data/online/pilot2';
 remove = 0;
 % d = load_data(folder,time);
 data = analyze_data(d);
@@ -20,7 +18,7 @@ gblocks = 1:3;
 graph_bode_simple(data, graph_name, gblocks,'cursor');
 
 %% graph performance
-gblocks = 6;
+gblocks = 1;
 subj = [];
 
 graph_amp_avg(data,gblocks,subj,1); % amplitude spectrums
