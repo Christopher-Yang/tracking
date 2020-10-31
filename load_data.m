@@ -5,8 +5,8 @@ function output = load_data(folder, time)
     
     % fields from data file to be analyzed
     fields = {'tX_freq','tY_freq','tX_amp','tY_amp','tX_phase','tY_phase','cX_freq','cY_freq','cX_amp','cY_amp','cX_phase','cY_phase'};
-    fields2 = {'time','cursorX','cursorY','targetX','targetY','cursorX_input','cursorY_input'};
-    fields3 = {'extraTime','extraCursorX','extraCursorY','extraTargetX','extraTargetY','extraCursorX_input','extraCursorY_input'};
+    fields2 = {'time','cursorX','cursorY','handX','handY','targetX','targetY','cursorX_input','cursorY_input'};
+    fields3 = {'extraTime','extraCursorX','extraCursorY','extraHandX','extraHandY','extraTargetX','extraTargetY','extraCursorX_input','extraCursorY_input'};
 
     allFields = [fields fields2 fields3];
     fnames = dir(folder);
@@ -230,10 +230,14 @@ function output = load_data(folder, time)
                 longDrops{j} = len(len > 3)*(1/frameRate);
             end
             
+            % extract whether block was mirrored
+            mirror = d.mirror(d.block==k);
+            
             for j = 1:length(fields)
                 output{i}{k}.(fields{j}) = sineParams.(fields{j})(1:Ntrials/Nblock);
             end
-            output{i}{k}.trialType = d.trialType(1:4);
+            output{i}{k}.mirror = mirror{1};
+            output{i}{k}.trialType = d.trialType(d.block == 1);
             output{i}{k}.frameRate = frameRate;
             output{i}{k}.frameDrops = frameDrops;
             output{i}{k}.longDrops = longDrops;

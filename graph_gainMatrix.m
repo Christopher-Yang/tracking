@@ -4,23 +4,19 @@ graph_name = {'Baseline','Block 1','Block 2','Block 3','Block 4','Block 5'};
 
 Nsubj = length(data);
 Nblock = length(data{1});
-Nfreq = length(data{1}{1}.sineParams.tX_freq{1});
-Ntypes = 4;
+Nfreq = 12;
+Ntrials = 2;
 paramsInit = zeros([2 Nblock]);
 
 analysis = 2;
 
 if analysis == 1
-    names{1} = {'xTarg_x','xTarg_y','yTarg_x','yTarg_y'};
-    names{2} = {'xCurs_x','xCurs_y','yCurs_x','yCurs_y'};
-    names{3} = names{1};
-    names{4} = names{2};
+    names = {'Hur','Hud'};
 else
-    names{1} = 'F';
-    names{2} = 'B';
-    names{3} = 'F2';
-    names{4} = 'B2';
+    names = {'F','B'};
 end
+
+Ntypes = length(names);
 
 for q = 1:Ntypes
     for p = 1:Nsubj % loop over subjects
@@ -30,27 +26,13 @@ for q = 1:Ntypes
             else
                 idx = [2 1 4 3];
             end
+            a = reshape(data{p}{k}.(names{q}),[4 Nfreq Ntrials]);
             
-            if analysis == 1
-                a = data{p}{k}.phasors;
-                for i = 1:4 % loop over all combinations of hand/target axes
-                    switch q
-                        case 1
-                            phasors = a.(names{q}{idx(i)}){1}.ratio;
-                        case 2
-                            phasors = a.(names{q}{idx(i)}){2}.ratio;
-                        case 3
-                            phasors = reshape(permute([a.(names{q}{idx(i)}){3}.ratio a.(names{q}{idx(i)}){4}.ratio],[2 1]),[Nfreq 1]);
-                        case 4
-                            phasors = reshape(permute([a.(names{q}{idx(i)}){4}.ratio a.(names{q}{idx(i)}){3}.ratio],[2 1]),[Nfreq 1]);
-                    end
-                    cplx(:,i,k,p,q) = phasors; % put all complex ratios in cplx
-                end
-            else
-                a = reshape(data{p}{k}.(names{q}),[4 Nfreq]);
-                for i = 1:4
-                    cplx(:,i,k,p,q) = a(i,:);
-                end
+            % average across trials
+            a = mean(a,3);
+            
+            for i = 1:4
+                cplx(:,i,k,p,q) = a(i,:);
             end
         end
         
@@ -104,9 +86,9 @@ map2 = [linspace(col1(1),col2(1),Nfreq)', linspace(col1(2),col2(2),Nfreq)', lins
 
 %% plot vectors
 if analysis == 1
-    labels = {'Target sines (individual)','Cursor sines (individual)','Target sines (dual)','Cursor sines (dual)'};
+    labels = {'Target sines','Cursor sines'};
 else
-    labels = {'Feedforward (indivudal)','Feedback (individual)','Feedforward (dual)','Feedback (dual)'};
+    labels = {'Feedforward','Feedback'};
 end
 
 figure(1); clf
@@ -139,7 +121,7 @@ end
 
 %% plot gain matrices as 2x2
 subj = 1;
-type = 1;
+type = 2;
 rMat = rotMat(:,:,:,:,subj,type);
 
 % rMat = mean(rotMat,5);
