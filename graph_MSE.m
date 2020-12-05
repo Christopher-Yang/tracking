@@ -10,47 +10,50 @@ Ntrials = length(data.(groups{1}){1}.(block_name{1}).MSE);
 
 % set color maps
 col = lines;
-col = [col(1:7,:) repelem(0.1,7)'];
-col2 = [160 82 45
-    46 139 87
-    65 105 225]./255;
+col = col(1:6,:);
+col(5:6,:) = col(3:4,:);
+col(3:4,:) = [0 0 0; 0 0 0];
 
 % store data in new variables
 for i = 1:length(groups) % iterate over groups of subjects
     % preallocate variables
-    MSE_subj = NaN(Nblocks, Nsubj);
-    MSE_full = NaN(Nblocks*Ntrials, Nsubj);
+    MSE_full = NaN(Ntrials, Nblocks, Nsubj);
     
     % store data in variables
     for j = 1:Nsubj % iterate over subjects
-        x = NaN(Nblocks*Ntrials, 1); 
+        x = NaN(Ntrials, Nblocks); 
         for k = 1:Nblocks % iterate over blocks
-            MSE_subj(k,j) = mean(data.(groups{i}){j}.(block_name{k}).MSE); % average MSE within subject
-            x((k-1)*Ntrials+1:(k-1)*Ntrials+Ntrials) = data.(groups{i}){j}.(block_name{k}).MSE; % store MSE from each trial in x
+            x(:,k) = data.(groups{i}){j}.(block_name{k}).MSE; % store MSE from each trial in x
         end
-        MSE_full(:,j) = x; % put the individual trial MSEs from x into MSE_full
+        MSE_full(:,:,j) = x; % put the individual trial MSEs from x into MSE_full
     end
-    MSE.(groups{i}).full = MSE_full;
-    MSE.(groups{i}).full_se = std(MSE_full,[],2)/sqrt(size(MSE_full,2)); % compute standard error across subjects
+    MSE.(groups{i}) = permute(MSE_full, [1 3 2]);
 end
 
 % generate Figure 2C
 figure(2); clf
-for i = 1:6 % draw shaded error bar in 6 segments corresponding to 6 blocks
-    s = shadedErrorBar(8*(i-1)+1:8*(i-1)+8,mean(MSE.rot.full(8*(i-1)+1:8*(i-1)+8,:),2),MSE.rot.full_se(8*(i-1)+1:8*(i-1)+8)); hold on;
-    editErrorBar(s,col2(1,:),1);
-    s = shadedErrorBar(8*(i-1)+1:8*(i-1)+8,mean(MSE.mir.full(8*(i-1)+1:8*(i-1)+8,:),2),MSE.mir.full_se(8*(i-1)+1:8*(i-1)+8));
-    editErrorBar(s,col2(2,:),1);
+subplot(1,2,1); hold on
+rectangle('Position',[9 0 31 150],'FaceColor',[0 0 0 0.1],'EdgeColor','none');
+for i = 1:6
+    plot((i-1)*8+1:(i-1)*8+8,MSE.rot(:,:,i),'Color',[0 0 0 0.5],'LineWidth',0.2)
+    plot((i-1)*8+1:(i-1)*8+8,mean(MSE.rot(:,:,i),2),'Color',col(i,:),'LineWidth',1.5)
 end
-rectangle('Position',[1 0 Ntrials 20],'FaceColor',col(1,:),'EdgeColor','none') % color different blocks with rectangles
-rectangle('Position',[Ntrials+1 0 Ntrials 20],'FaceColor',col(2,:),'EdgeColor','none')
-rectangle('Position',[Ntrials*4+1 0 Ntrials 20],'FaceColor',col(3,:),'EdgeColor','none')
-rectangle('Position',[Ntrials*5+1 0 Ntrials 20],'FaceColor',col(4,:),'EdgeColor','none')
-set(gca,'xtick',1:Ntrials:length(MSE.(groups{1}).full),'ytick',0:0.003:0.012,'TickDir','out')
-axis([1 Ntrials*Nblocks 0 0.012])
-xlabel('Tracking Cycle Number')
-ylabel('Mean Squared Error (m^2)');
-legend('Rotation','Mirror Reversal');
-box off
-legend boxoff
+title('Rotation')
+xlabel('Trial Number (tracking)')
+ylabel('Mean-squared error (cm^2)')
+xticks(1:8:41)
+axis([1 49 0 150])
+set(gca,'TickDir','out')
+
+subplot(1,2,2); hold on
+rectangle('Position',[9 0 31 150],'FaceColor',[0 0 0 0.1],'EdgeColor','none');
+for i = 1:6
+    plot((i-1)*8+1:(i-1)*8+8,MSE.mir(:,:,i),'Color',[0 0 0 0.5],'LineWidth',0.2)
+    plot((i-1)*8+1:(i-1)*8+8,mean(MSE.mir(:,:,i),2),'Color',col(i,:),'LineWidth',1.5)
 end
+title('Mirror Reversal')
+xlabel('Trial Number (tracking)')
+xticks(1:8:41)
+axis([1 49 0 150])
+set(gca,'TickDir','out')
+

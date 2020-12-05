@@ -56,7 +56,7 @@ disp('Done')
 % load dat1 % load saved data
 
 % Figure 2B: raw hand and target trajectories
-graph_traj(data1); 
+graph_traj(data1);
 
 % Figure 2C: mean-squared error
 graph_MSE(data1);

@@ -1,4 +1,4 @@
-function graph_transformMat(data)
+function graph_alignMatrix(data)
 % performs analysis and makes plots for transformation matrices
 
 % set variables for analysis

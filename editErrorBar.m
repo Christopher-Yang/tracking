@@ -7,7 +7,7 @@ function output = editErrorBar(x, col, width)
     x.mainLine.MarkerSize = 4;
     x.patch.FaceColor = col;
     x.patch.EdgeColor = 'none';
-    x.patch.FaceAlpha = 0.15;
+    x.patch.FaceAlpha = 0.5;
     x.patch.HandleVisibility = 'off';
     output = x;
 end

@@ -73,9 +73,9 @@ for i = 1:Nsubj % iterate over subjects
         
         % compute mean-squared error between cursor and target for
         % every trial
-        MSE = mean((cursor.x_pos-target.x_pos).^2 + ...
-            (cursor.y_pos-target.y_pos).^2,1);
-        
+        MSE = mean((100*(cursor.x_pos-target.x_pos)).^2 + ...
+            (100*(cursor.y_pos-target.y_pos)).^2,1);
+                
         fs = 130.004; % sampling rate for data collection
         
         % frequencies used for plotting amplitude spectra
