@@ -1,45 +1,49 @@
-function graph_alignMatrix(data)
-% performs analysis and makes plots for transformation matrices
+% Performs analysis and makes plots for alignment matrices. The optional 
+% argument "delay_opt" contains the time delay that minimizes the mean-
+% squared error between target and hand trajectories for each trial. If
+% delay_opt is provided, it considerably reduces computation time. If
+% delay_opt is not provided, it will be computed from scratch. You can save
+% a new delay_opt by uncommenting line 104
+
+function graph_alignMatrix(data, delay_opt)
 
 % set variables for analysis
-groups = {'rot','mir'};
-block = {'baseline','pert1','pert2','pert3','pert4','post'};
-graph_name = {'Baseline','Early','Train2','Train3','Late','Post'};
-Ngroup = length(groups);
-Nblock = length(block);
-Nsubj = 10;
-Ntrials = 8;
-
-% delay.mat contains the time delay that minimizes the mean-squared error
-% between target and hand trajectories for each trial. Loading this data 
-% file considerably reduces computation time. This was calculated using
-% lines ......... in graph_transformMat.m. To generate delay.mat, comment
-% lines 18-19, uncomment lines 24-25, and run graph_transformMat.m.
-load delay
-delayTest = 0;
-
-% Number of time steps to delay the target relative to the hand (each time 
-% step is 1/130.004 sec; default delay is 50). Change delay to a vector of 
-% values to test the mean-squared error with different delays.
-% delay = 10:10:200; 
-% delayTest = 1
-
+groups = {'rot','mir'}; % names of groups
+block = {'baseline','pert1','pert2','pert3','pert4','post'}; % block names
+Ngroup = length(groups); % number of groups of subjects
+Nblock = length(block); % number of blocks
+Nsubj = 10; % number of subjects
+Ntrials = 8; % number of trials per block
 paramsInit = [1 0 0 1]; % initialize parameters for optimization
-transformMat_vmr = NaN(2,2,Ntrials,Nblock,Nsubj); % preallocate matrices
-transformMat_mr = NaN(2,2,Ntrials,Nblock,Nsubj);
+alignMat_vmr = NaN(2,2,Ntrials,Nblock,Nsubj); % 
+alignMat_mr = NaN(2,2,Ntrials,Nblock,Nsubj);
 
-for l = 1:Ngroup
-    for i = 1:Nsubj
-        for j = 1:Nblock
-            dat = data.(groups{l}){i}.(block{j});
-            for m = 1:Ntrials
+% This if statement determines whether to use the provided delay_opt or
+% compute it from scratch. If computing from scratch, the code tests
+% the time delays contained in "delay." This variable is in time steps of
+% 1/130 sec. The code then selects which delay minimizes the mean squared
+% error between the target and hand.
+if nargin > 1
+    delayTest = 0;
+else
+    delay = 10:10:280; 
+    delayTest = 1;
+end
+
+for n = 1:Ngroup % loop over groups
+    for i = 1:Nsubj % loop over subjects
+        for j = 1:Nblock % loop over blocks
+            dat = data.(groups{n}){i}.(block{j});
+            for m = 1:Ntrials % loop over trials
                 % hand position
                 hand = [dat.Rhand.x_pos(:,m) dat.Rhand.y_pos(:,m)]';
+                
                 % target position
                 target = [dat.target.x_pos(:,m) dat.target.y_pos(:,m)]';
                 
+                % tests various delays if delay_opt is not provided
                 if delayTest == 1
-                    transformMat = NaN(2,2,Ntrials,Nblock);
+                    alignMat = NaN(2,2,Ntrials,Nblock);
                     for k = 1:length(delay) % compute MSE for given delay
                         err = @(params) scale(params,hand,target,delay(k));
                         
@@ -47,49 +51,68 @@ for l = 1:Ngroup
                         [params_opt,fval] = fmincon(err,paramsInit);
                         
                         % shape into 2x2 matrix
-                        transformMat(:,:,m,k) = [params_opt(1:2); params_opt(3:4)];
+                        alignMat(:,:,m,k) = [params_opt(1:2); params_opt(3:4)];
                         
                         % record MSE
-                        MSE(k,m,j,i,l) = fval;
+                        MSE(k) = fval;
                     end
                     
                     % select the transformation matrix that minimizes MSE
                     p = islocalmin(MSE);
-                    idx(j,i,l) = find(p==1);
-                    transformMat = transformMat(:,:,m,idx);
+                    mins = find(p==1);
+                    
+                    if length(mins) == 0
+                        delay_opt(m,j,i,n) = NaN;
+                        alignMat = NaN(2);
+                    elseif length(mins) == 1
+                        idx = mins;
+                        delay_opt(m,j,i,n) = delay(mins);
+                        alignMat = alignMat(:,:,m,mins);
+                    else
+                        [~, id] = min(MSE(p));
+                        idx = mins(id);
+                        delay_opt(m,j,i,n) = delay(idx);
+                        alignMat = alignMat(:,:,m,idx);
+                    end
+                    
+                % if delay_opt is provided, uses this for analysis
                 else
-                    err = @(params) scale(params,hand,target,delay(m,j,i,l));
+                    err = @(params) scale(params,hand,target,delay_opt(m,j,i,n));
                     
                     % fit transformation matrix
                     params_opt = fmincon(err,paramsInit);
                     
                     % shape into 2x2 matrix
-                    transformMat = [params_opt(1:2); params_opt(3:4)];
+                    alignMat = [params_opt(1:2); params_opt(3:4)];
                 end
                 
                 % store fitted matrices: the first and second dimensions of
-                % each transformMat_* correspond to the transformation matrix
-                % for the jth block and the ith subject
-                if l == 1
-                    transformMat_vmr(:,:,m,j,i) = transformMat;
+                % each alignMat_* correspond to the alignment matrix for 
+                % the jth block and the ith subject
+                if n == 1
+                    alignMat_vmr(:,:,m,j,i) = alignMat;
                 else
-                    transformMat_mr(:,:,m,j,i) = transformMat;
+                    alignMat_mr(:,:,m,j,i) = alignMat;
                 end
             end
         end
     end
 end
 
+% Save delay_opt as a .m file. Uncomment the line below if you would like
+% to save a new delay_opt file
+% save delay_opt delay_opt
+
 % estimate rotation angle for the VMR group
 for i = 1:Nsubj
     for j = 1:Nblock
         for m = 1:Ntrials
-            H = transformMat_vmr(:,:,m,j,i)';
+            H = alignMat_vmr(:,:,m,j,i)';
             [U,S,V] = svd(H);
-            if det(H') >= 0
+            if det(H') >= 0 % if determinant >= 0, rotation matrix can be computed
                 R = V*U';
                 theta_opt(m,j,i) = atan2(R(2,1),R(1,1))*180/pi;
-            else
+            else % if rotation matrix can't be computed, set value to NaN
                 theta_opt(m,j,i) = NaN;
             end
         end
@@ -99,18 +122,19 @@ end
 % compute orthogonal gain for mirror-reversal group
 R = rotz(-45); % 45 degree clockwise rotation matrix
 R = R(1:2,1:2);
-perpAxis = R*[1 0]';
+perpAxis = R*[1 0]'; % axis perpendicular to the mirroring axis
 
+% compute gain perpendicular to mirroring axis
 for i = 1:Nsubj
     for j = 1:Nblock
         for m = 1:Ntrials
-            scaleOrth(m,j,i) = perpAxis'*transformMat_mr(:,:,m,j,i)*perpAxis;
+            scaleOrth(m,j,i) = perpAxis'*alignMat_mr(:,:,m,j,i)*perpAxis;
         end
     end
 end
 
 %% generate Figure 3A
-% make color maps
+% make color maps for plots
 col1 = [1 0 0];
 col2 = [1 1 1];
 Nstep = 100;
@@ -126,8 +150,8 @@ map = [map1; map2];
 clims = [-1 1];
 
 % average the transformation matrices across subjects
-mat1 = mean(transformMat_vmr,5); % average rotation group
-mat2 = mean(transformMat_mr,5); % average mirror-reversal group
+mat1 = mean(alignMat_vmr,5); % average rotation group
+mat2 = mean(alignMat_mr,5); % average mirror-reversal group
 gblocks = [1 2 5 6]; % blocks to graph
 
 % plot 2x2 transformation matrices
@@ -186,14 +210,14 @@ col2 = [128 0 128]/255;
 % in both axes
 for i = 1:4
     for j = 1:Ntrials
-        x(:,:,j,i,1) = cov(squeeze(transformMat_vmr(1,1,j,gblocks(i),:)),...
-            squeeze(transformMat_vmr(2,1,j,gblocks(i),:)));
-        y(:,:,j,i,1) = cov(squeeze(transformMat_vmr(1,2,j,gblocks(i),:)),...
-            squeeze(transformMat_vmr(2,2,j,gblocks(i),:)));
-        x(:,:,j,i,2) = cov(squeeze(transformMat_mr(1,1,j,gblocks(i),:)),...
-            squeeze(transformMat_mr(2,1,j,gblocks(i),:)));
-        y(:,:,j,i,2) = cov(squeeze(transformMat_mr(1,2,j,gblocks(i),:)),...
-            squeeze(transformMat_mr(2,2,j,gblocks(i),:)));
+        x(:,:,j,i,1) = cov(squeeze(alignMat_vmr(1,1,j,gblocks(i),:)),...
+            squeeze(alignMat_vmr(2,1,j,gblocks(i),:)));
+        y(:,:,j,i,1) = cov(squeeze(alignMat_vmr(1,2,j,gblocks(i),:)),...
+            squeeze(alignMat_vmr(2,2,j,gblocks(i),:)));
+        x(:,:,j,i,2) = cov(squeeze(alignMat_mr(1,1,j,gblocks(i),:)),...
+            squeeze(alignMat_mr(2,1,j,gblocks(i),:)));
+        y(:,:,j,i,2) = cov(squeeze(alignMat_mr(1,2,j,gblocks(i),:)),...
+            squeeze(alignMat_mr(2,2,j,gblocks(i),:)));
     end
 end
 
@@ -214,7 +238,7 @@ for i = 1:4
             'LineWidth',1.5) % plot vectors
         plot([0 mat1(1,2,j,gblocks(i))],[0 mat1(2,2,j,gblocks(i))],'Color',col2,...
             'LineWidth',1.5)
-        axis([-1 1.3 -1 1.3])
+        axis([-1.5 1.4 -1.5 1.4])
         axis square
         if j == 1
             if i == 1
@@ -247,7 +271,7 @@ for i = 1:4
             'LineWidth',1.5) % plot vectors
         plot([0 mat2(1,2,j,gblocks(i))],[0 mat2(2,2,j,gblocks(i))],'Color',col2,...
             'LineWidth',1.5)
-        axis([-1 1.3 -1 1.3])
+        axis([-1.5 1.4 -1.5 1.4])
         axis square
         if j == 1
             if i == 1
@@ -269,10 +293,10 @@ col = lines;
 col = col(1:7,:);
 
 % average the off-diagonal elements of the transformation matrices
-vmr = cat(4,squeeze(-transformMat_vmr(1,2,:,:,:)),squeeze...
-    (transformMat_vmr(2,1,:,:,:)));
-mr = cat(4,squeeze(transformMat_mr(1,2,:,:,:)),squeeze...
-    (transformMat_mr(2,1,:,:,:)));
+vmr = cat(4,squeeze(-alignMat_vmr(1,2,:,:,:)),squeeze...
+    (alignMat_vmr(2,1,:,:,:)));
+mr = cat(4,squeeze(alignMat_mr(1,2,:,:,:)),squeeze...
+    (alignMat_mr(2,1,:,:,:)));
 vmr = mean(vmr,4);
 mr = mean(mr,4);
 
@@ -285,7 +309,7 @@ mr = reshape(mr,[Ntrials*Nblock Nsubj]);
 % relevant values of the transformation matrices for statistical analysis 
 % in R.
 % z = [vmr(1,:)'; vmr(40,:)'; vmr(41,:)'; mr(1,:)'; mr(40,:)'; mr(41,:)'];
-% dlmwrite('transformation_matrix.csv',z);
+% dlmwrite('alignment_matrix.csv',z);
 
 figure(7); clf
 % plot responses for all tracking blocks
@@ -299,21 +323,21 @@ for k = 1:2
         idx = Ntrials*(i-1)+1:Ntrials*(i-1)+Ntrials;
         if i == 3 || i == 4 % plot blocks between Early and Late in black
             if k == 1
-                plot(idx,vmr(idx,:),'k','Color',[0 0 0 0.5])
-                plot(idx,mean(vmr(idx,:),2),'k','LineWidth',3)
+                plot(idx,vmr(idx,:),'k','Color',[0 0 0 0.5],'LineWidth',0.2)
+                plot(idx,mean(vmr(idx,:),2),'k','LineWidth',1.5)
             else
-                plot(idx,mr(idx,:),'k','Color',[0 0 0 0.5])
-                plot(idx,mean(mr(idx,:),2),'k','LineWidth',3)
+                plot(idx,mr(idx,:),'k','Color',[0 0 0 0.5],'LineWidth',0.2)
+                plot(idx,mean(mr(idx,:),2),'k','LineWidth',1.5)
             end
         else % all other blocks plot with colors
             if k == 1
-                plot(idx,vmr(idx,:),'k','Color',[0 0 0 0.5])
+                plot(idx,vmr(idx,:),'k','Color',[0 0 0 0.5],'LineWidth',0.2)
                 plot(idx,mean(vmr(idx,:),2),'Color',col(colIdx(i),:)...
-                    ,'LineWidth',3)
+                    ,'LineWidth',1.5)
             else
-                plot(idx,mr(idx,:),'k','Color',[0 0 0 0.5])
+                plot(idx,mr(idx,:),'k','Color',[0 0 0 0.5],'LineWidth',0.2)
                 plot(idx,mean(mr(idx,:),2),'Color',col(colIdx(i),:)...
-                    ,'LineWidth',3)
+                    ,'LineWidth',1.5)
             end
         end
     end
@@ -332,9 +356,9 @@ for k = 3:4
     
     % data from individual subjects
     if k == 3
-        plot(idx,vmr(idx,:),'k','Color',[0 0 0 0.5])
+        plot(idx,vmr(idx,:),'k','Color',[0 0 0 0.5],'LineWidth',0.2)
     else
-        plot(idx,mr(idx,:),'k','Color',[0 0 0 0.5])
+        plot(idx,mr(idx,:),'k','Color',[0 0 0 0.5],'LineWidth',0.2)
     end
     
     % mean across subjects
@@ -343,10 +367,10 @@ for k = 3:4
         
         if k == 3
             plot(idx,mean(vmr(idx,:),2),'Color',col(colIdx(i),:)...
-                ,'LineWidth',3)
+                ,'LineWidth',1.5)
         else
             plot(idx,mean(mr(idx,:),2),'Color',col(colIdx(i),:)...
-                ,'LineWidth',3)
+                ,'LineWidth',1.5)
         end
     end
     axis([0.5 Ntrials*Nblock+0.5 -.2 0.8])
@@ -413,8 +437,6 @@ set(gca,'TickDir','out')
 title('Mirror-Reversal')
 xticks(1:8:41)
 xlabel('Trial Number')
-% xticks([1 2 5 6])
-% xticklabels(graph_name([1 2 5 6]))
 yticks(-1:0.5:1)
 ylabel('Scaling (orthogonal to mirror axis)')
 axis([0.5 length(scaleOrthMu)+0.5 -1.1 1.1])

@@ -61,16 +61,26 @@ graph_traj(data1);
 % Figure 2C: mean-squared error
 graph_MSE(data1);
 
-% Figure 3: transformation matrix
-graph_transformMat(data1);
+% Figure 3: alignment matrix; delay_opt contains the optimal time to align
+% the target and hand trajectories that minimizes mean squared error; if
+% you would like to compute delay_opt instead of load it, uncomment lines
+% ___ and comment lines ____
 
-% Figures 4A, S1A, and S2A: amplitude spectra
+% USE PRECOMPUTED OPTIMAL DELAYS
+load delay_opt
+graph_alignMatrix(data1,delay_opt);
+
+% COMPUTE OPTIMAL DELAYS FROM SCRATCH
+% graph_alignMatrix(data1);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Figure 4A and Figure 4-supplements 1A & 2: amplitude spectra
 graph_ampSpectra(data1);
 
-% Figures 4B and S1B: coherence
+% Figures 4B and Figure 4-supplement 1B: coherence
 graph_coherence(data1);
 
-% Figures 5, S2B, and S4: gain matrix
+% Figure 5, Figure 5-supplement 1, and S4: gain matrix
 graph_gainMatrix(data1,experiment); 
 
 % Figure S3: phasors

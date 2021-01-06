@@ -1,4 +1,3 @@
-function data = analyze_data(d, subj_name, block_name)
 % Process raw tracking data, "d", for the given subjects in "subj_name" 
 % and blocks in "block_name." The output data structure, "data," is 
 % organized as "data1.[group]{[subject number]}.[block]." In the block 
@@ -21,6 +20,8 @@ function data = analyze_data(d, subj_name, block_name)
 %   ratio - complex ratio (phasor) between input and output
 %   gain/phase - gain/phase of the phasor
 %   index - indices in x_axis which are the target frequencies
+
+function data = analyze_data(d, subj_name, block_name)
 
 disp('Analyzing...');
 rng(3);

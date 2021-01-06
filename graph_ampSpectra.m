@@ -72,21 +72,26 @@ for k = 1:length(groups)
                 datY = squeeze(a.y_all(:,subj,:));
             end
                 
-            % generate Figures 4A, S1A, and S2A
+            % generate Figure 4A and Figure 4 supplements 1 & 2
+            % supplement 2
             figure(fig(1))
             subplot(4,2,2*(i-1)+k); hold on
             
             % plot target frequencies and amplitudes
-            plot(freqsX,ampX*100,'d','Color',col(1,:),'MarkerSize',6,'MarkerFaceColor',col(1,:))
-            plot(freqsY,ampY*100,'d','Color',col(2,:),'MarkerSize',6,'MarkerFaceColor',col(2,:))
+            plot(freqsX,ampX*100,'d','Color',col(1,:),'MarkerSize',6,...
+                'MarkerFaceColor',col(1,:))
+            plot(freqsY,ampY*100,'d','Color',col(2,:),'MarkerSize',6,...
+                'MarkerFaceColor',col(2,:))
             
             % plot value of spectra at certain frequencies
-            plot(freqsX,datX(ix,i)*100,'-o','Color',col(1,:),'MarkerSize',6,'MarkerFaceColor',col(1,:))
-            plot(freqsY,datX(iy,i)*100,'-o','Color',col(2,:),'MarkerSize',6,'MarkerFaceColor',col(2,:))
+            plot(freqsX,datX(ix,i)*100,'-o','Color',col(1,:),...
+                'MarkerSize',6,'MarkerFaceColor',col(1,:))
+            plot(freqsY,datX(iy,i)*100,'-o','Color',col(2,:),...
+                'MarkerSize',6,'MarkerFaceColor',col(2,:))
             
             % plot individual subjects
-            %         plot(xAxis,a.x_all(:,:,i),'Color',[0 0 0 0.3],'LineWidth',0.25...
-            %             ,'HandleVisibility','off')
+%             plot(xAxis,a.x_all(:,:,i),'Color',[0 0 0 0.3],...
+%                 'LineWidth',0.25,'HandleVisibility','off')
             
             % plot average across subjects
             plot(xAxis,datX(:,i)*100,'k','LineWidth',0.5)
@@ -95,13 +100,12 @@ for k = 1:length(groups)
             set(gcf,'Position',[100 50 520 600])
             axis([0 2.3 0 2.5])
             title([graph_name{gblocks(i)}, names{k}])
-%             if k == 1
-                ylabel('X Amplitude (cm)')
-%             end
+            ylabel('X Amplitude (cm)')
             if i == length(gblocks)
                 xlabel('Frequency (Hz)')
             elseif i == 1 && k == 2
-                legend({'X target','Y target','Hand response (X freq)','Hand response (Y freq)'})
+                legend({'X target','Y target','Hand response (X freq)',...
+                    'Hand response (Y freq)'})
                 legend boxoff
             end
             
@@ -109,15 +113,20 @@ for k = 1:length(groups)
             subplot(4,2,2*(i-1)+k); hold on
             
             % plot target frequencies and amplitudes
-            plot(freqsX, ampX*100,'d','Color',col(1,:),'MarkerSize',6,'MarkerFaceColor',col(1,:))
-            plot(freqsY, ampY*100,'d','Color',col(2,:),'MarkerSize',6,'MarkerFaceColor',col(2,:))
+            plot(freqsX, ampX*100,'d','Color',col(1,:),'MarkerSize',6,...
+                'MarkerFaceColor',col(1,:))
+            plot(freqsY, ampY*100,'d','Color',col(2,:),'MarkerSize',6,...
+                'MarkerFaceColor',col(2,:))
             
             % plot value of spectra at certain frequencies
-            plot(freqsY,datY(iy,i)*100,'-o','Color',col(2,:),'MarkerSize',6,'MarkerFaceColor',col(2,:))
-            plot(freqsX,datY(ix,i)*100,'-o','Color',col(1,:),'MarkerSize',6,'MarkerFaceColor',col(1,:))
+            plot(freqsY,datY(iy,i)*100,'-o','Color',col(2,:),...
+                'MarkerSize',6,'MarkerFaceColor',col(2,:))
+            plot(freqsX,datY(ix,i)*100,'-o','Color',col(1,:),...
+                'MarkerSize',6,'MarkerFaceColor',col(1,:))
             
             % plot individual subjects
-            %         plot(xAxis,a.y_all(:,:,i),'Color',[0 0 0 0.3],'LineWidth',0.25)
+%             plot(xAxis,a.y_all(:,:,i),'Color',[0 0 0 0.3],...
+%                 'LineWidth',0.25)
             
             % plot average avross subjects
             plot(xAxis,datY(:,i)*100,'k','LineWidth',0.5)
@@ -126,40 +135,15 @@ for k = 1:length(groups)
             set(gcf,'Position',[100 50 520 600])
             axis([0 2.3 0 2.5])
             title([graph_name{gblocks(i)}, names{k}])
-%             if k == 1
-                ylabel('Y Amplitude (cm)')
-%             end
+            ylabel('Y Amplitude (cm)')
             if i == length(gblocks)
                 xlabel('Frequency (Hz)')
             elseif i == 1 && k == 2
-                legend({'X target','Y target','Hand response (X freq)','Hand response (Y freq)'})
+                legend({'X target','Y target','Hand response (X freq)',...
+                    'Hand response (Y freq)'})
                 legend boxoff
             end
         end
     end
 end
-
-% create reference figures
-example = zeros(length(xAxis),2);
-example(ix,1) = ampX;
-example(iy,2) = ampY;
-
-% figure(11); clf
-% subplot(2,1,1); hold on
-% plot(freqsX, ampX,'d','Color',col(1,:),'MarkerSize',6,'MarkerFaceColor',col(1,:))
-% plot(freqsY, ampY,'d','Color',col(2,:),'MarkerSize',6,'MarkerFaceColor',col(2,:))
-% plot(freqsY,example(iy,1)*100,'o','Color',col(2,:),'MarkerSize',6,'MarkerFaceColor',col(2,:))
-% plot(xAxis,example(:,1),'k','LineWidth',0.5)
-% axis([0 2.3 0 .025])
-% xticks([])
-% yticks([])
-% 
-% subplot(2,1,2); hold on
-% plot(freqsX, ampX,'d','Color',col(1,:),'MarkerSize',6,'MarkerFaceColor',col(1,:))
-% plot(freqsY, ampY,'d','Color',col(2,:),'MarkerSize',6,'MarkerFaceColor',col(2,:))
-% plot(freqsX,example(ix,2),'o','Color',col(1,:),'MarkerSize',6,'MarkerFaceColor',col(1,:))
-% plot(xAxis,example(:,2),'k','LineWidth',0.5)
-% axis([0 2.3 0 .025])
-% xticks([])
-% yticks([])
 end

@@ -1,9 +1,10 @@
-function output = load_data(subj_rot, subj_mir, block_name, folder)
 % Extract raw data from the data files specified by the subject numbers
 % (subj_rot and subj_mir), blocks (block_name), and file path (folder).
 % This data is stored in "traj" while the frequencies, amplitudes, and
 % phases used to generate target motion are stored in "tFile." See
 % README.md for information what is contained in each data file and tFile.
+
+function output = load_data(subj_rot, subj_mir, block_name, folder)
 
 disp('Loading...');
 time = 40; % seconds of data to be analyzed per trial; can be 20 or 40 secs

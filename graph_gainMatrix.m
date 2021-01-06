@@ -1,6 +1,6 @@
-% function graph_gainMatrix(data,experiment)
+function graph_gainMatrix(data,experiment)
 % perform the analysis and make figures for the gain matrices
-data = data2;
+
 % set variables for analysis
 groups = {'rot','mir'};
 blocks = {'baseline','pert1','pert2','pert3','pert4','post'};
@@ -178,17 +178,6 @@ mat2 = permute(thetaOpt,[1 4 2 3 5 6]);
 mat2 = reshape(mat2,[4 Nblock*Ntrials Nfreq Nsubj Ngroup]);
 mat2(3,:,:,:,1) = -mat2(3,:,:,:,1); % for the rotation group, flip the sign of element 1,2
 mat2 = [mean(mat2([1 4],:,:,:,:),1); mean(mat2(2:3,:,:,:,:),1)]; % average on-diagonal and off-diagonal elements
-% if experiment == 2
-%     mat2 = permute(mat2,[4 2 3 1 5]);
-%     for i = 1:2
-%         for j = 1:Nfreq
-%             for k = 1:Ngroup
-%                 mat2(:,:,j,i,k) = filloutliers(squeeze(mat2(:,:,j,i,k)),NaN,'quartiles','thresholdfactor',2);
-%             end
-%         end
-%     end
-%     mat2 = permute(mat2,[4 2 3 1 5]);
-% end
 on = squeeze(nanmean(mat2(1,:,:,:,:),4)); % extract on-diagonal mean
 off = squeeze(nanmean(mat2(2,:,:,:,:),4)); % extract off-diagonal mean
 
@@ -205,11 +194,11 @@ off = squeeze(nanmean(mat2(2,:,:,:,:),4)); % extract off-diagonal mean
 % values of the gain matrices from experiment 2. This is used for 
 % statistical analysis in R.
 % if experiment == 2
-    z = permute(mat2(2,[1 7 30 31],:,:,:),[4 3 2 5 1]);
+%     z = permute(mat2(2,[1 7 30 31],:,:,:),[4 3 2 5 1]);
 %     z = reshape(z,[numel(z) 1]);
 %     dlmwrite('gain_matrix2.csv',z);
 % end
-%%
+
 % compute standard error over the averaged on- and off-diagonal elements
 onAll = permute(mat2(1,:,:,:,:),[2 4 3 5 1]);
 offAll = permute(mat2(2,:,:,:,:),[2 4 3 5 1]);
@@ -450,7 +439,7 @@ if experiment == 1
     
     % i=1 plots rotation data, i=2 plots mirror-reversal data
     for i = 1:Ngroup
-        figure(i+19); clf
+        figure(i+21); clf
         for k = 1:Nblock
             for p = 1:Nfreq
                 subplot(Nblock,Nfreq,(k-1)*Nfreq+p)
@@ -495,4 +484,4 @@ function e = scale(params,cplx_data,template)
     end
     e = sum(sum(e));
 end
-% end
+end
