@@ -51,69 +51,42 @@ function data = analyze_data(d)
             pAxis = pAxis(1:8);
             Nfreq = length(d{1}{1}.tX_freq{1})*4;
             
-            clear Hur Hud 
-            for j = 1:4
-                if j <= 2
-                    for m = 1:2
-                        Hur(j,:,m) = reshape(permute([a.(pAxis{j}){2*(m-1)+1}.ratio a.(pAxis{j}){2*(m-1)+2}.ratio a.(pAxis{j}){2*(m-1)+5}.ratio a.(pAxis{j}){2*(m-1)+6}.ratio],[2 1]),[Nfreq 1]);
-                        Hud(j,:,m) = reshape(permute([a.(pAxis{j+4}){2*(m-1)+2}.ratio a.(pAxis{j+4}){2*(m-1)+1}.ratio a.(pAxis{j+4}){2*(m-1)+6}.ratio a.(pAxis{j+4}){2*(m-1)+5}.ratio],[2 1]),[Nfreq 1]);
-                    end
-                else
-                    for m = 1:2
-                        Hur(j,:,m) = reshape(permute([a.(pAxis{j}){2*(m-1)+5}.ratio a.(pAxis{j}){2*(m-1)+6}.ratio a.(pAxis{j}){2*(m-1)+1}.ratio a.(pAxis{j}){2*(m-1)+2}.ratio],[2 1]),[Nfreq 1]);
-                        Hud(j,:,m) = reshape(permute([a.(pAxis{j+4}){2*(m-1)+6}.ratio a.(pAxis{j+4}){2*(m-1)+5}.ratio a.(pAxis{j+4}){2*(m-1)+2}.ratio a.(pAxis{j+4}){2*(m-1)+1}.ratio],[2 1]),[Nfreq 1]);
-                    end
-                end
-            end
-            
-            Hur = reshape(Hur,[2 2 Nfreq 2]);
-            Hud = reshape(Hud,[2 2 Nfreq 2]);
-            
-            if strcmp(d{i}{k}.mirror,'TRUE') 
-                M = [0 1; 1 0];
-            else
-                M = eye(2);
-            end
-            
-            % testing whether B and F analysis is okay with fixed Hur and
-            % Hud
-%             interval = pi/6;
-%             angle = 0:interval:2*pi-interval;
-%             realPart = cos(angle);
-%             imaginaryPart = sin(angle);
-%             comp = permute(realPart + imaginaryPart*1j,[2 1]);
-%             comp = 0.7.*comp;
+%             clear Hur Hud 
+%             for j = 1:4
+%                 if j <= 2
+%                     for m = 1:2
+%                         Hur(j,:,m) = reshape(permute([a.(pAxis{j}){2*(m-1)+1}.ratio a.(pAxis{j}){2*(m-1)+2}.ratio a.(pAxis{j}){2*(m-1)+5}.ratio a.(pAxis{j}){2*(m-1)+6}.ratio],[2 1]),[Nfreq 1]);
+%                         Hud(j,:,m) = reshape(permute([a.(pAxis{j+4}){2*(m-1)+2}.ratio a.(pAxis{j+4}){2*(m-1)+1}.ratio a.(pAxis{j+4}){2*(m-1)+6}.ratio a.(pAxis{j+4}){2*(m-1)+5}.ratio],[2 1]),[Nfreq 1]);
+%                     end
+%                 else
+%                     for m = 1:2
+%                         Hur(j,:,m) = reshape(permute([a.(pAxis{j}){2*(m-1)+5}.ratio a.(pAxis{j}){2*(m-1)+6}.ratio a.(pAxis{j}){2*(m-1)+1}.ratio a.(pAxis{j}){2*(m-1)+2}.ratio],[2 1]),[Nfreq 1]);
+%                         Hud(j,:,m) = reshape(permute([a.(pAxis{j+4}){2*(m-1)+6}.ratio a.(pAxis{j+4}){2*(m-1)+5}.ratio a.(pAxis{j+4}){2*(m-1)+2}.ratio a.(pAxis{j+4}){2*(m-1)+1}.ratio],[2 1]),[Nfreq 1]);
+%                     end
+%                 end
+%             end
+%             
+%             Hur = reshape(Hur,[2 2 Nfreq 2]);
+%             Hud = reshape(Hud,[2 2 Nfreq 2]);
 %             
 %             if strcmp(d{i}{k}.mirror,'TRUE') 
-%                 Hur(1,2,:) = comp;
-%                 Hur(2,1,:) = comp;
-%                 Hur = cat(4,Hur,Hur);
-% 
-%                 Hud(1,2,:) = comp;
-%                 Hud(2,1,:) = comp;
-%                 Hud = cat(4,Hud,Hud);
+%                 M = [0 1; 1 0];
 %             else
-%                 Hur(1,1,:) = comp;
-%                 Hur(2,2,:) = comp;
-%                 Hur = cat(4,Hur,Hur);
-% 
-%                 Hud(1,1,:) = comp;
-%                 Hud(2,2,:) = comp;
-%                 Hud = cat(4,Hud,Hud);
+%                 M = eye(2);
+%             end
+%             
+%             for m = 1:2
+%                 for j = 1:Nfreq
+%                     B(:,:,j,m) = -Hud(:,:,j,m)*inv(M*Hud(:,:,j,m) + eye(2));
+%                     F(:,:,j,m) = Hur(:,:,j,m) + B(:,:,j,m)*(M*Hur(:,:,j,m) - eye(2));
+%                 end
 %             end
             
-            for m = 1:2
-                for j = 1:Nfreq
-                    B(:,:,j,m) = -Hud(:,:,j,m)*inv(M*Hud(:,:,j,m) + eye(2));
-                    F(:,:,j,m) = Hur(:,:,j,m) + B(:,:,j,m)*(M*Hur(:,:,j,m) - eye(2));
-                end
-            end
-            
             % store data
-            data{i}{k}.Hur = Hur;
-            data{i}{k}.Hud = Hud;
-            data{i}{k}.B = B;
-            data{i}{k}.F = F;
+%             data{i}{k}.Hur = Hur;
+%             data{i}{k}.Hud = Hud;
+%             data{i}{k}.B = B;
+%             data{i}{k}.F = F;
             data{i}{k}.pos = trajs;
             data{i}{k}.x_axis = x_axis;
             data{i}{k}.MSE = MSE;
