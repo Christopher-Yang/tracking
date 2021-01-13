@@ -3,7 +3,11 @@
 % squared error between target and hand trajectories for each trial. If
 % delay_opt is provided, it considerably reduces computation time. If
 % delay_opt is not provided, it will be computed from scratch. You can save
-% a new delay_opt by uncommenting line 104
+% a new delay_opt by uncommenting line 109.
+% 
+% This function also generates "alignment_matrix.csv," which contains the
+% off-diagonal values of the alignment matrices for statistical analysis in
+% R. To generate this file, uncomment lines 315-316.
 
 function graph_alignMatrix(data, delay_opt)
 
@@ -30,6 +34,7 @@ else
     delayTest = 1;
 end
 
+% this loop computes the alignment matrices
 for n = 1:Ngroup % loop over groups
     for i = 1:Nsubj % loop over subjects
         for j = 1:Nblock % loop over blocks
@@ -47,7 +52,7 @@ for n = 1:Ngroup % loop over groups
                     for k = 1:length(delay) % compute MSE for given delay
                         err = @(params) scale(params,hand,target,delay(k));
                         
-                        % fit transformation matrix
+                        % fit alignment matrix
                         [params_opt,fval] = fmincon(err,paramsInit);
                         
                         % shape into 2x2 matrix
@@ -57,7 +62,7 @@ for n = 1:Ngroup % loop over groups
                         MSE(k) = fval;
                     end
                     
-                    % select the transformation matrix that minimizes MSE
+                    % select the alignment matrix that minimizes MSE
                     p = islocalmin(MSE);
                     mins = find(p==1);
                     
@@ -79,7 +84,7 @@ for n = 1:Ngroup % loop over groups
                 else
                     err = @(params) scale(params,hand,target,delay_opt(m,j,i,n));
                     
-                    % fit transformation matrix
+                    % fit alignment matrix
                     params_opt = fmincon(err,paramsInit);
                     
                     % shape into 2x2 matrix
@@ -124,7 +129,6 @@ R = rotz(-45); % 45 degree clockwise rotation matrix
 R = R(1:2,1:2);
 perpAxis = R*[1 0]'; % axis perpendicular to the mirroring axis
 
-% compute gain perpendicular to mirroring axis
 for i = 1:Nsubj
     for j = 1:Nblock
         for m = 1:Ntrials
@@ -149,12 +153,12 @@ map2 = [linspace(col1(1),col2(1),Nstep)', linspace(col1(2),col2(2),...
 map = [map1; map2];
 clims = [-1 1];
 
-% average the transformation matrices across subjects
+% average the alignment matrices across subjects
 mat1 = mean(alignMat_vmr,5); % average rotation group
 mat2 = mean(alignMat_mr,5); % average mirror-reversal group
 gblocks = [1 2 5 6]; % blocks to graph
 
-% plot 2x2 transformation matrices
+% plot 2x2 alignment matrices for rotation group
 figure(3); clf
 for i = 1:4 % iterate over blocks
     for j = 1:Ntrials % iterate over trials
@@ -178,6 +182,7 @@ for i = 1:4 % iterate over blocks
     end
 end
 
+% plot 2x2 alignment matrices for mirror-reversal group
 figure(4); clf
 for i = 1:4 % iterate over blocks
     for j = 1:Ntrials % iterate over trials
@@ -201,8 +206,6 @@ for i = 1:4 % iterate over blocks
     end
 end
 
-%%
-
 col1 = [0 128 0]/255;
 col2 = [128 0 128]/255;
 
@@ -221,7 +224,7 @@ for i = 1:4
     end
 end
 
-% visualize transformation matrices as vectors
+% visualize alignment matrices as vectors for rotation group
 figure(5); clf
 for i = 1:4
     for j = 1:Ntrials
@@ -255,6 +258,7 @@ for i = 1:4
     end
 end
 
+% visualize alignment matrices as vectors for mirror-reversal group
 figure(6); clf
 for i = 1:4
     for j = 1:Ntrials
@@ -292,7 +296,7 @@ end
 col = lines;
 col = col(1:7,:);
 
-% average the off-diagonal elements of the transformation matrices
+% average the off-diagonal elements of the alignment matrices
 vmr = cat(4,squeeze(-alignMat_vmr(1,2,:,:,:)),squeeze...
     (alignMat_vmr(2,1,:,:,:)));
 mr = cat(4,squeeze(alignMat_mr(1,2,:,:,:)),squeeze...
@@ -305,16 +309,16 @@ colIdx = [1 2 0 0 3 4];
 vmr = reshape(vmr,[Ntrials*Nblock Nsubj]);
 mr = reshape(mr,[Ntrials*Nblock Nsubj]);
 
-% This section generates "transformation_matrix.csv" which contains the 
-% relevant values of the transformation matrices for statistical analysis 
+% This section generates "alignment_matrix.csv" which contains the 
+% relevant values of the alignment matrices for statistical analysis 
 % in R.
-% z = [vmr(1,:)'; vmr(40,:)'; vmr(41,:)'; mr(1,:)'; mr(40,:)'; mr(41,:)'];
-% dlmwrite('alignment_matrix.csv',z);
+z = [vmr(1,:)'; vmr(40,:)'; vmr(41,:)'; mr(1,:)'; mr(40,:)'; mr(41,:)'];
+dlmwrite('alignment_matrix.csv',z);
 
 figure(7); clf
 % plot responses for all tracking blocks
 for k = 1:2
-    subplot(2,2,k); hold on 
+    subplot(1,2,k); hold on 
     rectangle('Position',[9 -10 31 110],'FaceColor',[0 0 0 0.1],'EdgeColor','none');
     plot([0 Ntrials*Nblock+1],[0 0],'k')
     
@@ -348,39 +352,6 @@ for k = 1:2
     yticks(0:0.4:0.8)
 end
 
-% plot responses for just baseline and post-learning to assess aftereffects
-for k = 3:4
-    subplot(2,2,k); hold on
-    plot([0 Ntrials*Nblock+1],[0 0],'k')
-    idx = [1:8 41:48];
-    
-    % data from individual subjects
-    if k == 3
-        plot(idx,vmr(idx,:),'k','Color',[0 0 0 0.5],'LineWidth',0.2)
-    else
-        plot(idx,mr(idx,:),'k','Color',[0 0 0 0.5],'LineWidth',0.2)
-    end
-    
-    % mean across subjects
-    for i = [1 6]
-        idx = Ntrials*(i-1)+1:Ntrials*(i-1)+Ntrials;
-        
-        if k == 3
-            plot(idx,mean(vmr(idx,:),2),'Color',col(colIdx(i),:)...
-                ,'LineWidth',1.5)
-        else
-            plot(idx,mean(mr(idx,:),2),'Color',col(colIdx(i),:)...
-                ,'LineWidth',1.5)
-        end
-    end
-    axis([0.5 Ntrials*Nblock+0.5 -.2 0.8])
-    set(gca,'TickDir','out')
-    xticks(1:8:41)
-    xlabel('Trial Number')
-    ylabel('Off-diagonal scaling')
-    yticks(0:0.4:0.8)
-end
-
 %% generate Figure 3C
 
 theta_opt2 = reshape(theta_opt,[Nblock*Ntrials Nsubj]);
@@ -395,6 +366,7 @@ colors = lines;
 colors = colors(1:7,:);
 idx = [1 2 0 0 3 4];
 
+% plot left panel of Figure 3C
 figure(8); clf
 subplot(1,2,1); hold on
 rectangle('Position',[9 -10 31 110],'FaceColor',[0 0 0 0.1],'EdgeColor','none');
@@ -418,6 +390,7 @@ yticks(0:30:90)
 ylabel(['Angle (' char(176) ')'])
 axis([0.5 length(thetaMu) + 0.5 -10 100])
 
+% plot right panel of Figure 3C
 subplot(1,2,2); hold on
 rectangle('Position',[9 -10 31 110],'FaceColor',[0 0 0 0.1],'EdgeColor','none');
 plot([0 Nblock*Ntrials+1],[1 1],'--k','LineWidth',1) % ideal baseline response

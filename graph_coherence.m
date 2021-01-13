@@ -20,7 +20,7 @@ SR.y_all = NaN(Ntrials,Nfreq,Nblock,Nsubj,Ngroup);
 col = copper;
 col = col(floor((size(col,1)/(Nfreq))*(1:Nfreq)),:);
 
-% compute target-hand coherence (SR: stimulus-response)
+% compute target-hand coherence (SR: stimulus-response coherence)
 for p = 1:length(groups)
     for i = 1:Nsubj
         for j = 1:Nblock
@@ -59,9 +59,10 @@ SR.y = squeeze(mean(SR.y_all,4));
 SR.xSE = squeeze(std(SR.x_all,[],4)/sqrt(Nsubj)); 
 SR.ySE = squeeze(std(SR.y_all,[],4)/sqrt(Nsubj));
 
-% generate Figure 4B and Figure 4-supplement 1B
-figure(15); clf
+% generate figures
+figure(13); clf
 for j = 1:2
+    % plot Figure 4B
     subplot(2,2,j); hold on
     rectangle('Position',[Ntrials+1 -0.5 4*Ntrials-1 2],'FaceColor',...
             [0 0 0 0.1],'EdgeColor','none');
@@ -83,6 +84,7 @@ for j = 1:2
     yticks(0:0.25:1)
     axis([1 Ntrials*Nblock 0 1])
     
+    % plot Figure 4-supplement 1B
     subplot(2,2,j+2); hold on
     rectangle('Position',[Ntrials+1 -0.5 4*Ntrials-1 2],'FaceColor',...
             [0 0 0 0.1],'EdgeColor','none');

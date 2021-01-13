@@ -1,13 +1,15 @@
+% plots the right hand's amplitude spectra in Figure 4A and Figure
+% 4-supplements 1A and 2
+
 function graph_ampSpectra(data)
-% plots the right hand's amplitude spectra
 
 % set variables for plotting
 output = 'Rhand';
 groups = {'rot','mir'};
 block_name = {'baseline','pert1','pert2','pert3','pert4','post'};
 graph_name = {'Baseline','Early','Train2','Train3','Late','Post'};
-gblocks = [1 2 5 6];
-trialIdx = [1 1 8 1];
+gblocks = [1 2 5 6]; % blocks to plot (baseline, early, late, post)
+trialIdx = [1 1 8 1]; % trials within each block to plot (1 = first trial; 8 = last trial)
 col = [255 193 7
        30 136 229]./255; % colors used for plotting
 names = {' (Rotation)',' (Mirror Reversal)'};
@@ -26,9 +28,10 @@ for k = 1:length(groups)
     ix = d{1}.(block_name{1}).(output).phasors.x_x.index;
     iy = d{1}.(block_name{1}).(output).phasors.y_y.index;
     
+    % preallocate variables
     g1 = NaN(length(xAxis),length(gblocks),Nsubj);
     g2 = NaN(length(xAxis),1000,length(gblocks));
-    amps.(groups{k}).x = g1; % preallocate data structure
+    amps.(groups{k}).x = g1;
     amps.(groups{k}).y = g1;
     a = amps.(groups{k});
     a.bootx = g2;
@@ -55,14 +58,14 @@ for k = 1:length(groups)
     a.x_all = permute(a.x_all,[1 3 2]); 
     a.y_all = permute(a.y_all,[1 3 2]);
     
-    for i = 1:length(gblocks)
-        for j = 2
-            if j == 1
-                fig = [7 8];
+    for i = 1:length(gblocks) % loop for each block to plot
+        for j = 1:2 % loop for making two different figures
+            if j == 1 % plots Figure 4A and Figure 4-supplement 1
+                fig = [9 10];
                 datX = a.x;
                 datY = a.y;
-            else
-                fig = [9 10];
+            else % plots Figure 4-supplement 2
+                fig = [11 12];
                 if k == 1
                     subj = 4;
                 else
@@ -72,8 +75,7 @@ for k = 1:length(groups)
                 datY = squeeze(a.y_all(:,subj,:));
             end
                 
-            % generate Figure 4A and Figure 4 supplements 1 & 2
-            % supplement 2
+            % plot x-axis spectra
             figure(fig(1))
             subplot(4,2,2*(i-1)+k); hold on
             
@@ -88,10 +90,6 @@ for k = 1:length(groups)
                 'MarkerSize',6,'MarkerFaceColor',col(1,:))
             plot(freqsY,datX(iy,i)*100,'-o','Color',col(2,:),...
                 'MarkerSize',6,'MarkerFaceColor',col(2,:))
-            
-            % plot individual subjects
-%             plot(xAxis,a.x_all(:,:,i),'Color',[0 0 0 0.3],...
-%                 'LineWidth',0.25,'HandleVisibility','off')
             
             % plot average across subjects
             plot(xAxis,datX(:,i)*100,'k','LineWidth',0.5)
@@ -109,6 +107,7 @@ for k = 1:length(groups)
                 legend boxoff
             end
             
+            % plot y-axis spectra
             figure(fig(2))
             subplot(4,2,2*(i-1)+k); hold on
             

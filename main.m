@@ -3,11 +3,11 @@
 % main.m generates all figures related to the sum-of-sinusoids tracking 
 % task. 
 % 
-% Parts 1-2 of the script (lines 19-83) analyzes and makes figures for the 
-% data from the main experiment (Figures 2B-5 and S1-S4). Parts 3-4 (lines 
-% 84-111) analyzes and makes figures for the second experiment (Figure S5). 
-% Analysis and plotting code can be run independently of one another.
-% 
+% Parts 1-2 of the script analyzes and makes figures for the data from the 
+% main experiment (Figures 2B-5C and associated figure supplements). Parts 
+% 3-4 analyzes and makes figures for the second experiment (Figure 6 and 
+% associated figure supplements).
+%
 % To generate all figures, run the entire script, which should take 
 % between 5-10 minutes. If only certain figures are needed, first run the 
 % analysis in Part 1 or Part 3. Then run the appropriate functions to 
@@ -49,7 +49,7 @@ d = load_data(subj_rot,subj_mir,block_name,folder);
 data1.rot = analyze_data(d.rot,subj_rot,block_name);
 data1.mir = analyze_data(d.mir,subj_mir,block_name);
 
-% save dat1 data1; % save data structure
+% save data1 data1; % save data structure
 disp('Done')
 
 %% PART 2: FIGURES FOR MAIN EXPERIMENT
@@ -61,16 +61,18 @@ graph_traj(data1);
 % Figure 2C: mean-squared error
 graph_MSE(data1);
 
-% Figure 3: alignment matrix; delay_opt contains the optimal time to align
-% the target and hand trajectories that minimizes mean squared error; if
-% you would like to compute delay_opt instead of load it, uncomment lines
-% ___ and comment lines ____
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Figure 3: alignment matrix. "delay_opt" contains the optimal time to 
+% align the target and hand trajectories that minimizes mean squared error.
+% Loading delay_opt will significantly reduce computation time.
+% If you would like to compute delay_opt instead of load it, comment 
+% lines 72-73 and comment line 76. 
 
 % USE PRECOMPUTED OPTIMAL DELAYS
 load delay_opt
 graph_alignMatrix(data1,delay_opt);
 
-% COMPUTE OPTIMAL DELAYS FROM SCRATCH
+% COMPUTE OPTIMAL DELAYS FROM SCRATCH (takes ~60 mins to run)
 % graph_alignMatrix(data1);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -80,16 +82,32 @@ graph_ampSpectra(data1);
 % Figures 4B and Figure 4-supplement 1B: coherence
 graph_coherence(data1);
 
-% Figure 5, Figure 5-supplement 1, and S4: gain matrix
-graph_gainMatrix(data1,experiment); 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Figure 4C-D: catch-up strategy model; "coherence" contains the 
+% precomputed coherence from the LQR simulation. Loading coherence.mat 
+% significantly reduces computation time. If you would like to compute
+% coherence instead of loading it, comment lines 93-94 and uncomment line 
+% 97
 
-% Figure S3: phasors
-% rotation group
-graph_phasor(data1.rot{4}.baseline.Rhand.phasors,22) % baseline
-graph_phasor(data1.rot{4}.pert4.Rhand.phasors,23) % late learning
-% mirror-reversal group
-graph_phasor(data1.mir{9}.baseline.Rhand.phasors,24) % baseline
-graph_phasor(data1.mir{9}.pert4.Rhand.phasors,25) % late learning
+% USE PRECOMPUTED COHERENCE
+load simResults
+LQR(data1,simResults)
+
+% COMPUTE COHERENCE FROM SCRATCH (TAKES ~20 MINS TO RUN)
+% LQR(data1)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Figure 5, Figure 5-supplements 1 & 2: gain matrix
+graph_gainMatrix(data1,experiment);
+
+% The below function does not generate any figures in the paper. Instead,
+% it is an LQR simulation that is different from the "LQR()" function
+% above. Instead of an intermittent observation model, "LQR_distance()"
+% only updates its movement goal when the distance between the LQR and the
+% target surpasses a certain threshold. The results of this model were only
+% briefly mentioned in the text, so we have included this model if you
+% would like to see these results. It will require ~15 mins to run.
+% LQR_distance(data1);
 
 %% PART 3: ANALYSIS FOR SECOND EXPERIMENT
 % set variables for second experiment
@@ -117,5 +135,5 @@ disp('Done')
 %% PART 4: FIGURES FOR SECOND EXPERIMENT
 % load dat2 % load saved data
 
-% Figure S5: gain matrix
-graph_gainMatrix(data2,experiment); 
+% Figure 6, and Figure 6-supplement 1: gain matrix
+graph_gainMatrix(data2,experiment);

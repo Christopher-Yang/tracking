@@ -1,5 +1,5 @@
 function graph_traj(data)
-% plots raw cursor and target trajectories
+% plots raw cursor and target trajectories in Figure 2B
 
 % set variables for plotting
 gblocks = [1:2 5:6];
