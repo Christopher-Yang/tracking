@@ -39,9 +39,10 @@ function output = load_data(folder, time)
             trial = [];
             extraData = [];
             
-            if block == d.block(k)
+            % increments count2 if block increases
+            if block == d.block(k) % current block is still the same
                 count2 = count2 + 1;
-            else
+            else % current block has incremented
                 block = d.block(k);
                 count2 = 1;
             end
@@ -68,124 +69,178 @@ function output = load_data(folder, time)
                 extraData = extraData(useSamples,:);
             end
             
+            % check whether there's any missing data
+            Nmissing = sum(sum(isnan(trial)))/size(trial,2);
+            Nextra = size(extraData,1);
+            
             % insert missing data (extraData) into the the main data
             % (trial)
-            for m = 1:size(extraData,1)
-                
-                % find the time point immediately after and before missing
-                % data
-                after = find(trial(:,1)>=extraData(m,1),1);
-                before = find(trial(:,1)<extraData(m,1),1,'last');
-                
-                replace = 1; % used to end while loop
-                check = 1; % defines search breadth for NaNs
-                while replace
-                    % if NaN is first data point, place missing data there
-                    if after == 1
-                        trial(1,:) = extraData(m,:);
-                        replace = 0;
-                    
-                    % if NaN is last data point, place missing data there
-                    elseif before == size(trial,1)
-                        trial(end,:) = extraData(m,:);
-                        replace = 0;
-                    
-                    % if NaN is between before and after, place the missing
-                    % data there
-                    elseif after-before == 2
-                        trial(before+1,:) = extraData(m,:);
-                        replace = 0;
-                    
-                    % if there's 2 NaNs between before and after, fill
-                    % missing data in index that's closer in time to before
-                    % or after
-                    elseif after-before == 3
-                        if trial(after,1)-extraData(m,1) > extraData(m,1)-trial(before,1)
-                            trial(before+1,:) = extraData(m,:);
-                        else
-                            trial(after-1,:) = extraData(m,:);
-                        end
-                        replace = 0;
-
-                    % if more than 3 NaNs between before and after, don't
-                    % fill data
-                    elseif after-before > 3
-                        disp('   Multiple NaNs between before and after')
-                        replace = 0;
+            if Nmissing ~= 0 % skip insertion if there's no missing data
+                if Nextra <= Nmissing % this handles insertion when number of extra data <= missing data
+                    for m = 1:size(extraData,1)
                         
-                    % if NaN is outside of before and after, place the
-                    % missing data as specified below
-                    else
-                        % find the indices of NaN(s)
-                        if before-check < 1
-                            first = 1;
-                        else
-                            first = before-check;
-                        end
-                        if after+check > Nsamples
-                            last = Nsamples;
-                        else
-                            last = after+check;
-                        end
-                        idxRange = first:last;
+                        % find the time point immediately after and before missing
+                        % data
+                        after = find(trial(:,1)>=extraData(m,1),1);
+                        before = find(trial(:,1)<extraData(m,1),1,'last');
                         
-                        try
-                            missing = idxRange(isnan(trial(idxRange,1)));
-                        catch
-                            error('Something went wrong')
-                        end
-                        
-                        % do different things based on number of NaNs found
-                        switch length(missing)
-                            % NaN not found
-                            case 0
-                                if check > 18 % only search within 300 ms of desired data position
-                                    disp('NaN could not be found');
-                                    replace = 0;
-                                else % increase search range
-                                    check = check + 1; 
-                                end
-                            
-                            % one NaN found
-                            case 1
-                                % determine whether Nan is earlier or later
-                                % in time
-                                if missing < before
-                                    idx = missing:before;
-                                elseif missing > after
-                                    idx = after:missing;
-                                end
-                                
-                                % create "chunk," which will replace a
-                                % subsection of the matrix
-                                chunk = trial(idx,:);
-                                chunk = sortrows([chunk; extraData(m,:)]);
-                                chunk(end,:) = [];
-                                trial(idx,:) = chunk;
-                                
-                                % end the while loop
-                                replace = 0; 
-                                
-                            % two NaNs found
-                            case 2
-                                chunk = sortrows([trial(missing(1)+1:missing(2)-1,:); extraData(m,:)]);
-
-                                % check whether to fill data by pushing
-                                % data forward or backward
-                                if ~isnan(trial(missing(1)-1,1)) % push data backward
-                                    if chunk(1,1) - trial(missing(1)-1,1) < tolerance
-                                        trial(missing(1):missing(2)-1,:) = chunk;
-                                    end
-                                elseif ~isnan(trial(missing(2)+1,1)) % push data forward
-                                    if trial(missing(2)+1,1) - chunk(end,1) < tolerance
-                                        trial(missing(1)+1:missing(2),:) = chunk;
-                                    end
-                                else % don't insert data if reasonable solution can't be found
-                                    disp('Could not find reasonable place to insert data');
-                                end
-                                
-                                % end while loop
+                        replace = 1; % used to end while loop
+                        check = 1; % defines search breadth for NaNs
+                        while replace
+                            % if NaN is first data point, place missing data there
+                            if after == 1
+                                trial(1,:) = extraData(m,:);
                                 replace = 0;
+                                
+                            % if NaN is last data point, place missing data there
+                            elseif before == size(trial,1)
+                                trial(end,:) = extraData(m,:);
+                                replace = 0;
+                                
+                            % if NaN is between before and after, place the missing
+                            % data there
+                            elseif after-before == 2
+                                trial(before+1,:) = extraData(m,:);
+                                replace = 0;
+                                
+                            % if there's 2 NaNs between before and after, fill
+                            % missing data in index that's closer in time to before
+                            % or after
+                            elseif after-before == 3
+                                if trial(after,1)-extraData(m,1) > extraData(m,1)-trial(before,1)
+                                    trial(before+1,:) = extraData(m,:);
+                                else
+                                    trial(after-1,:) = extraData(m,:);
+                                end
+                                replace = 0;
+                                
+                            % if more than 3 NaNs between before and after, don't
+                            % fill data
+                            elseif after-before > 3
+                                disp('      Multiple NaNs between before and after')
+                                replace = 0;
+                                
+                            % if NaN is outside of before and after, place the
+                            % missing data as specified below
+                            else
+                                % find the indices of NaN(s)
+                                if before-check < 1
+                                    first = 1;
+                                else
+                                    first = before-check;
+                                end
+                                if after+check > Nsamples
+                                    last = Nsamples;
+                                else
+                                    last = after+check;
+                                end
+                                idxRange = first:last;
+                                
+                                try
+                                    missing = idxRange(isnan(trial(idxRange,1)));
+                                catch
+                                    error('      Something went wrong')
+                                end
+                                
+                                % do different things based on number of NaNs found
+                                switch length(missing)
+                                    
+                                    case 0 % NaN not found
+                                        if check > 18 % only search within 300 ms of desired data position
+                                            disp('      NaN could not be found');
+                                            replace = 0;
+                                        else % increase search range
+                                            check = check + 1;
+                                        end
+                                        
+                                        
+                                    case 1 % one NaN found
+                                        % determine whether Nan is earlier or later
+                                        % in time
+                                        if missing < before
+                                            idx = missing:before;
+                                        elseif missing > after
+                                            idx = after:missing;
+                                        end
+                                        
+                                        % create "chunk," which will replace a
+                                        % subsection of the matrix
+                                        chunk = trial(idx,:);
+                                        chunk = sortrows([chunk; extraData(m,:)]);
+                                        chunk(end,:) = [];
+                                        trial(idx,:) = chunk;
+                                        
+                                        % end the while loop
+                                        replace = 0;
+                                        
+                                        
+                                    case 2 % two NaNs found
+                                        chunk = sortrows([trial(missing(1)+1:missing(2)-1,:); extraData(m,:)]);
+                                        
+                                        % check whether to fill data by pushing
+                                        % data forward or backward
+                                        if ~isnan(trial(missing(1)-1,1)) % push data backward
+                                            if chunk(1,1) - trial(missing(1)-1,1) < tolerance
+                                                trial(missing(1):missing(2)-1,:) = chunk;
+                                            end
+                                        elseif ~isnan(trial(missing(2)+1,1)) % push data forward
+                                            if trial(missing(2)+1,1) - chunk(end,1) < tolerance
+                                                trial(missing(1)+1:missing(2),:) = chunk;
+                                            end
+                                        else % don't insert data if reasonable solution can't be found
+                                            disp('      Could not find reasonable place to insert data');
+                                        end
+                                        
+                                        % end while loop
+                                        replace = 0;
+                                end
+                            end
+                        end
+                    end
+                else % this best handles filling in missing data if frame rate >> 60 Hz
+                    % find NaNs in data
+                    idx2 = find(isnan(trial(:,1)));
+                    
+                    % loop over all NaNs
+                    for m = 1:length(idx2)
+                        
+                        % search backward for first non-NaN value
+                        before = idx2(m)-1;
+                        search = true;
+                        while search
+                            if isnan(trial(before))
+                                before = before - 1;
+                            else
+                                search = false;
+                            end
+                        end
+                        
+                        % search forward for first non-NaN value
+                        after = idx2(m)+1;
+                        search = true;
+                        while search
+                            if isnan(trial(after))
+                                after = after + 1;
+                            else
+                                search = false;
+                            end
+                        end
+                        
+                        Nidx = after - before + 1; % number of indices between after and before + 2
+                        fillIdx = idx2(m) - before + 1; % the index of interest
+                        
+                        % linearly interpolate between before and after
+                        sample_interp = linspace(trial(before), trial(after), Nidx);
+                        
+                        % find which extra data most closely matches
+                        % interpolated data
+                        [~, idx3] = min(abs(extraData(:,1) - sample_interp(fillIdx)));
+                        
+                        % if extra data that's chosen falls between the
+                        % times for "before" and "after," then fill in
+                        % missing data
+                        if extraData(idx3,1) < trial(after,1) && extraData(idx3,1) > trial(before,1)
+                            trial(idx2(m),:) = extraData(idx3,:);
                         end
                     end
                 end
