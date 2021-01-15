@@ -1,3 +1,11 @@
+% This function simulates an intermittent catch-up strategy. The optional
+% argument "simResults" contains the output of the simulation, which is the
+% coherence between the LQR and target movement as well as the hand
+% trajectories with a 300 ms sampling period. If simResults is provided, it
+% considerably reduces computation time. If simResults isn't provided, then
+% it will be computed from scratch. You can save the results of the
+% simulation by uncommenting line 142.
+
 function LQR(data,simResults)
 
 % set variables for analysis
@@ -131,7 +139,7 @@ if nargin == 1
     
     % uncomment the line below to save the coherence results from the
     % simulation
-    save simResults simResults
+%     save simResults simResults
 end
 
 % compute DFTs of the LQR's response
