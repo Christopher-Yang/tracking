@@ -11,7 +11,7 @@ function LQR(data,simResults)
 % set variables for analysis
 rng(3);
 Nfreq = 7; % number of frequencies
-Nsims = 1000; % number of simulations to run per observation time
+Nsims = 20; % number of simulations to run per observation time
 Nreps = 2; % number of base periods to track
 delt = 1/130; % simulation time step
 
@@ -42,7 +42,7 @@ Ac = [0 1 0 0 0
     0 -G/M 1/M 0 0
     0 0 -1/tau 0 0
     0 0 0 0 1
-    0 0 0 0 0];
+    0 0 0 -10 -10];
 Bc = [0 0 1/tau 0 0]';
 
 mat_c = [Ac Bc;
@@ -52,6 +52,11 @@ mat_d = expm(mat_c*delt); % discretize mat_c
 % extract discretized A and B matrices for mat_d
 A = mat_d(1:5,1:5);
 B = mat_d(1:5,end);
+
+% A(4:5,4:5) = [0.9988 0.0077; -0.1497 0.9985]; % \Delta = 1
+% A(4:5,4:5) = [0.9965 0.0153; -0.2988 0.9927];
+% A(4:5,4:5) = [0.9016 0.0878; -1.7279 0.6811]; % \Delta = 13
+A(4:5,4:5) = [0.9829 0.0376; -0.7361 0.9506]; % \Delta = 5
 
 % accuracy and effort costs
 R = 0.0001; % effort cost
@@ -98,11 +103,11 @@ if nargin == 1
         for j = 1:Nsims % repeat simulation Nsims times
             mu = Mu2(k,j); % observation time to be used for current simulation
             intervalTimer = 0; % tracks how much time has elapsed since last observation
-            idx = 1; % tracks index of last observation
             
-            % initialize hand and target position
+            % initialize hand position and target position/velocity
             x(1,1) = 0; % hand position
             x(4,1) = target(j,1); % target position
+            x(5,1) = (target(j,2)-target(j,1))/delt; % approximate initial velocity; approximation won't matter because transient is removed from analysis
             
             % simulate trajectory for every time step
             for i = 2:Nstep
@@ -115,9 +120,7 @@ if nargin == 1
                 if intervalTimer > mu % if elapsed time is higher
                     intervalTimer = 0; % reset timer
                     x(4,i) = target(j,i); % observe a new target position
-                    idx = i; % record index of observed position
-                else
-                    x(4,i) = target(j,idx); % do not observe a new target position
+                    x(5,i) = (target(j,i)-target(j,i-1))/delt; % observe new target velocity
                 end
             end
                         
@@ -127,6 +130,10 @@ if nargin == 1
         % store hand trajectory for 300 ms observation time
         if k == 21
             simResults.hand = hand;
+        end
+        
+        if k == Ndelay
+            hand;
         end
         
         % compute coherence for each simulation

@@ -32,37 +32,53 @@ for q = 1:Ngroup % loop over groups
             % i=3: y-target to x-hand
             % i=4: y-target to y-hand
             for i = 1:4
-                % average complex ratios
+                % store complex ratios in cplx
                 cplx(:,:,i,k,p,q) = data.(groups{q}){p}.(blocks{k})...
                     .Rhand.phasors.(names{i}).ratio;
             end
         end
         
-        for m = 1:Ntrials
-            for i = 1:Nfreq
-                % x-component of xx and yy baseline phasors
-                x = cos(angle(cplx(i,m,[1 4],1,p,q)));
-                % y-component of xx and yy baseline phasors
-                y = sin(angle(cplx(i,m,[1 4],1,p,q)));
-                
-                % generate template of gain = 1 and phase same as baseline
-                template = [(x(1)+y(1)*1j); (x(2)+y(2)*1j)];
-                
-                % fit gains for x frequencies
-                error = @(params) scale(params,cplx(i,m,[1 2],:,p,q),template(1));
-                opt1(:,i,m,p,q) = fmincon(error,paramsInit);
-                
-                % fit gains for y frequencies
-                error = @(params) scale(params,cplx(i,m,[3 4],:,p,q),template(2));
-                opt2(:,i,m,p,q) = fmincon(error,paramsInit);
-            end
+        for i = 1:Nfreq
+            
+            % compute average baseline phasor for a particular frequency
+            dat = mean(cplx(i,:,[1 4],1,p,q),2);
+            
+            % x-component of xx and yy baseline phasor
+            x = cos(angle(dat));
+            
+            % y-component of xx and yy baseline phasor
+            y = sin(angle(dat));
+            
+            % project data onto baseline x phasor
+            dat = cplx(i,:,[1 2],:,p,q); % extract data for x-target to x-/y-hand 
+            phasor = reshape(dat, [1 numel(dat)]);
+            num = [real(phasor); imag(phasor)]; % separate real and imaginary parts of phasors
+            unitVec = [x(1); y(1)]; % unit vector with phase equal to baseline vector
+            gainX(:,i,p,q) = dot(num, repmat(unitVec, [1 numel(dat)])); % project num onto unitVec
+            frac1(:,i,p,q) = abs(gainX(:,i,p,q))./abs(phasor)'; % calculate proportion of gain retained in projection
+            
+            % project data onto baseline y phasor
+            dat = cplx(i,:,[3 4],:,p,q); % extract data for x-target to x-/y-hand 
+            phasor = reshape(dat, [1 numel(dat)]);
+            num = [real(phasor); imag(phasor)]; % separate real and imaginary parts of phasors
+            unitVec = [x(2); y(2)]; % unit vector with phase equal to baseline vector
+            gainY(:,i,p,q) = dot(num, repmat(unitVec, [1 numel(dat)])); % project num onto unitVec
+            frac2(:,i,p,q) = abs(gainY(:,i,p,q))./abs(phasor)'; % calculate proportion of gain retained in projection
         end
     end
 end
 
 % combine opt1 and opt2
-thetaOpt = [reshape(opt1,[2 Nblock Nfreq Ntrials Nsubj Ngroup]); reshape(opt2...
-    ,[2 Nblock Nfreq Ntrials Nsubj Ngroup])]; 
+thetaOpt = [reshape(gainX,[Ntrials 2 Nblock Nfreq Nsubj Ngroup]) ...
+    reshape(gainY,[Ntrials 2 Nblock Nfreq Nsubj Ngroup])]; 
+thetaOpt = permute(thetaOpt, [2 3 4 1 5 6]);
+
+% if desired, weight estimated gains by the amount of gain lost in the
+% projection
+% fracOpt = [reshape(frac1,[Ntrials 2 Nblock Nfreq Nsubj Ngroup]) ...
+%     reshape(frac2,[Ntrials 2 Nblock Nfreq Nsubj Ngroup])];
+% fracOpt = permute(fracOpt, [2 3 4 1 5 6]);
+% thetaOpt = thetaOpt .* (1./fracOpt);
 
 % shape thetaOpt into gain matrix format: the first and second dimensions
 % of gainMat correspond to the gain matrix for a given frequency (third 
@@ -191,15 +207,15 @@ off = squeeze(nanmean(mat2(2,:,:,:,:),4)); % extract off-diagonal mean
 
 % This section generates csv files for statistical analysis in R. Uncomment
 % the lines below to generate these matrices
-if experiment == 1
-    z = permute(mat2(2,[1 40 41],:,:,:),[4 3 2 5 1]);
-    z = reshape(z,[numel(z) 1]);
-    dlmwrite('gain_matrix.csv',z);
-elseif experiment == 2
-    z = permute(mat2(2,[1 7 30 31],:,:,:),[4 3 2 5 1]);
-    z = reshape(z,[numel(z) 1]);
-    dlmwrite('gain_matrix2.csv',z);
-end
+% if experiment == 1
+%     z = permute(mat2(2,[1 40 41],:,:,:),[4 3 2 5 1]);
+%     z = reshape(z,[numel(z) 1]);
+%     dlmwrite('gain_matrix.csv',z);
+% elseif experiment == 2
+%     z = permute(mat2(2,[1 7 30 31],:,:,:),[4 3 2 5 1]);
+%     z = reshape(z,[numel(z) 1]);
+%     dlmwrite('gain_matrix2.csv',z);
+% end
 
 % compute standard error over the averaged on- and off-diagonal elements
 onAll = permute(mat2(1,:,:,:,:),[2 4 3 5 1]);
@@ -483,16 +499,5 @@ if experiment == 1 % only plot the gain matrices for the first experiment
             end
         end
     end
-end
-
-% fit gains to the data
-function e = scale(params,cplx_data,template)
-    theta = reshape(params,[2 length(params)/2]);
-    phasors = theta*template;
-    e = (phasors - squeeze(cplx_data)).^2;
-    for v = 1:numel(e)
-        e(v) = norm(e(v));
-    end
-    e = sum(sum(e));
 end
 end
