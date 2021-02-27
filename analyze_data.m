@@ -51,42 +51,43 @@ function data = analyze_data(d)
             pAxis = pAxis(1:8);
             Nfreq = length(d{1}{1}.tX_freq{1})*4;
             
-%             clear Hur Hud 
-%             for j = 1:4
-%                 if j <= 2
-%                     for m = 1:2
-%                         Hur(j,:,m) = reshape(permute([a.(pAxis{j}){2*(m-1)+1}.ratio a.(pAxis{j}){2*(m-1)+2}.ratio a.(pAxis{j}){2*(m-1)+5}.ratio a.(pAxis{j}){2*(m-1)+6}.ratio],[2 1]),[Nfreq 1]);
-%                         Hud(j,:,m) = reshape(permute([a.(pAxis{j+4}){2*(m-1)+2}.ratio a.(pAxis{j+4}){2*(m-1)+1}.ratio a.(pAxis{j+4}){2*(m-1)+6}.ratio a.(pAxis{j+4}){2*(m-1)+5}.ratio],[2 1]),[Nfreq 1]);
-%                     end
-%                 else
-%                     for m = 1:2
-%                         Hur(j,:,m) = reshape(permute([a.(pAxis{j}){2*(m-1)+5}.ratio a.(pAxis{j}){2*(m-1)+6}.ratio a.(pAxis{j}){2*(m-1)+1}.ratio a.(pAxis{j}){2*(m-1)+2}.ratio],[2 1]),[Nfreq 1]);
-%                         Hud(j,:,m) = reshape(permute([a.(pAxis{j+4}){2*(m-1)+6}.ratio a.(pAxis{j+4}){2*(m-1)+5}.ratio a.(pAxis{j+4}){2*(m-1)+2}.ratio a.(pAxis{j+4}){2*(m-1)+1}.ratio],[2 1]),[Nfreq 1]);
-%                     end
-%                 end
-%             end
-%             
-%             Hur = reshape(Hur,[2 2 Nfreq 2]);
-%             Hud = reshape(Hud,[2 2 Nfreq 2]);
-%             
-%             if strcmp(d{i}{k}.mirror,'TRUE') 
-%                 M = [0 1; 1 0];
-%             else
-%                 M = eye(2);
-%             end
-%             
-%             for m = 1:2
-%                 for j = 1:Nfreq
-%                     B(:,:,j,m) = -Hud(:,:,j,m)*inv(M*Hud(:,:,j,m) + eye(2));
-%                     F(:,:,j,m) = Hur(:,:,j,m) + B(:,:,j,m)*(M*Hur(:,:,j,m) - eye(2));
-%                 end
-%             end
+            clear Hur Hud
+            for j = 1:2
+                if j == 1
+                    m = 0;
+                else
+                    m = 4;
+                end
+                
+                Hur(1,1,:,j) = reshape(permute([a.xTarg_x{1+m}.ratio a.xTarg_x{2+m}.ratio a.xTarg_x{3+m}.ratio a.xTarg_x{4+m}.ratio], [2 1]), [8 1]);
+                Hur(2,1,:,j) = reshape(permute([a.xTarg_y{1+m}.ratio a.xTarg_y{2+m}.ratio a.xTarg_y{3+m}.ratio a.xTarg_y{4+m}.ratio], [2 1]), [8 1]);
+                Hur(1,2,:,j) = reshape(permute([a.yTarg_x{3+m}.ratio a.yTarg_x{4+m}.ratio a.yTarg_x{1+m}.ratio a.yTarg_x{2+m}.ratio], [2 1]), [8 1]);
+                Hur(2,2,:,j) = reshape(permute([a.yTarg_y{3+m}.ratio a.yTarg_y{4+m}.ratio a.yTarg_y{1+m}.ratio a.yTarg_y{2+m}.ratio], [2 1]), [8 1]);
+                
+                Hud(1,1,:,j) = reshape(permute([a.xCurs_x{4+m}.ratio a.xCurs_x{1+m}.ratio a.xCurs_x{2+m}.ratio a.xCurs_x{3+m}.ratio], [2 1]), [8 1]);
+                Hud(2,1,:,j) = reshape(permute([a.xCurs_y{4+m}.ratio a.xCurs_y{1+m}.ratio a.xCurs_y{2+m}.ratio a.xCurs_y{3+m}.ratio], [2 1]), [8 1]);
+                Hud(1,2,:,j) = reshape(permute([a.yCurs_x{2+m}.ratio a.yCurs_x{3+m}.ratio a.yCurs_x{4+m}.ratio a.yCurs_x{1+m}.ratio], [2 1]), [8 1]);
+                Hud(2,2,:,j) = reshape(permute([a.yCurs_y{2+m}.ratio a.yCurs_y{3+m}.ratio a.yCurs_y{4+m}.ratio a.yCurs_y{1+m}.ratio], [2 1]), [8 1]);
+            end
+            
+            if strcmp(d{i}{k}.mirror,'TRUE') 
+                M = [0 1; 1 0];
+            else
+                M = eye(2);
+            end
+            
+            for m = 1:2
+                for j = 1:Nfreq
+                    B(:,:,j,m) = -Hud(:,:,j,m)*inv(M*Hud(:,:,j,m) + eye(2));
+                    F(:,:,j,m) = Hur(:,:,j,m) + B(:,:,j,m)*(M*Hur(:,:,j,m) - eye(2));
+                end
+            end
             
             % store data
-%             data{i}{k}.Hur = Hur;
-%             data{i}{k}.Hud = Hud;
-%             data{i}{k}.B = B;
-%             data{i}{k}.F = F;
+            data{i}{k}.Hur = Hur;
+            data{i}{k}.Hud = Hud;
+            data{i}{k}.B = B;
+            data{i}{k}.F = F;
             data{i}{k}.pos = trajs;
             data{i}{k}.x_axis = x_axis;
             data{i}{k}.MSE = MSE;

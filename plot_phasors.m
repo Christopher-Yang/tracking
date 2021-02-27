@@ -1,9 +1,9 @@
 Nsubj = length(data);
-Nfreq = 12;
+Nfreq = 8;
 col = copper;
 col = col(floor((size(col,1)/(Nfreq))*(1:Nfreq)),:);
 
-block = 5;
+block = 1;
 names1 = {'xTarg_x','yTarg_x','xTarg_y','yTarg_y'};
 names2 = {'xCurs_x','yCurs_x','xCurs_y','yCurs_y'};
 subj = 1;

@@ -1,7 +1,7 @@
 % clear all;
 time = 40; %in seconds
 
-folder = 'Data/online/pilot_learning';
+folder = 'Data/online/Chris/test';
 remove = 0;
 d = load_data(folder,time);
 data = analyze_data(d);

@@ -16,48 +16,31 @@ index = findMin(x_axis,input); % indices of the desired frequencies
 for i = 1:Ntrials
     
     % analysis for trials with target sines
-%     if trialType(i) == 1 || trialType(i) >= 3
-        in.x = target.xFFT(:,i); % input trajectory
-        in.y = target.yFFT(:,i);
-        out.x = cursorHand.xFFT(:,i); % output trajectory
-        out.y = cursorHand.yFFT(:,i);
-        flip = 0;
-        
-        % compute complex ratios
-        phasors.xTarg_x{i} = evaluateFFT(in.x, out.x, index.tX_freq{i}, flip);
-        phasors.xTarg_y{i} = evaluateFFT(in.x, out.y, index.tX_freq{i}, flip);
-        phasors.yTarg_x{i} = evaluateFFT(in.y, out.x, index.tY_freq{i}, flip);
-        phasors.yTarg_y{i} = evaluateFFT(in.y, out.y, index.tY_freq{i}, flip);
-
-    % if no target sines, set cell array to NaN
-%     else
-%         phasors.xTarg_x{i} = NaN;
-%         phasors.xTarg_y{i} = NaN;
-%         phasors.yTarg_x{i} = NaN;
-%         phasors.yTarg_y{i} = NaN;
-%     end
+    in.x = target.xFFT(:,i); % input trajectory
+    in.y = target.yFFT(:,i);
+    out.x = cursorHand.xFFT(:,i); % output trajectory
+    out.y = cursorHand.yFFT(:,i);
+    flip = 0;
+    
+    % compute complex ratios
+    phasors.xTarg_x{i} = evaluateFFT(in.x, out.x, index.tX_freq{i}, flip);
+    phasors.xTarg_y{i} = evaluateFFT(in.x, out.y, index.tX_freq{i}, flip);
+    phasors.yTarg_x{i} = evaluateFFT(in.y, out.x, index.tY_freq{i}, flip);
+    phasors.yTarg_y{i} = evaluateFFT(in.y, out.y, index.tY_freq{i}, flip);
     
     % analysis for trials with cursor sines
-%     if trialType(i) >= 2
-        in.x = cursorInput.xFFT(:,i);
-        in.y = cursorInput.yFFT(:,i);
-        out.x = cursorHand.xFFT(:,i);
-        out.y = cursorHand.yFFT(:,i);
-        flip = 1;
-        
-        % compute complex ratios
-        phasors.xCurs_x{i} = evaluateFFT(in.x, out.x, index.cX_freq{i}, flip);
-        phasors.xCurs_y{i} = evaluateFFT(in.x, out.y, index.cX_freq{i}, flip);
-        phasors.yCurs_x{i} = evaluateFFT(in.y, out.x, index.cY_freq{i}, flip);
-        phasors.yCurs_y{i} = evaluateFFT(in.y, out.y, index.cY_freq{i}, flip);
-        
-    % if no cursor sines, set cell array to NaN
-%     else
-%         phasors.xCurs_x{i} = NaN;
-%         phasors.xCurs_y{i} = NaN;
-%         phasors.yCurs_x{i} = NaN;
-%         phasors.yCurs_y{i} = NaN;
-%     end
+    in.x = cursorInput.xFFT(:,i);
+    in.y = cursorInput.yFFT(:,i);
+    out.x = cursorHand.xFFT(:,i);
+    out.y = cursorHand.yFFT(:,i);
+    flip = 1;
+    
+    % compute complex ratios
+    phasors.xCurs_x{i} = evaluateFFT(in.x, out.x, index.cX_freq{i}, flip);
+    phasors.xCurs_y{i} = evaluateFFT(in.x, out.y, index.cX_freq{i}, flip);
+    phasors.yCurs_x{i} = evaluateFFT(in.y, out.x, index.cY_freq{i}, flip);
+    phasors.yCurs_y{i} = evaluateFFT(in.y, out.y, index.cY_freq{i}, flip);
+
 end
 
 % store indices of frequencies
