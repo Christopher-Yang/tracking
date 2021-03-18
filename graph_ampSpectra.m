@@ -10,8 +10,8 @@ block_name = {'baseline','pert1','pert2','pert3','pert4','post'};
 graph_name = {'Baseline','Early','Train2','Train3','Late','Post'};
 gblocks = [1 2 5 6]; % blocks to plot (baseline, early, late, post)
 trialIdx = [1 1 8 1]; % trials within each block to plot (1 = first trial; 8 = last trial)
-col = [255 193 7
-       30 136 229]./255; % colors used for plotting
+col = [34 181 115
+       198 156 109]./255; % colors used for plotting
 names = {' (Rotation)',' (Mirror Reversal)'};
 
 for k = 1:length(groups)
