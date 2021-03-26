@@ -82,32 +82,11 @@ graph_ampSpectra(data1);
 % Figures 4B and Figure 4-supplement 1B: coherence
 graph_coherence(data1);
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Figure 4C-D: catch-up strategy model; "coherence" contains the 
-% precomputed coherence from the LQR simulation. Loading coherence.mat 
-% significantly reduces computation time. If you would like to compute
-% coherence instead of loading it, comment lines 93-94 and uncomment line 
-% 97
-
-% USE PRECOMPUTED COHERENCE
-load simResults
-LQR(data1,simResults)
-
-% COMPUTE COHERENCE FROM SCRATCH (TAKES ~20 MINS TO RUN)
-% LQR(data1)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Figures 4C and Figure 4-supplement 1C: lag 
+graph_lag(data1);
 
 % Figure 5, Figure 5-supplements 1 & 2: gain matrix
 graph_gainMatrix(data1,experiment);
-
-% The below function does not generate any figures in the paper. Instead,
-% it is an LQR simulation that is different from the "LQR()" function
-% above. Instead of an intermittent observation model, "LQR_distance()"
-% only updates its movement goal when the distance between the LQR and the
-% target surpasses a certain threshold. The results of this model were only
-% briefly mentioned in the text, so we have included this model if you
-% would like to see these results. It will require ~15 mins to run.
-% LQR_distance(data1);
 
 %% PART 3: ANALYSIS FOR SECOND EXPERIMENT
 % set variables for second experiment

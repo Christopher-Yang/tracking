@@ -41,6 +41,11 @@ a = data.mir{subj};
 for i = 1:Nblock % iterate over blocks
     subplot(2,4,i+4); hold on
     
+    % plot 5 cm line as reference
+    if i == 1
+        plot([0 0.05], [-.1 -.1], 'k', 'LineWidth', 3)
+    end
+    
     % plot target
     plot(a.(block_name{gblocks(i)}).target.x_pos(1:650,trial),a ...
         .(block_name{gblocks(i)}).target.y_pos(1:650,trial),'k');

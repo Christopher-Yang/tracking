@@ -312,8 +312,8 @@ mr = reshape(mr,[Ntrials*Nblock Nsubj]);
 % This section generates "alignment_matrix.csv" which contains the 
 % relevant values of the alignment matrices for statistical analysis 
 % in R.
-z = [vmr(1,:)'; vmr(40,:)'; vmr(41,:)'; mr(1,:)'; mr(40,:)'; mr(41,:)'];
-dlmwrite('alignment_matrix.csv',z);
+% z = [vmr(1,:)'; vmr(40,:)'; vmr(41,:)'; mr(1,:)'; mr(40,:)'; mr(41,:)'];
+% dlmwrite('alignment_matrix.csv',z);
 
 figure(7); clf
 % plot responses for all tracking blocks
