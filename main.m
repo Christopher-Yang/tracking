@@ -108,7 +108,7 @@ d = load_data(subj_rot,subj_mir,block_name,folder);
 data2.rot = analyze_data(d.rot,subj_rot,block_name);
 data2.mir = analyze_data(d.mir,subj_mir,block_name);
 
-% save dat2 data2; % save data structure
+% save data2 data2; % save data structure
 disp('Done')
 
 %% PART 4: FIGURES FOR SECOND EXPERIMENT

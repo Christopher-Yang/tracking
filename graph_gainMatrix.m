@@ -212,7 +212,7 @@ off = squeeze(nanmean(mat2(2,:,:,:,:),4)); % extract off-diagonal mean
 %     z = reshape(z,[numel(z) 1]);
 %     dlmwrite('gain_matrix.csv',z);
 % elseif experiment == 2
-%     z = permute(mat2(2,[1 7 30 31],:,:,:),[4 3 2 5 1]);
+%     z = permute(mat2(2,[1 30 31],:,:,:),[4 3 2 5 1]);
 %     z = reshape(z,[numel(z) 1]);
 %     dlmwrite('gain_matrix2.csv',z);
 % end
