@@ -36,7 +36,13 @@ function output = load_data(subj_name, block_name, folder, time, remove)
             bName = block_name{j};
             
             if remove == 1
-                if i == 4 && j == 1
+                if i == 4 && j == 1 % subj4, B1_baseline
+                    output{i}.(bName).traj = full(:,:,2:5);
+                else
+                    output{i}.(bName).traj = full;
+                end
+            elseif remove == 2
+                if i == i && j == 2 % 2-day, subj1, B2_darkBaseline
                     output{i}.(bName).traj = full(:,:,2:5);
                 else
                     output{i}.(bName).traj = full;
