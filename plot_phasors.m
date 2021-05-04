@@ -22,7 +22,7 @@ for j = 1:2
     end
 end
 
-graph_names = {'X-->X','Y-->X','X-->Y','Y-->Y'};
+graph_names = {'{xx}','{yx}','{xy}','{yy}'};
 
 figure(1); clf
 for j = 1:4
@@ -33,7 +33,7 @@ for j = 1:4
     for k = 1:Nfreq
         plot(real(Hur(:,k,j)),imag(Hur(:,k,j)),'.','Color',col(k,:),'MarkerSize',20)
     end
-    title(graph_names{j})
+    title(['Hur_' graph_names{j}])
     axis([-1.2 1.2 -1.2 1.2])
     axis square
 end
@@ -47,7 +47,7 @@ for j = 1:4
     for k = 1:Nfreq
         plot(real(Hud(:,k,j)),imag(Hud(:,k,j)),'.','Color',col(k,:),'MarkerSize',20)
     end
-    title(graph_names{j})
+    title(['Hud_' graph_names{j}])
     axis([-1.2 1.2 -1.2 1.2])
     axis square
 end
@@ -61,7 +61,7 @@ for j = 1:4
     for k = 1:Nfreq
         plot(real(B(:,k,j)),imag(B(:,k,j)),'.','Color',col(k,:),'MarkerSize',20)
     end
-    title(graph_names{j})
+    title(['B_' graph_names{j}])
     axis([-1.2 1.2 -1.2 1.2])
     axis square
 end
@@ -75,7 +75,7 @@ for j = 1:4
     for k = 1:Nfreq
         plot(real(F(:,k,j)),imag(F(:,k,j)),'.','Color',col(k,:),'MarkerSize',20)
     end
-    title(graph_names{j})
+    title(['F_' graph_names{j}])
     axis([-1.2 1.2 -1.2 1.2])
     axis square
 end
