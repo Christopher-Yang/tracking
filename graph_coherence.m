@@ -1,228 +1,205 @@
-function graph_coherence(data, block_name, graph_name, output)
-    
-rng(1);
-names1 = {'x_all','y_all'};
-names2 = {'x','y'};
-Nsubj = length(data)-1;
-Nfreq = length(data{end}.ampX);
-Nreps = length(data{1}.(block_name{1}).MSE);
-Nblock = length(block_name);
-f_x = data{end}.cursor.x_x.freqs;
-f_y = data{end}.cursor.y_y.freqs;
-sorted_freqs = sort([f_x f_y]);
+function graph_coherence(data, output)
+% plots the coherence between target and hand movement
 
+% set variables for plotting
+groups = {'day2', 'day5', 'day10'}; % group names
+block_name{1} = {'B1_baseline', 'B9', 'B11_habit'}; % block names
+block_name{2} = {'B1_baseline', 'B24', 'B26_habit'}; % block names
+block_name{3} = {'B1_baseline', 'B49', 'B51_habit'}; % block names
+Ngroup = length(groups); % number of groups
+Nblock = length(block_name{1}); % number of blocks
+allSubj = [13 14 5]; % number of subjects
+
+a = data.(groups{1}){1}.B1_baseline;
+Ntrials = length(a.MSE); % number of trials
+Nfreq = length(a.freqX); % number of frequencies
+f_x = a.freqX; % x frequencies
+f_y = a.freqY; % y frequencies
+sorted_freqs = sort([f_x f_y]); % frequencies sorted in ascending order
+
+% set line colors
 col = copper;
-n = round(64.*((1:Nfreq-1)/(Nfreq-1)));
-col = col([1 n],:);
+col = col(floor((size(col,1)/(Nfreq))*(1:Nfreq)),:);
 
-for i = 1:Nsubj
-    for j = 1:Nblock
-        targetX = mean(data{i}.(block_name{j}).target.x_pos_all,2);
-        targetY = mean(data{i}.(block_name{j}).target.y_pos_all,2);
-        outX = data{i}.(block_name{j}).(output).x_pos_all;
-        outY = data{i}.(block_name{j}).(output).y_pos_all;
-        
-        N = size(targetX,1);
-        for k = 1:Nreps
-            coh = mscohere([outX(:,k) outY(:,k)],[targetX targetY],blackmanharris(round(N/5)),[],sorted_freqs,130.004,'mimo')';
-            cohxx(k,:) = coh(1,:);
-            cohyy(k,:) = coh(2,:);
-        end
-        SR.x_all(j,:,i) = mean(cohxx(:,1:2:end));
-        SR.y_all(j,:,i) = mean(cohyy(:,2:2:end));
-        
-        FLAG = 1;
-        k1 = 1;
-        k2 = Nreps;
-        k3 = 1;
-        while FLAG
-            cohx(k3,:) = mscohere(outX(:,k1),outX(:,k2),[],[],f_x,130.004);
-            cohy(k3,:) = mscohere(outY(:,k1),outY(:,k2),[],[],f_y,130.004);
-            k1 = k1 + 1;
-            if k1 == k2
-                k1 = 1;
-                k2 = k2 - 1;
+% compute target-hand coherence (SR: stimulus-response coherence)
+for p = 1:length(groups)
+    
+    % preallocate variables to store coherence
+    SR{p}.x_all = NaN(Ntrials,Nfreq,Nblock,allSubj(p));
+    SR{p}.y_all = NaN(Ntrials,Nfreq,Nblock,allSubj(p));
+    RR{p}.x_all = NaN(Nfreq,Nblock,allSubj(p));
+    RR{p}.y_all = NaN(Nfreq,Nblock,allSubj(p));
+
+    for i = 1:allSubj(p)
+        for j = 1:Nblock
+            
+            a = data.(groups{p}){i}.(block_name{p}{j});
+            
+            % target position data in all trials
+            targetX = a.target.x_pos; 
+            targetY = a.target.y_pos;
+            
+            % hand position data in all trials
+            outX = a.(output).x_pos; 
+            outY = a.(output).y_pos;
+            N = size(targetX,1);
+            
+            % preallocate variables
+            cohx = NaN(Ntrials, length(sorted_freqs));
+            cohy = NaN(Ntrials, length(sorted_freqs));
+            
+            % calculate coherence
+            for k = 1:Ntrials
+                coh = mscohere([outX(:,k) outY(:,k)],[targetX(:,k) ...
+                    targetY(:,k)],blackmanharris(round(N/5)),[] ...
+                    ,sorted_freqs,130.004,'mimo')';
+                cohx(k,:) = coh(1,:); % store target-hand x coherence
+                cohy(k,:) = coh(2,:); % store target-hand y coherence
             end
-            if k2 == 1
-                FLAG = 0;
+            
+            % average across trials
+            SR{p}.x_all(:,:,j,i) = cohx(:,1:2:end); 
+            SR{p}.y_all(:,:,j,i) = cohy(:,2:2:end);
+            
+            FLAG = 1;
+            k1 = 1;
+            k2 = Ntrials;
+            k3 = 1;
+            cohx = NaN(nchoosek(Ntrials,2), length(sorted_freqs));
+            cohy = NaN(nchoosek(Ntrials,2), length(sorted_freqs));
+            while FLAG
+                coh = mscohere([outX(:,k1) outY(:,k1)],[outX(:,k2) ...
+                    outY(:,k2)],blackmanharris(round(N/5)),[] ...
+                    ,sorted_freqs,130.004,'mimo')';
+                cohx(k3,:) = coh(1,:);
+                cohy(k3,:) = coh(2,:);
+                k1 = k1 + 1;
+                if k1 == k2
+                    k1 = 1;
+                    k2 = k2 - 1;
+                end
+                if k2 == 1
+                    FLAG = 0;
+                end
+                k3 = k3 + 1;
             end
-            k3 = k3 + 1;
+            RR{p}.x_all(:,j,i) = mean(sqrt(cohx(:,1:2:end)),1);
+            RR{p}.y_all(:,j,i) = mean(sqrt(cohy(:,2:2:end)),1);
         end
-        RR.x_all(j,:,i) = mean(cohx);
-        RR.y_all(j,:,i) = mean(cohy);
     end
+    
+    % mean and standard error of stimulus-response coherence across subjects
+    SR{p}.x = squeeze(mean(SR{p}.x_all,4));
+    SR{p}.y = squeeze(mean(SR{p}.y_all,4));
+    SR{p}.xSE = squeeze(std(SR{p}.x_all,[],4)/sqrt(allSubj(p)));
+    SR{p}.ySE = squeeze(std(SR{p}.y_all,[],4)/sqrt(allSubj(p)));
+    
+    RR{p}.x = squeeze(mean(RR{p}.x_all,3));
+    RR{p}.y = squeeze(mean(RR{p}.y_all,3));
+    RR{p}.xSE = squeeze(std(RR{p}.x_all,[],3)/sqrt(allSubj(p)));
+    RR{p}.ySE = squeeze(std(RR{p}.y_all,[],3)/sqrt(allSubj(p)));
+    
+    x = squeeze(mean(SR{p}.x_all,1));
+    y = squeeze(mean(SR{p}.y_all,1));
+    
+    % total.x_all = 1 - x;
+    % total.y_all = 1 - y;
+    
+    NL{p}.x_all = RR{p}.x_all - x;
+    NL{p}.y_all = RR{p}.y_all - y;
+    
+    NL{p}.x = squeeze(mean(NL{p}.x_all,3));
+    NL{p}.y = squeeze(mean(NL{p}.y_all,3));
+    NL{p}.xSE = squeeze(std(NL{p}.x_all,[],3)/sqrt(allSubj(p)));
+    NL{p}.ySE = squeeze(std(NL{p}.y_all,[],3)/sqrt(allSubj(p)));
+    
+    % proportion.x_all = NL.x_all./total.x_all;
+    % proportion.y_all = NL.y_all./total.y_all;
+    %
+    % proportion.x = squeeze(mean(proportion.x_all,3));
+    % proportion.y = squeeze(mean(proportion.y_all,3));
+    % proportion.xSE = squeeze(std(proportion.x_all,[],3)/sqrt(allSubj(p)));
+    % proportion.ySE = squeeze(std(proportion.y_all,[],3)/sqrt(allSubj(p)));
 end
 
-SR.x = mean(SR.x_all,3);
-SR.y = mean(SR.y_all,3);
-RR.x = mean(RR.x_all,3);
-RR.y = mean(RR.y_all,3);
-
-% SRboot = NaN(Nblock,Nfreq,1000);
-% RRboot = NaN(Nblock,Nfreq,1000);
-% for i = 1:length(names1)
-%     SRcohere = SR.(names1{i});
-%     RRcohere = RR.(names1{i});
-%     for j = 1:1000
-%         k = datasample(SRcohere,10,3);
-%         SRboot(:,:,j) = mean(k,3);
-%         k = datasample(sqrt(RRcohere),10,3);
-%         RRboot(:,:,j) = mean(k,3);
-%     end
-%     SRboot = sort(SRboot,3);
-%     RRboot = sort(RRboot,3);
-%     
-%     SRerr.(names2{i}) = cat(3,SRboot(:,:,end-25),SRboot(:,:,26));
-%     SRerr.(names2{i})(:,:,1) = SRerr.(names2{i})(:,:,1) - SR.(names2{i});
-%     SRerr.(names2{i})(:,:,2) = SR.(names2{i}) - SRerr.(names2{i})(:,:,2);
-%     SRerr.(names2{i}) = permute(SRerr.(names2{i}), [3 2 1]);
-%     
-%     RRerr.(names2{i}) = cat(3,RRboot(:,:,end-25),RRboot(:,:,26));
-%     RRerr.(names2{i})(:,:,1) = RRerr.(names2{i})(:,:,1) - sqrt(RR.(names2{i}));
-%     RRerr.(names2{i})(:,:,2) = sqrt(RR.(names2{i})) - RRerr.(names2{i})(:,:,2);
-%     RRerr.(names2{i}) = permute(RRerr.(names2{i}), [3 2 1]);
-% end
-
-% figure
-% subplot(2,2,1); hold on
-% % for j = 1:length(gblocks)
-% %     s = shadedErrorBar(f_x,SR.x(j,:),SRerr.x(:,:,j),'lineProps','-o');
-% %     editErrorBar(s,col(j,:),1);
-% % end
-% for i = 1:Nblock
-%     plot(f_x, SR.x(i,:),'-o','Color',col(i,:),'LineWidth',1,'MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
-%     plot(f_x,squeeze(SR.x_all(i,:,:)),'Color',[col(i,:) 0.4],'HandleVisibility','off')
-% end
-% set(gca,'Xscale','log','box','off','TickDir','out')
-% ylabel([output,' X movements'])
-% axis([0.09 2.3 0 1])
-% title('SR')
-% yticks(0:0.2:1)
-% legend(graph_name{gblocks},'Location','southwest')
-% 
-% subplot(2,2,3); hold on
-% % for j = 1:length(gblocks)
-% %     s = shadedErrorBar(f_y,SR.y(j,:),SRerr.y(:,:,j),'lineProps','-o');
-% %     editErrorBar(s,col(j,:),1);
-% % end
-% for i = 1:Nblock
-%     plot(f_y, SR.y(i,:),'-o','Color',col(i,:),'LineWidth',1,'MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
-%     plot(f_y,squeeze(SR.y_all(i,:,:)),'Color',[col(i,:) 0.4])
-% end
-% set(gca,'Xscale','log','box','off','TickDir','out')
-% xlabel('Frequency (Hz)')
-% ylabel([output,' Y movements'])
-% axis([0.09 2.3 0 1])
-% yticks(0:0.2:1)
-% 
-% subplot(2,2,2); hold on
-% % for j = 1:length(gblocks)
-% %     s = shadedErrorBar(f_x,sqrt(RR.x(j,:)),RRerr.x(:,:,j),'lineProps','-o');
-% %     editErrorBar(s,col(j,:),1);
-% % end
-% for i = 1:Nblock
-%     plot(f_x, RR.x(i,:),'-o','Color',col(i,:),'LineWidth',1,'MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
-%     plot(f_x,squeeze(RR.x_all(i,:,:)),'Color',[col(i,:) 0.4])
-% end
-% set(gca,'Xscale','log','box','off','TickDir','out')
-% axis([0.09 2.3 0 1])
-% title('RR')
-% yticks(0:0.2:1)
-% 
-% subplot(2,2,4); hold on
-% % for j = 1:length(gblocks)
-% %     s = shadedErrorBar(f_y,sqrt(RR.y(j,:)),RRerr.y(:,:,j),'lineProps','-o');
-% %     editErrorBar(s,col(j,:),1);
-% % end
-% for i = 1:Nblock
-%     plot(f_y, RR.x(i,:),'-o','Color',col(i,:),'LineWidth',1,'MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
-%     plot(f_y,squeeze(RR.y_all(i,:,:)),'Color',[col(i,:) 0.4])
-% end
-% set(gca,'Xscale','log','box','off','TickDir','out')
-% xlabel('Frequency (Hz)')
-% axis([0.09 2.3 0 1])
-% yticks(0:0.2:1)
-
-for i = 1:Nfreq
-    leg{i} = ['Freq ',num2str(i)];
-end
-tick = find(contains(graph_name,'('));
-
-figure(1); clf
-subplot(2,1,1); hold on
-for i = 1:Nfreq
-    plot(1:Nblock,SR.x(:,i),'Color',col(i,:),'LineWidth',1)
-end
-for i = 1:Nfreq
-    plot(tick,SR.x(tick,i),'.','Color',col(i,:),'MarkerSize',25)
-end
-title('SR')
-ylabel([output,' X coherence'])
-xticks(tick)
-xticklabels(graph_name(tick))
-yticks(0:0.2:1)
-axis([1 Nblock 0 1])
-legend(leg,'Location','southeast')
-
-subplot(2,1,2); hold on
-for i = 1:Nfreq
-    plot(1:Nblock,SR.y(:,i),'Color',col(i,:),'LineWidth',1)
-    plot(tick,SR.y(tick,i),'.','Color',col(i,:),'MarkerSize',25)
-end
-xlabel('Block')
-ylabel([output,' Y coherence'])
-xticks(tick)
-xticklabels(graph_name(tick))
-yticks(0:0.2:1)
-axis([1 Nblock 0 1])
-
-figure(2); clf
-subplot(2,1,1); hold on
-for i = 1:Nfreq
-    plot(1:Nblock,RR.x(:,i),'Color',col(i,:),'LineWidth',1)
-    plot(tick,RR.x(tick,i),'.','Color',col(i,:),'MarkerSize',25)
-end
-title('RR')
-ylabel([output,' X coherence'])
-xticks(tick)
-xticklabels(graph_name(tick))
-yticks(0:0.2:1)
-axis([1 Nblock 0 1])
-
-subplot(2,1,2); hold on
-for i = 1:Nfreq
-    plot(1:Nblock,RR.y(:,i),'Color',col(i,:),'LineWidth',1)
-    plot(tick,RR.y(tick,i),'.','Color',col(i,:),'MarkerSize',25)
-end
-ylabel([output,' Y coherence'])
-xlabel('Block')
-xticks(tick)
-xticklabels(graph_name(tick))
-yticks(0:0.2:1)
-axis([1 Nblock 0 1])
-
-idx = setdiff(1:Nblock,tick);
-idx = [idx(2) idx(end)];
-
-figure(3); clf; hold on
-for i = 1:Nfreq
-    plot([-8 -7],[0 0],'Color',col(i,:),'LineWidth',1.5,'MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
-end
-for i = 1:Nfreq
-    plot(1:2,SR.x(idx,i),'-o','Color',col(i,:),'LineWidth',1.5,'MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
-    plot(3:4,SR.y(idx,i),'-o','Color',col(i,:),'LineWidth',1.5,'MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
-    plot(5:6,RR.x(idx,i),'-o','Color',col(i,:),'LineWidth',1.5,'MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
-    plot(7:8,RR.y(idx,i),'-o','Color',col(i,:),'LineWidth',1.5,'MarkerFaceColor',col(i,:),'MarkerEdgeColor','none')
-    for j = 1:Nsubj
-        plot(1:2,SR.x_all(idx,i,j),'Color',[col(i,:) 0.4])
-        plot(3:4,SR.y_all(idx,i,j),'Color',[col(i,:) 0.4])
-        plot(5:6,RR.x_all(idx,i,j),'Color',[col(i,:) 0.4])
-        plot(7:8,RR.y_all(idx,i,j),'Color',[col(i,:) 0.4])
+% generate figures
+figure(13); clf
+for j = 1:3
+    % plot Figure 4B
+    subplot(2,3,j); hold on
+    for i = 1:Nblock
+        for k = 1:Nfreq
+            plotIdx = Ntrials*(i-1)+1:Ntrials*(i-1)+Ntrials;
+            s = shadedErrorBar(plotIdx,SR{j}.x(:,k,i),SR{j}.xSE(:,k,i));
+            editErrorBar(s,col(k,:),1.5);
+        end
     end
+    if j == 1
+        title('Rotation')
+    else
+        title('Mirror-Reversal')
+    end
+    set(gca,'TickDir','out')
+    if j == 1
+        ylabel('Coherence for x-target freqs')
+    end
+    xticks(1:8:41)
+    yticks(0:0.25:1)
+    axis([1 Ntrials*Nblock 0 1])
+    
+    % plot Figure 4-supplement 1B
+    subplot(2,3,j+3); hold on
+    for i = 1:Nblock
+        for k = 1:Nfreq
+            plotIdx = Ntrials*(i-1)+1:Ntrials*(i-1)+Ntrials;
+            s = shadedErrorBar(plotIdx,SR{j}.y(:,k,i),SR{j}.ySE(:,k,i));
+            editErrorBar(s,col(k,:),1.5);
+        end
+    end
+    set(gca,'TickDir','out')
+    xlabel('Trial Number')
+    if j == 1
+        ylabel('Coherence for y-target freqs')
+    end
+    xticks(1:8:41) 
+    yticks(0:0.25:1)
+    axis([1 Ntrials*Nblock 0 1])
 end
-xticks(1.5:2:7.5)
-xticklabels({'SR_X','SR_Y','RR_X','RR_Y'})
-ylabel([output,' coherence'])
-legend(leg,'Location','northeast')
-xlim([1 8])
+
+figure(50); clf
+for j = 1:3
+    subplot(2,3,j); hold on
+    for k = 1:Nfreq
+        s = shadedErrorBar(1:Nblock,NL{j}.x(k,:),NL{j}.xSE(k,:));
+        editErrorBar(s,col(k,:),1.5);
+    end
+    if j == 1
+        title('Rotation')
+    else
+        title('Mirror-Reversal')
+    end
+    set(gca,'TickDir','out')
+    if j == 1
+        ylabel('Coherence for x-target freqs')
+    end
+    xticks([1 2 5 6])
+    xticklabels({'Baseline', 'Early', 'Late', 'Post'})
+    yticks(0:0.25:1)
+    axis([1 6 -0.2 1])
+    
+    subplot(2,3,j+3); hold on
+    for k = 1:Nfreq
+        s = shadedErrorBar(1:Nblock,NL{j}.y(k,:),NL{j}.ySE(k,:));
+        editErrorBar(s,col(k,:),1.5);
+    end
+    set(gca,'TickDir','out')
+    xlabel('Trial Number')
+    if j == 1
+        ylabel('Coherence for y-target freqs')
+    end
+    xticks([1 2 5 6])
+    xticklabels({'Baseline', 'Early', 'Late', 'Post'})
+    yticks(0:0.25:1)
+    axis([1 6 -0.2 1])
+end
 end
