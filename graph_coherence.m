@@ -87,10 +87,10 @@ SR.y = squeeze(mean(SR.y_all,4));
 SR.xSE = squeeze(std(SR.x_all,[],4)/sqrt(Nsubj));
 SR.ySE = squeeze(std(SR.y_all,[],4)/sqrt(Nsubj));
 
-RR.x = squeeze(mean(RR.x_all,4));
-RR.y = squeeze(mean(RR.y_all,4));
-RR.xSE = squeeze(std(RR.x_all,[],4)/sqrt(Nsubj));
-RR.ySE = squeeze(std(RR.y_all,[],4)/sqrt(Nsubj));
+RR.x = squeeze(mean(RR.x_all,3));
+RR.y = squeeze(mean(RR.y_all,3));
+RR.xSE = squeeze(std(RR.x_all,[],3)/sqrt(Nsubj));
+RR.ySE = squeeze(std(RR.y_all,[],3)/sqrt(Nsubj));
 
 x = squeeze(mean(SR.x_all,1));
 y = squeeze(mean(SR.y_all,1));
