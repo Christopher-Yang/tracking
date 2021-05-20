@@ -3,9 +3,10 @@ function graph_coherence(data, output)
 
 % set variables for plotting
 groups = {'day2', 'day5', 'day10'}; % group names
-block_name{1} = {'B1_baseline', 'B9', 'B11_habit'}; % block names
-block_name{2} = {'B1_baseline', 'B24', 'B26_habit'}; % block names
-block_name{3} = {'B1_baseline', 'B49', 'B51_habit'}; % block names
+graph_names = {'2-day', '5-day', '10-day'};
+block_name{1} = {'B1_baseline', 'B3', 'B9', 'B11_habit'}; % block names
+block_name{2} = {'B1_baseline', 'B3', 'B24', 'B26_habit'}; % block names
+block_name{3} = {'B1_baseline', 'B3', 'B49', 'B51_habit'}; % block names
 Ngroup = length(groups); % number of groups
 Nblock = length(block_name{1}); % number of blocks
 allSubj = [13 14 5]; % number of subjects
@@ -134,16 +135,13 @@ for j = 1:3
             editErrorBar(s,col(k,:),1.5);
         end
     end
-    if j == 1
-        title('Rotation')
-    else
-        title('Mirror-Reversal')
-    end
+    title(graph_names{j})
     set(gca,'TickDir','out')
     if j == 1
         ylabel('Coherence for x-target freqs')
     end
-    xticks(1:8:41)
+    xticks(1:5:16)
+    xticklabels({'Baseline', 'Early', 'Late', 'Flip'})
     yticks(0:0.25:1)
     axis([1 Ntrials*Nblock 0 1])
     
@@ -157,49 +155,49 @@ for j = 1:3
         end
     end
     set(gca,'TickDir','out')
-    xlabel('Trial Number')
     if j == 1
         ylabel('Coherence for y-target freqs')
     end
-    xticks(1:8:41) 
+    xticks(1:5:16)
+    xticklabels({'Baseline', 'Early', 'Late', 'Flip'})
     yticks(0:0.25:1)
     axis([1 Ntrials*Nblock 0 1])
 end
 
-figure(50); clf
-for j = 1:3
-    subplot(2,3,j); hold on
-    for k = 1:Nfreq
-        s = shadedErrorBar(1:Nblock,NL{j}.x(k,:),NL{j}.xSE(k,:));
-        editErrorBar(s,col(k,:),1.5);
-    end
-    if j == 1
-        title('Rotation')
-    else
-        title('Mirror-Reversal')
-    end
-    set(gca,'TickDir','out')
-    if j == 1
-        ylabel('Coherence for x-target freqs')
-    end
-    xticks([1 2 5 6])
-    xticklabels({'Baseline', 'Early', 'Late', 'Post'})
-    yticks(0:0.25:1)
-    axis([1 6 -0.2 1])
-    
-    subplot(2,3,j+3); hold on
-    for k = 1:Nfreq
-        s = shadedErrorBar(1:Nblock,NL{j}.y(k,:),NL{j}.ySE(k,:));
-        editErrorBar(s,col(k,:),1.5);
-    end
-    set(gca,'TickDir','out')
-    xlabel('Trial Number')
-    if j == 1
-        ylabel('Coherence for y-target freqs')
-    end
-    xticks([1 2 5 6])
-    xticklabels({'Baseline', 'Early', 'Late', 'Post'})
-    yticks(0:0.25:1)
-    axis([1 6 -0.2 1])
-end
+% figure(50); clf
+% for j = 1:3
+%     subplot(2,3,j); hold on
+%     for k = 1:Nfreq
+%         s = shadedErrorBar(1:Nblock,NL{j}.x(k,:),NL{j}.xSE(k,:));
+%         editErrorBar(s,col(k,:),1.5);
+%     end
+%     if j == 1
+%         title('Rotation')
+%     else
+%         title('Mirror-Reversal')
+%     end
+%     set(gca,'TickDir','out')
+%     if j == 1
+%         ylabel('Coherence for x-target freqs')
+%     end
+%     xticks([1 2 5 6])
+%     xticklabels({'Baseline', 'Early', 'Late', 'Post'})
+%     yticks(0:0.25:1)
+%     axis([1 6 -0.2 1])
+%     
+%     subplot(2,3,j+3); hold on
+%     for k = 1:Nfreq
+%         s = shadedErrorBar(1:Nblock,NL{j}.y(k,:),NL{j}.ySE(k,:));
+%         editErrorBar(s,col(k,:),1.5);
+%     end
+%     set(gca,'TickDir','out')
+%     xlabel('Trial Number')
+%     if j == 1
+%         ylabel('Coherence for y-target freqs')
+%     end
+%     xticks([1 2 5 6])
+%     xticklabels({'Baseline', 'Early', 'Late', 'Post'})
+%     yticks(0:0.25:1)
+%     axis([1 6 -0.2 1])
+% end
 end

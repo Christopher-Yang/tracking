@@ -299,6 +299,27 @@ ylabel('Gain')
 set(gca, 'TickDir', 'out')
 legend(groupNames)
 
+figure(24); clf; hold on
+plot([0.5 23.5], [0 0], 'k', 'HandleVisibility', 'off')
+for q = 1:Ngroup
+    h = squeeze(mean(thetaOpt{q}(1,3,:,:,:),4));
+    for i = 1:Nfreq
+        plot(4*(i-1) + q, h(i,:), '.', 'Color', col(q,:), 'MarkerSize', 20, 'HandleVisibility', 'off')
+        if i == 1
+            plot(4*(i-1) + q, mean(h(i,:),2), 'ok', 'MarkerFaceColor', col(q,:), 'MarkerSize', 10, 'LineWidth', 1)
+        else
+            plot(4*(i-1) + q, mean(h(i,:),2), 'ok', 'MarkerFaceColor', col(q,:), 'MarkerSize', 10, 'LineWidth', 1, 'HandleVisibility', 'off')
+        end
+    end
+end
+axis([0.5 23.5 -0.4 0.8])
+xticks(2:4:22)
+xticklabels(1:6)
+xlabel('Frequency')
+ylabel('Gain')
+set(gca, 'TickDir', 'out')
+legend(groupNames)
+
 
 %% plot habit
 % figure(5); clf
