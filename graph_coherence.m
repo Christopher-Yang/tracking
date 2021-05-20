@@ -53,28 +53,46 @@ for p = 1:length(groups)
             SR.x_all(:,:,j,i,p) = cohx(:,1:2:end); 
             SR.y_all(:,:,j,i,p) = cohy(:,2:2:end);
             
-            FLAG = 1;
-            k1 = 1;
+            % set variables for computing response-response coherence
+            FLAG = 1; % flag for running while loop
+            k1 = 1; % k1 and k2 are indices of trials to compute coherence
             k2 = Ntrials;
-            k3 = 1;
-            cohx = NaN(nchoosek(8,2), length(sorted_freqs));
-            cohy = NaN(nchoosek(8,2), length(sorted_freqs));
+            count = 1; % counter for runs through while loop
+            cohx = NaN(nchoosek(Ntrials,2), length(sorted_freqs));
+            cohy = NaN(nchoosek(Ntrials,2), length(sorted_freqs));
+            
+            % loop for computing pairwise coherence between trials within a
+            % block
             while FLAG
+                
+                % compute coherence between trials k1 and k2
                 coh = mscohere([outX(:,k1) outY(:,k1)],[outX(:,k2) ...
                     outY(:,k2)],blackmanharris(round(N/5)),[] ...
                     ,sorted_freqs,130.004,'mimo')';
-                cohx(k3,:) = coh(1,:);
-                cohy(k3,:) = coh(2,:);
+                
+                % store coherence values in index k3
+                cohx(count,:) = coh(1,:); % coherence at x-frequencies
+                cohy(count,:) = coh(2,:); % coherence at y-frequencies
+                
+                % increment indices
                 k1 = k1 + 1;
+                count = count + 1;
+                
+                % when k1 has been incremented up to k2, reset k1 to 1 and
+                % decrement k2 by 1
                 if k1 == k2
                     k1 = 1;
                     k2 = k2 - 1;
                 end
+                
+                % if k2 has been decremented to the minimum value, end
+                % while loop
                 if k2 == 1
                     FLAG = 0;
                 end
-                k3 = k3 + 1;
             end
+            
+            % average pairwise RR coherences across trials
             RR.x_all(:,j,i,p) = mean(sqrt(cohx(:,1:2:end)),1);
             RR.y_all(:,j,i,p) = mean(sqrt(cohy(:,2:2:end)),1);
         end
@@ -87,32 +105,24 @@ SR.y = squeeze(mean(SR.y_all,4));
 SR.xSE = squeeze(std(SR.x_all,[],4)/sqrt(Nsubj));
 SR.ySE = squeeze(std(SR.y_all,[],4)/sqrt(Nsubj));
 
+% mean of response-response coherence across subjects
 RR.x = squeeze(mean(RR.x_all,3));
 RR.y = squeeze(mean(RR.y_all,3));
-RR.xSE = squeeze(std(RR.x_all,[],3)/sqrt(Nsubj));
-RR.ySE = squeeze(std(RR.y_all,[],3)/sqrt(Nsubj));
 
+% mean of stimulus-response coherence across trials
 x = squeeze(mean(SR.x_all,1));
 y = squeeze(mean(SR.y_all,1));
 
-% total.x_all = 1 - x;
-% total.y_all = 1 - y;
-
+% compute the amount of variance accounted for by response-response
+% coherence that is not accounted for by stimulus-response coherence
 NL.x_all = RR.x_all - x;
 NL.y_all = RR.y_all - y;
 
+% mean and standard error of NL across subjects
 NL.x = squeeze(mean(NL.x_all,3));
 NL.y = squeeze(mean(NL.y_all,3));
 NL.xSE = squeeze(std(NL.x_all,[],3)/sqrt(Nsubj));
 NL.ySE = squeeze(std(NL.y_all,[],3)/sqrt(Nsubj));
-
-% proportion.x_all = NL.x_all./total.x_all;
-% proportion.y_all = NL.y_all./total.y_all;
-% 
-% proportion.x = squeeze(mean(proportion.x_all,3));
-% proportion.y = squeeze(mean(proportion.y_all,3));
-% proportion.xSE = squeeze(std(proportion.x_all,[],3)/sqrt(Nsubj));
-% proportion.ySE = squeeze(std(proportion.y_all,[],3)/sqrt(Nsubj));
 
 % generate figures
 figure(13); clf
@@ -162,6 +172,9 @@ for j = 1:2
     axis([1 Ntrials*Nblock 0 1])
 end
 
+% this plots the proportion of behavior that is accounted for by a
+% nonlinear model but not a linear model; this figure is not displayed in 
+% the paper but is mentioned in the text
 figure(50); clf
 for j = 1:2
     subplot(2,2,j); hold on

@@ -114,14 +114,17 @@ for p = 1:Nsubj
     for m = 1:Ntrials
         for k = 1:Nblock
             for i = 1:Nfreq
-                gainOrth(i,k,m,p) = perpAxis'*gainMat(:,:,i,k,m,p,2)*perpAxis;
+                gainOrth(i,k,m,p) = perpAxis'*gainMat(:,:,i,k,m,p,2)*...
+                    perpAxis;
             end
         end
     end
 end
 
-thetaFit = reshape(permute(thetaFit,[3 2 1 4]),[Nblock*Ntrials Nfreq Nsubj]);
-gainOrth = reshape(permute(gainOrth,[3 2 1 4]),[Nblock*Ntrials Nfreq Nsubj]);
+thetaFit = reshape(permute(thetaFit,[3 2 1 4]),[Nblock*Ntrials Nfreq ...
+    Nsubj]);
+gainOrth = reshape(permute(gainOrth,[3 2 1 4]),[Nblock*Ntrials Nfreq ...
+    Nsubj]);
 
 %% plot vectors from gain matrices (Figure 5A, Figure 5-supplement 2A, Figure 6B, and Figure 6-supplement 1A)
 % generate color maps
@@ -356,13 +359,15 @@ figure(f); clf
 
 % rotation angle for rotation group
 subplot(1,2,1); hold on
-rectangle('Position',[Ntrials+1 -40 4*Ntrials-1 180],'FaceColor',[0 0 0 0.1],'EdgeColor','none');
+rectangle('Position',[Ntrials+1 -40 4*Ntrials-1 180],'FaceColor',...
+    [0 0 0 0.1],'EdgeColor','none');
 plot([1 Nblock*Ntrials],[0 0],'--k','LineWidth',1) % ideal baseline response
 plot([1 Nblock*Ntrials],[90 90],'--k','LineWidth',1) % ideal compensation
 for k = 1:Nblock
     for i = 1:Nfreq
         plotIdx = Ntrials*(k-1)+1:Ntrials*(k-1)+Ntrials;
-        s = shadedErrorBar(plotIdx,thetaFitMu(plotIdx,i),thetaFitSE(plotIdx,i));
+        s = shadedErrorBar(plotIdx,thetaFitMu(plotIdx,i),...
+            thetaFitSE(plotIdx,i));
         editErrorBar(s,colors(i,:),1.5);
     end
 end
@@ -375,14 +380,17 @@ axis(ax1)
 
 % orthogonal gain for mirror-reversal group
 subplot(1,2,2); hold on
-rectangle('Position',[Ntrials+1 -2 4*Ntrials-1 4],'FaceColor',[0 0 0 0.1],'EdgeColor','none');
+rectangle('Position',[Ntrials+1 -2 4*Ntrials-1 4],'FaceColor',...
+    [0 0 0 0.1],'EdgeColor','none');
 plot([1 Nblock*Ntrials],[1 1],'--k','LineWidth',1,'HandleVisibility','off') % ideal baseline response
-plot([1 Nblock*Ntrials],[-1 -1],'--k','LineWidth',1,'HandleVisibility','off') % ideal compensation
+plot([1 Nblock*Ntrials],[-1 -1],'--k','LineWidth',1,'HandleVisibility',...
+    'off') % ideal compensation
 plot([1 Nblock*Ntrials],[0 0],'k','HandleVisibility','off')
 for k = 1:Nblock
     for i = 1:Nfreq
         plotIdx = Ntrials*(k-1)+1:Ntrials*(k-1)+Ntrials;
-        s = shadedErrorBar(plotIdx,gainOrthMu(plotIdx,i),gainOrthSE(plotIdx,i));
+        s = shadedErrorBar(plotIdx,gainOrthMu(plotIdx,i),...
+            gainOrthSE(plotIdx,i));
         editErrorBar(s,colors(i,:),1.5);
     end
 end
@@ -401,13 +409,15 @@ figure(f+1); clf
 
 % rotation angle for rotation group
 subplot(1,2,1); hold on
-rectangle('Position',[Ntrials+1 -180 4*Ntrials-1 360],'FaceColor',[0 0 0 0.1],'EdgeColor','none');
+rectangle('Position',[Ntrials+1 -180 4*Ntrials-1 360],'FaceColor',...
+    [0 0 0 0.1],'EdgeColor','none');
 plot([1 Nblock*Ntrials],[0 0],'--k','LineWidth',1) % ideal baseline response
 plot([1 Nblock*Ntrials],[90 90],'--k','LineWidth',1) % ideal compensation
 for k = 1:Nblock
     for i = 1:Nfreq
         plotIdx = Ntrials*(k-1)+1:Ntrials*(k-1)+Ntrials;
-        plot(plotIdx,thetaFitMu(plotIdx,i),'Color',colors(i,:),'LineWidth',1.5);
+        plot(plotIdx,thetaFitMu(plotIdx,i),'Color',colors(i,:),...
+            'LineWidth',1.5);
     end
 end
 set(gca,'TickDir','out')
@@ -419,14 +429,17 @@ axis(ax3)
 
 % orthogonal gain for mirror-reversal group
 subplot(1,2,2); hold on
-rectangle('Position',[Ntrials+1 -2 4*Ntrials-1 4],'FaceColor',[0 0 0 0.1],'EdgeColor','none');
+rectangle('Position',[Ntrials+1 -2 4*Ntrials-1 4],'FaceColor',...
+    [0 0 0 0.1],'EdgeColor','none');
 plot([1 Nblock*Ntrials],[1 1],'--k','LineWidth',1,'HandleVisibility','off') % ideal baseline response
-plot([1 Nblock*Ntrials],[-1 -1],'--k','LineWidth',1,'HandleVisibility','off') % ideal compensation
+plot([1 Nblock*Ntrials],[-1 -1],'--k','LineWidth',1,'HandleVisibility',...
+    'off') % ideal compensation
 plot([1 Nblock*Ntrials],[0 0],'k','HandleVisibility','off')
 for k = 1:Nblock
     for i = 1:Nfreq
         plotIdx = Ntrials*(k-1)+1:Ntrials*(k-1)+Ntrials;
-        plot(plotIdx,gainOrthMu(plotIdx,i),'Color',colors(i,:),'LineWidth',1.5);
+        plot(plotIdx,gainOrthMu(plotIdx,i),'Color',colors(i,:),...
+            'LineWidth',1.5);
     end
 end
 set(gca,'TickDir','out')

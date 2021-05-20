@@ -20,7 +20,8 @@ for i = 1:length(group)
     for j = 1:Nsubj
         for k = 1:length(block)
             for m = 1:length(ax)
-                ratio(:,:,m,k,j,i) = data1.(group{i}){j}.(block{k}).cursor.phasors.(ax{m}).ratio;
+                ratio(:,:,m,k,j,i) = data1.(group{i}){j}.(block{k}). ...
+                    cursor.phasors.(ax{m}).ratio;
             end
         end
     end
@@ -54,14 +55,17 @@ lagMu = squeeze(mean(lag,3));
 lagDiff = squeeze(lag(:,5,:,:) - lag(:,1,:,:));
 lagDiffMu = squeeze(mean(lagDiff,2));
 
-% plot absolute lag at baseline and late learning; Figure 4-figure
-% supplement 1C
+% plot figures
 figure(14); clf
 for i = 1:2
+    % absolute lag at baseline and late learning; Figure 4-figure 
+    % supplement 1C
     subplot(2,2,i); hold on
-    plot(freqs,squeeze(lag(:,1,:,i)),'Color',[col(1,:) 0.5],'HandleVisibility','off')
+    plot(freqs,squeeze(lag(:,1,:,i)),'Color',[col(1,:) 0.5],...
+        'HandleVisibility','off')
     plot(freqs,lagMu(:,1,i),'Color',col(1,:),'LineWidth',2)
-    plot(freqs,squeeze(lag(:,5,:,i)),'Color',[col(3,:) 0.5],'HandleVisibility','off')
+    plot(freqs,squeeze(lag(:,5,:,i)),'Color',[col(3,:) 0.5],...
+        'HandleVisibility','off')
     plot(freqs,lagMu(:,5,i),'Color',col(3,:),'LineWidth',2)
     title(groupNames{i})
     axis([0 2.2 0 1400])
@@ -72,14 +76,11 @@ for i = 1:2
     else
         legend({'Baseline','Late'})
     end
-% end
 
-% plot increase in lag between baseline and late learning; Figure 4C
-% figure(15); clf; hold on
-% for i = 1:2
-
+    % increase in lag between baseline and late learning; Figure 4C
     subplot(2,2,3:4); hold on
-    plot(freqs,lagDiff(:,:,i),'Color',[col2(i,:) 0.5],'HandleVisibility','off')
+    plot(freqs,lagDiff(:,:,i),'Color',[col2(i,:) 0.5],...
+        'HandleVisibility','off')
     plot(freqs,lagDiffMu(:,i),'Color',col2(i,:),'LineWidth',2)
     if i == 1
         axis([0 2.2 -300 1000])

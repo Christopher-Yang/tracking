@@ -33,10 +33,13 @@ end
 % generate Figure 2C
 figure(2); clf
 subplot(1,2,1); hold on
-rectangle('Position',[9 0 31 150],'FaceColor',[0 0 0 0.1],'EdgeColor','none');
+rectangle('Position',[9 0 31 150],'FaceColor',[0 0 0 0.1],'EdgeColor',...
+    'none');
 for i = 1:6
-    plot((i-1)*8+1:(i-1)*8+8,MSE.rot(:,:,i),'Color',[0 0 0 0.5],'LineWidth',0.2)
-    plot((i-1)*8+1:(i-1)*8+8,mean(MSE.rot(:,:,i),2),'Color',col(i,:),'LineWidth',1.5)
+    plot((i-1)*8+1:(i-1)*8+8,MSE.rot(:,:,i),'Color',[0 0 0 0.5],...
+        'LineWidth',0.2)
+    plot((i-1)*8+1:(i-1)*8+8,mean(MSE.rot(:,:,i),2),'Color',col(i,:),...
+        'LineWidth',1.5)
 end
 title('Rotation')
 xlabel('Trial Number (tracking)')
@@ -46,10 +49,13 @@ axis([1 49 0 150])
 set(gca,'TickDir','out')
 
 subplot(1,2,2); hold on
-rectangle('Position',[9 0 31 150],'FaceColor',[0 0 0 0.1],'EdgeColor','none');
+rectangle('Position',[9 0 31 150],'FaceColor',[0 0 0 0.1],'EdgeColor',...
+    'none');
 for i = 1:6
-    plot((i-1)*8+1:(i-1)*8+8,MSE.mir(:,:,i),'Color',[0 0 0 0.5],'LineWidth',0.2)
-    plot((i-1)*8+1:(i-1)*8+8,mean(MSE.mir(:,:,i),2),'Color',col(i,:),'LineWidth',1.5)
+    plot((i-1)*8+1:(i-1)*8+8,MSE.mir(:,:,i),'Color',[0 0 0 0.5],...
+        'LineWidth',0.2)
+    plot((i-1)*8+1:(i-1)*8+8,mean(MSE.mir(:,:,i),2),'Color',col(i,:),...
+        'LineWidth',1.5)
 end
 title('Mirror Reversal')
 xlabel('Trial Number (tracking)')

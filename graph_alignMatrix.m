@@ -56,7 +56,8 @@ for n = 1:Ngroup % loop over groups
                         [params_opt,fval] = fmincon(err,paramsInit);
                         
                         % shape into 2x2 matrix
-                        alignMat(:,:,m,k) = [params_opt(1:2); params_opt(3:4)];
+                        alignMat(:,:,m,k) = [params_opt(1:2); ...
+                            params_opt(3:4)];
                         
                         % record MSE
                         MSE(k) = fval;
@@ -82,7 +83,8 @@ for n = 1:Ngroup % loop over groups
                     
                 % if delay_opt is provided, uses this for analysis
                 else
-                    err = @(params) scale(params,hand,target,delay_opt(m,j,i,n));
+                    err = @(params) scale(params,hand,target,...
+                        delay_opt(m,j,i,n));
                     
                     % fit alignment matrix
                     params_opt = fmincon(err,paramsInit);
@@ -231,16 +233,16 @@ for i = 1:4
         subplot(4,Ntrials,(i-1)*Ntrials+j); hold on
         plot([0 1],[0 0],'k') % unit x vector
         plot([0 0],[0 1],'k') % unit y vector
-        a = error_ellipse(x(:,:,j,i,1),mat1(:,1,j,gblocks(i)),'color',col1,...
-            'conf',0.95); % draw confidence ellipses
-        b = error_ellipse(y(:,:,j,i,1),mat1(:,2,j,gblocks(i)),'color',col2,...
-            'conf',0.95);
+        a = error_ellipse(x(:,:,j,i,1),mat1(:,1,j,gblocks(i)),'color',...
+            col1,'conf',0.95); % draw confidence ellipses
+        b = error_ellipse(y(:,:,j,i,1),mat1(:,2,j,gblocks(i)),'color',...
+            col2,'conf',0.95);
         patch(a.XData,a.YData,col1,'FaceAlpha',0.2) % shade confidence ellipses
         patch(b.XData,b.YData,col2,'FaceAlpha',0.2)
-        plot([0 mat1(1,1,j,gblocks(i))],[0 mat1(2,1,j,gblocks(i))],'Color',col1,...
-            'LineWidth',1.5) % plot vectors
-        plot([0 mat1(1,2,j,gblocks(i))],[0 mat1(2,2,j,gblocks(i))],'Color',col2,...
-            'LineWidth',1.5)
+        plot([0 mat1(1,1,j,gblocks(i))],[0 mat1(2,1,j,gblocks(i))],...
+            'Color',col1,'LineWidth',1.5) % plot vectors
+        plot([0 mat1(1,2,j,gblocks(i))],[0 mat1(2,2,j,gblocks(i))],...
+            'Color',col2,'LineWidth',1.5)
         axis([-1.5 1.4 -1.5 1.4])
         axis square
         if j == 1
@@ -265,16 +267,16 @@ for i = 1:4
         subplot(4,Ntrials,(i-1)*Ntrials+j); hold on
         plot([0 1],[0 0],'k') % unit x vector
         plot([0 0],[0 1],'k') % unit y vector
-        a = error_ellipse(x(:,:,j,i,2),mat2(:,1,j,gblocks(i)),'color',col1,...
-            'conf',0.95); % draw confidence ellipses
-        b = error_ellipse(y(:,:,j,i,2),mat2(:,2,j,gblocks(i)),'color',col2,...
-            'conf',0.95);
+        a = error_ellipse(x(:,:,j,i,2),mat2(:,1,j,gblocks(i)),'color',...
+            col1,'conf',0.95); % draw confidence ellipses
+        b = error_ellipse(y(:,:,j,i,2),mat2(:,2,j,gblocks(i)),'color',...
+            col2,'conf',0.95);
         patch(a.XData,a.YData,col1,'FaceAlpha',0.2) % shade confidence ellipses
         patch(b.XData,b.YData,col2,'FaceAlpha',0.2)
-        plot([0 mat2(1,1,j,gblocks(i))],[0 mat2(2,1,j,gblocks(i))],'Color',col1,...
-            'LineWidth',1.5) % plot vectors
-        plot([0 mat2(1,2,j,gblocks(i))],[0 mat2(2,2,j,gblocks(i))],'Color',col2,...
-            'LineWidth',1.5)
+        plot([0 mat2(1,1,j,gblocks(i))],[0 mat2(2,1,j,gblocks(i))],...
+            'Color',col1,'LineWidth',1.5) % plot vectors
+        plot([0 mat2(1,2,j,gblocks(i))],[0 mat2(2,2,j,gblocks(i))],...
+            'Color',col2,'LineWidth',1.5)
         axis([-1.5 1.4 -1.5 1.4])
         axis square
         if j == 1
@@ -319,7 +321,8 @@ figure(7); clf
 % plot responses for all tracking blocks
 for k = 1:2
     subplot(1,2,k); hold on 
-    rectangle('Position',[9 -10 31 110],'FaceColor',[0 0 0 0.1],'EdgeColor','none');
+    rectangle('Position',[9 -10 31 110],'FaceColor',[0 0 0 0.1],...
+        'EdgeColor','none');
     plot([0 Ntrials*Nblock+1],[0 0],'k')
     
     % mean across subjects
@@ -330,12 +333,14 @@ for k = 1:2
                 plot(idx,vmr(idx,:),'k','Color',[0 0 0 0.5],'LineWidth',0.2)
                 plot(idx,mean(vmr(idx,:),2),'k','LineWidth',1.5)
             else
-                plot(idx,mr(idx,:),'k','Color',[0 0 0 0.5],'LineWidth',0.2)
+                plot(idx,mr(idx,:),'k','Color',[0 0 0 0.5],'LineWidth',...
+                    0.2)
                 plot(idx,mean(mr(idx,:),2),'k','LineWidth',1.5)
             end
         else % all other blocks plot with colors
             if k == 1
-                plot(idx,vmr(idx,:),'k','Color',[0 0 0 0.5],'LineWidth',0.2)
+                plot(idx,vmr(idx,:),'k','Color',[0 0 0 0.5],'LineWidth',...
+                    0.2)
                 plot(idx,mean(vmr(idx,:),2),'Color',col(colIdx(i),:)...
                     ,'LineWidth',1.5)
             else
@@ -369,7 +374,8 @@ idx = [1 2 0 0 3 4];
 % plot left panel of Figure 3C
 figure(8); clf
 subplot(1,2,1); hold on
-rectangle('Position',[9 -10 31 110],'FaceColor',[0 0 0 0.1],'EdgeColor','none');
+rectangle('Position',[9 -10 31 110],'FaceColor',[0 0 0 0.1],'EdgeColor',...
+    'none');
 plot([0 Nblock*Ntrials+1],[0 0],'--k','LineWidth',1) % ideal baseline response
 plot([0 Nblock*Ntrials+1],[90 90],'--k','LineWidth',1) % ideal compensation
 % plot mean across subjects
@@ -379,7 +385,8 @@ for i = 1:Nblock
     if i == 3 || i == 4 % plot blocks between Early and Late in black
         plot(plotIdx,thetaMu(plotIdx),'Color',[0 0 0],'LineWidth',1.5)
     else % all other blocks plotted in color
-        plot(plotIdx,thetaMu(plotIdx),'Color',colors(idx(i),:),'LineWidth',1.5)
+        plot(plotIdx,thetaMu(plotIdx),'Color',colors(idx(i),:),...
+            'LineWidth',1.5)
     end
 end
 set(gca,'TickDir','out')
@@ -392,7 +399,8 @@ axis([0.5 length(thetaMu) + 0.5 -10 100])
 
 % plot right panel of Figure 3C
 subplot(1,2,2); hold on
-rectangle('Position',[9 -10 31 110],'FaceColor',[0 0 0 0.1],'EdgeColor','none');
+rectangle('Position',[9 -10 31 110],'FaceColor',[0 0 0 0.1],'EdgeColor',...
+    'none');
 plot([0 Nblock*Ntrials+1],[1 1],'--k','LineWidth',1) % ideal baseline response
 plot([0 Nblock*Ntrials+1],[-1 -1],'--k','LineWidth',1) % ideal compensation
 plot([0 Nblock*Ntrials+1],[0 0],'k')
@@ -403,7 +411,8 @@ for i = 1:Nblock
     if i == 3 || i == 4 % plot blocks between Early and Late in black
         plot(plotIdx,scaleOrthMu(plotIdx),'Color',[0 0 0],'LineWidth',1.5)
     else% all other blocks plotted in color
-        plot(plotIdx,scaleOrthMu(plotIdx),'Color',colors(idx(i),:),'LineWidth',1.5)
+        plot(plotIdx,scaleOrthMu(plotIdx),'Color',colors(idx(i),:),...
+            'LineWidth',1.5)
     end
 end
 set(gca,'TickDir','out')
