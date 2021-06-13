@@ -1,4 +1,4 @@
-function output = load_data(folder, time)
+function output = load_data(folder, subj, time)
     
     % display status 
     disp('Loading...');
@@ -10,13 +10,21 @@ function output = load_data(folder, time)
 
     allFields = [fields fields2 fields3];
     fnames = dir(folder);
-    Nsubj = length(fnames)-2;
+    Nfiles = length(fnames)-2;
+    Nsubj = length(subj);
+    
+    for i = 1:Nfiles
+        fnames2{i} = fnames(2+i).name;
+    end
     
     for i = 1:Nsubj
         disp(['   Subject ' num2str(i)]); % display progress
         
+        % find
+        fileIdx = find(contains(fnames2, subj(i)) == 1);
+        
         % read data
-        d = readtable([folder '/' fnames(2+i).name]);
+        d = readtable([folder '/' fnames(2+fileIdx).name]);
         
         % only analyze tracking trials
         tracking = strcmp(d.task,'tracking');
@@ -285,19 +293,21 @@ function output = load_data(folder, time)
                 longDrops{j} = len(len > 3)*(1/frameRate);
             end
             
-            % extract whether block was mirrored
-            mirror = d.mirror(d.block==k);
+            % extract whether block was veridical (perturb = 0), rotated 
+            % (perturb = 1), or mirrored (perturb = 2);
+            perturb = d.perturb(d.block==k);
             
             for j = 1:length(fields)
                 output{i}{k}.(fields{j}) = sineParams.(fields{j})(1:Ntrials/Nblock);
             end
-            output{i}{k}.mirror = mirror{1};
+            output{i}{k}.perturb = perturb(1);
             output{i}{k}.trialType = d.trialType(d.block == 1);
             output{i}{k}.frameRate = frameRate;
             output{i}{k}.frameDrops = frameDrops;
             output{i}{k}.longDrops = longDrops;
             output{i}{k}.OS = d.OS{1};
             output{i}{k}.browser = d.browser{1};
+            output{i}{k}.id = subj{i};
 %             output{i}.cmConvert = d.cmConvert(1);
         end
     end

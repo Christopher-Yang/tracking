@@ -70,7 +70,9 @@ function data = analyze_data(d)
                 Hud(2,2,:,j) = reshape(permute([a.yCurs_y{2+m}.ratio a.yCurs_y{3+m}.ratio a.yCurs_y{4+m}.ratio a.yCurs_y{1+m}.ratio], [2 1]), [8 1]);
             end
             
-            if strcmp(d{i}{k}.mirror,'TRUE') 
+            if d{i}{k}.perturb == 1
+                M = [0 1; -1 0];
+            elseif d{i}{k}.perturb == 2
                 M = [0 1; 1 0];
             else
                 M = eye(2);

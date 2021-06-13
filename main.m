@@ -2,9 +2,14 @@
 time = 40; %in seconds
 
 folder = 'Data/online/pilot_learning2';
+subj_rot = {'pilot13','pilot14','pilot15','pilot16','pilot17'};
+subj_mir = {'pilot8','pilot9','pilot10','pilot12'};
 remove = 0;
-d = load_data(folder,time);
-data = analyze_data(d);
+d.rot = load_data(folder,subj_rot,time);
+d.mir = load_data(folder,subj_mir,time);
+
+data.rot = analyze_data(d.rot);
+data.mir = analyze_data(d.mir);
 
 % save dat data;
 disp('Done')
@@ -21,7 +26,7 @@ graph_bode_simple(data, graph_name, gblocks,'cursor');
 gblocks = 1;
 subj = [];
 
-graph_amp_avg(data,gblocks,subj,1); % amplitude spectrums
+graph_amp_avg(data,gblocks,1,1); % amplitude spectrums
 % graph_gainMatrix(data)
 % graph_MSE(data, block_name, graph_name); % mean squared error
 % graph_lag(data, gblocks, graph_name,'Lhand'); % response lag
