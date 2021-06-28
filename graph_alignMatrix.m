@@ -3,11 +3,11 @@
 % squared error between target and hand trajectories for each trial. If
 % delay_opt is provided, it considerably reduces computation time. If
 % delay_opt is not provided, it will be computed from scratch. You can save
-% a new delay_opt by uncommenting line 109.
+% a new delay_opt by uncommenting line 111.
 % 
 % This function also generates "alignment_matrix.csv," which contains the
 % off-diagonal values of the alignment matrices for statistical analysis in
-% R. To generate this file, uncomment lines 315-316.
+% R. To generate this file, uncomment lines 317-318.
 
 function graph_alignMatrix(data, delay_opt)
 

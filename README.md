@@ -53,19 +53,15 @@ following:
     graph_ampSpectra.m: plots amplitude spectra
     graph_coherence.m: plots spectral coherence plots
     graph_gainMatrix.m: plots gain matrices
+    graph_lag.m: plots lag between cursor and target movement
     graph_MSE.m: plots mean-squared error
     graph_traj.m: plots target and cursor trajectories
     load_data.m: extracts raw data from data files
-    LQR.m: simulates a time-based catch-up strategy model
-    LQR_distance.m: a distance-based catch-up strategy model
     shadedErrorBar.m: plots lines with shaded error bars
 
-The following *.mat files are included that contain precomputed
-matrices that dramatically reduce computation time (see code for
-details):
-
-    delay_opt.mat: used by graph_alignMatrix.m
-    simResults.mat: used by LQR.m
+This collection also includes "delay_opt.mat", which contains
+processed data that dramatically reduces the computation time
+of graph_alignMatrix.m (see code for details).
 
 This code requires the following MATLAB Toolboxes:
 

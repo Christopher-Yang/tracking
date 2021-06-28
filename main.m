@@ -66,13 +66,13 @@ graph_MSE(data1);
 % align the target and hand trajectories that minimizes mean squared error.
 % Loading delay_opt will significantly reduce computation time.
 % If you would like to compute delay_opt instead of load it, comment 
-% lines 72-73 and comment line 76. 
+% lines 72-73 and uncomment line 76. 
 
 % USE PRECOMPUTED OPTIMAL DELAYS
 load delay_opt
 graph_alignMatrix(data1,delay_opt);
 
-% COMPUTE OPTIMAL DELAYS FROM SCRATCH (takes ~60 mins to run)
+% COMPUTE delay_opt FROM SCRATCH (takes ~60 mins to run)
 % graph_alignMatrix(data1);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

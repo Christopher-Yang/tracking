@@ -5,7 +5,7 @@
 % This function also generates "gain_matrix.csv" for experiment 1 and
 % "gain_matrix2.csv" for experiment 2. These files contain the off-diagonal
 % values of the gain matrices for statistical analysis in R. To generate
-% these files, uncomment lines _____
+% these files, uncomment lines 213-221
 
 function graph_gainMatrix(data,experiment)
 
