@@ -72,7 +72,7 @@ for i = 1:Nsubj % iterate over subjects
         
         if bimanual_mode == 0
             mirMat = eye(2);
-        elseif bimanualmode == 4
+        elseif bimanual_mode == 3
             mirMat = [0 1; 1 0];
         end
         

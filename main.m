@@ -5,9 +5,13 @@ folder = 'Data/fb_ff/'; % set path to data
 
 % names of blocks: pert1=Early, pert4=Late, pert2 and pert3 are the
 % tracking blacks that occurred between Early and Late
-block_name = {'B1','B2','B3'}; 
-subj_rot = {'subj1'}; % rotation subjects
-subj_mir = {''}; % mirror-reversal subjects
+% block_name = {'B1','B2','B3'}; 
+% subj_rot = {'subj1'}; % rotation subjects
+% subj_mir = {''}; % mirror-reversal subjects
+
+block_name = {'B2'};
+subj_rot = {'test2'};
+subj_mir = {''};
 
 % NOTE: subj1 had extra data at end of data files for each trial; need to
 % go fix KineReach code
