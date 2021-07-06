@@ -2,6 +2,7 @@ function output = load_data(subj_name, block_name, folder, time, remove)
     
     disp('Loading...');
     most_freq = 0;
+    samplingRate = 130;
 
     for i = 1:length(subj_name)
         disp(['   Subject ' num2str(i)]);
@@ -13,7 +14,7 @@ function output = load_data(subj_name, block_name, folder, time, remove)
             end
             tFile = dlmread([path,'/tFile.tgt']);
             Tb = 1/(tFile(1)/2);
-            Nsamples = round(time*130.004);
+            Nsamples = round(time*samplingRate);
             fnames = dir(path);
             full = [];
             
@@ -22,7 +23,7 @@ function output = load_data(subj_name, block_name, folder, time, remove)
                 data.(name) = dlmread([path,'/',fnames(3+(k-1)).name],' ',6,0);
                 idx = data.(name)(:,9)==1;
                 data.(name) = data.(name)(idx,:);
-                data.(name) = data.(name)(end-Nsamples+1:end,:);    %only trajectory after 5 sec warm up time is used
+                data.(name) = data.(name)(5*samplingRate+1:5*samplingRate+Nsamples,:);    %only trajectory after 5 sec warm up time is used
 %                 data.(name) = cat(3,data.(name)(1:N,:),data.(name)(N+1:2*N,:),data.(name)(2*N+1:3*N,:)); % divide signal into trials with the length of base period
                 full = cat(3,full,data.(name));
             end
