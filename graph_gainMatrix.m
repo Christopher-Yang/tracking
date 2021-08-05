@@ -32,7 +32,7 @@ for q = 1:Ngroup % loop over groups
     blk = block_name.(groups{q});
     Nblock = length(blk);
     Nfreq = length(data.(groups{q}){1}.(blk{1}).freqX);
-    Ntrial = length(data.(groups{q}){1}.B1_baseline.MSE);
+    Ntrial = 5;
     paramsInit = zeros([2 Nblock]);
     
     dark{q} = find(contains(graph_name.(groups{q}),'(D)'));
@@ -54,14 +54,20 @@ for q = 1:Ngroup % loop over groups
     for p = 1:Nsubj % loop over subjects
         for k = 1:Nblock % loop over block
             for i = 1:4 % loop over all combinations of hand/target axes
-                cplx{q}(:,:,i,k,p) = data.(groups{q}){p}.(blk{k}).(output).phasors.(names{i}).ratio; % put all complex ratios in cplx
+                a = data.(groups{q}){p}.(blk{k}).(output).phasors.(names{i}).ratio;
+                if size(a,2) ~= Ntrial
+                    Nmissing = Ntrial - size(a,2);
+                    cplx{q}(:,:,i,k,p) = [a NaN(Nfreq,Nmissing)];
+                else
+                    cplx{q}(:,:,i,k,p) = a; % put all complex ratios in cplx
+                end
             end
         end
         
         for i = 1:Nfreq
             
             % compute average baseline phasor for a particular frequency
-            dat = mean(cplx{q}(i,:,[1 4],1,p),2);
+            dat = mean(cplx{q}(i,:,[1 4],1,p),2,'omitnan');
 
             % x-component of xx and yy baseline phasor
             x = cos(angle(dat));
@@ -97,8 +103,8 @@ for q = 1:Ngroup % loop over groups
     % cursor
 %     thetaOpt{q}(workspace,2:end,:,:,counterbalance{q}) = -thetaOpt{q}(workspace,2:end,:,:,counterbalance{q});
     
-    thetaOpt_mu{q} = mean(thetaOpt{q},5);
-    thetaOpt_se{q} = std(thetaOpt{q},[],5)./sqrt(Nsubj);
+    thetaOpt_mu{q} = mean(thetaOpt{q},5,'omitnan');
+    thetaOpt_se{q} = std(thetaOpt{q},[],5,'omitnan')./sqrt(Nsubj);
     
     % combine frac1 and frac2
     fracOpt{q} = [reshape(frac1{q},[Ntrial 2 Nblock Nfreq Nsubj]) ...
@@ -114,7 +120,17 @@ for q = 1:Ngroup % loop over groups
     % group (sixth dimension)
     gainMat{q} = reshape(thetaOpt{q},[2 2 Nblock Nfreq Ntrial Nsubj]);
     gainMat{q} = permute(gainMat{q},[1 2 4 3 5 6]);
+    
+    habitGains = thetaOpt{q}(1,end-2,:,:,:);
+    habitGains = squeeze(habitGains);
+    baselineGains = thetaOpt{q}(1,1,:,:,:);
+    baselineGains = squeeze(baselineGains);
+    percent = habitGains./baselineGains;
+    
+    flipSign.(groups{q}) = percent(:,:,:,1) < -0.2;
 end
+
+save flipSign flipSign
 
 % for plotting lines
 col = lines;

@@ -20,7 +20,7 @@ function [processed, raw_fft] = fourier(output_traj,input_traj,Nfreq)
             idx = idx(1:Nfreq);
             processed.ratio = output_fft(idx,:)./input_fft(idx,:);
             processed.gain = abs(processed.ratio);
-            processed.phase = angle(processed.ratio);
+            processed.phase = unwrap(angle(processed.ratio));
             processed.index = idx;
     end
 end

@@ -46,8 +46,9 @@ graph_bode_simple(data, graph_name, gblocks,'cursor');
 
 % graph_amp_avg(data,block_name,gblocks,graph_name,'cursor'); % amplitude spectrums
 % graph_MSE(data, block_name, graph_name); % mean squared error
-% graph_lag(data, gblocks, graph_name,'Lhand'); % response lag
+graph_lag(data); % response lag
 % graph_complexError(data, graph_name, gblocks); % complex tracking error
 % graph_coherence(data, 'cursor') % coherence
 % graph_xcorr(data,block_name,graph_name)
-graph_gainMatrix(data,block_name,graph_name);
+% graph_gainMatrix(data,block_name,graph_name);
+graph_phasors(data)

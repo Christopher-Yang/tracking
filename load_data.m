@@ -43,7 +43,7 @@ function output = load_data(subj_name, block_name, folder, time, remove)
                     output{i}.(bName).traj = full;
                 end
             elseif remove == 2
-                if i == i && j == 2 % 2-day, subj1, B2_darkBaseline
+                if i == 1 && j == 2 % 2-day, subj1, B2_darkBaseline
                     output{i}.(bName).traj = full(:,:,2:5);
                 else
                     output{i}.(bName).traj = full;

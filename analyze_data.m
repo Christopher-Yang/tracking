@@ -20,10 +20,11 @@ function data = analyze_data(d, block_name)
             ampX = input(num*2+1:num*3);
             ampY = input(num*3+1:num*4);
             
+            trajs = NaN(size(output,1),2,Nreps,4);
             for k = 0:3
 %                 trajs(:,:,k+1) = ([mean(output(:,k*2+1,:),3) mean(output(:,k*2+2,:),3)]');
                 for l = 1:Nreps
-                    trajs(:,:,l,k+1) = (([output(:,k*2+1,l) output(:,k*2+2,l)])')';
+                    trajs(:,:,l,k+1) = [output(:,k*2+1,l) output(:,k*2+2,l)];
                 end
 %                 trajs(:,:,k+1) = trajs(:,:,k+1) - repmat([mean(trajs(1,:,k+1)) mean(trajs(2,:,k+1))]', [1 size(trajs,2)]);
                 trajs(:,:,:,k+1) = trajs(:,:,:,k+1) - repmat(mean(trajs(:,:,:,k+1),1), [size(trajs,1) 1 1]);
