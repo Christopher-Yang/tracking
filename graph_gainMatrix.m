@@ -35,7 +35,7 @@ for q = 1:Ngroup % loop over groups
     Ntrial = 5;
     paramsInit = zeros([2 Nblock]);
     
-    dark{q} = find(contains(graph_name.(groups{q}),'(D)'));
+    dark{q} = find(contains(graph_name.(groups{q}),'D)'));
     flip{q} = find(contains(graph_name.(groups{q}),'(F)'));
     special{q} = find(contains(graph_name.(groups{q}),'('));
     normal{q} = 1:Nblock;
@@ -168,8 +168,8 @@ for q = 1:Ngroup
         plot([0 0],[0 1],'k')
         for i = 1:Nfreq
             if k == length(normal{q})+1
-                plot([0 thetaOpt_mu{q}(1,flip{q},i,1)],[0 thetaOpt_mu{q}(2,flip{q},i,1)],'LineWidth',1.5,'Color',map1(i,:))
-                plot([0 thetaOpt_mu{q}(3,flip{q},i,1)],[0 thetaOpt_mu{q}(4,flip{q},i,1)],'LineWidth',1.5,'Color',map2(i,:))
+                plot([0 thetaOpt_mu{q}(1,flip{q}(1),i,1)],[0 thetaOpt_mu{q}(2,flip{q}(1),i,1)],'LineWidth',1.5,'Color',map1(i,:))
+                plot([0 thetaOpt_mu{q}(3,flip{q}(1),i,1)],[0 thetaOpt_mu{q}(4,flip{q}(1),i,1)],'LineWidth',1.5,'Color',map2(i,:))
             else
                 plot([0 thetaOpt_mu{q}(1,normal{q}(k),i,1)],[0 thetaOpt_mu{q}(2,normal{q}(k),i,1)],'LineWidth',1.5,'Color',map1(i,:))
                 plot([0 thetaOpt_mu{q}(3,normal{q}(k),i,1)],[0 thetaOpt_mu{q}(4,normal{q}(k),i,1)],'LineWidth',1.5,'Color',map2(i,:))
@@ -198,7 +198,7 @@ for q = 1:Ngroup
     Nblock = length(normal{q});
     totalTrials = (Nblock+2)*Ntrial;
     ticks = 1:5:totalTrials;
-    ticks = ticks([1 2 end-1 end]);
+    ticks = ticks([1 2 end-2 end-1 end]);
     
     subplot(2, 3, q); hold on
     plot([1 totalTrials], [0 0], 'k')
@@ -219,7 +219,7 @@ for q = 1:Ngroup
     title(groupNames{q})
     axis([1 totalTrials -0.5 1])
     xticks(ticks)
-    xticklabels({'Baseline','Early','Late','Flip'})
+    xticklabels({'Baseline','Early','Late',"Flip 1","Flip 2"})
     if q == 1
         ylabel('X --> X')
     end
@@ -243,7 +243,7 @@ for q = 1:Ngroup
     end
     axis([1 totalTrials -0.5 1])
     xticks(ticks)
-    xticklabels({'Baseline','Early','Late','Flip'})
+    xticklabels({'Baseline','Early','Late',"Flip 1","Flip 2"})
     if q == 1
         ylabel('Y --> Y')
     end
@@ -260,7 +260,7 @@ for q = 1:Ngroup
     Nblock = length(dark{q});
     totalTrials = Nblock*Ntrial;
     ticks = 1:5:totalTrials;
-    ticks = ticks([1 2 end]);
+    ticks = ticks([1 2 end-1 end]);
     
     subplot(2, 3, q); hold on
     plot([1 totalTrials], [0 0], 'k')
@@ -273,7 +273,7 @@ for q = 1:Ngroup
     title(groupNames{q})
     axis([1 totalTrials -0.5 1])
     xticks(ticks)
-    xticklabels({'Baseline','Early','Late'})
+    xticklabels({'Baseline','Early','Late','Flip'})
     if q == 1
         ylabel('X --> X')
     end
@@ -289,7 +289,7 @@ for q = 1:Ngroup
     end
     axis([1 totalTrials -0.5 1])
     xticks(ticks)
-    xticklabels({'Baseline','Early','Late'})
+    xticklabels({'Baseline','Early','Late','Flip'})
     if q == 1
         ylabel('Y --> Y')
     end
@@ -304,7 +304,7 @@ names = {'Flip 1','Flip 2','Flip (dark)'};
 figure(4); clf
 for k = 1:3
     subplot(1,3,k); hold on
-    plot([0.5 23.5], [0 0], 'k', 'HandleVisibility', 'off')
+    plot([0.5 6.5], [0 0], 'k', 'HandleVisibility', 'off')
     for q = 1:Ngroup
         if k == 1
             block = size(thetaOpt{q},2)-2;
@@ -315,18 +315,14 @@ for k = 1:3
         end
         
         h = squeeze(mean(thetaOpt{q}(1,block,:,:,:),4));
-        for i = 1:Nfreq
-            plot(4*(i-1) + q, h(i,:), '.', 'Color', col(q,:), 'MarkerSize', 20, 'HandleVisibility', 'off')
-            if i == 1
-                plot(4*(i-1) + q, mean(h(i,:),2), 'ok', 'MarkerFaceColor', col(q,:), 'MarkerSize', 10, 'LineWidth', 1)
-            else
-                plot(4*(i-1) + q, mean(h(i,:),2), 'ok', 'MarkerFaceColor', col(q,:), 'MarkerSize', 10, 'LineWidth', 1, 'HandleVisibility', 'off')
-            end
-        end
+        mu = mean(h,2);
+        se = std(h,[],2)./sqrt(size(h,2));
+        
+        s = shadedErrorBar(1:Nfreq,mu,se);
+        editErrorBar(s,col(q,:),1);
     end
-    axis([0.5 23.5 -0.7 0.7])
-    xticks(2:4:22)
-    xticklabels(1:6)
+    axis([0.5 6.5 -0.4 0.3])
+    xticks(1:6)
     xlabel('Frequency')
     ylabel('Gain')
     title(names{k})
