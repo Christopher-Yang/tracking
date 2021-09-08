@@ -2,8 +2,8 @@ clear all;
 time = 60; %in seconds
 
 folder = 'Data/denovo_2day/';
-block_name.day2 = {'B1_baseline','B2_darkBaseline','B3','B5','B6_dark','B9','B10_dark','B11_habit','B12_habit','B13_habitDark'};
-graph_name.day2 = {'Baseline','Baseline (D)','Early','Day 1','Day 1 (D)','Day 2','Day 2 (D)','Flip1 (F)','Flip2 (F)','Flip3 (FD)'};
+block_name.day2 = {'B1_baseline','B2_darkBaseline','B3','B6_dark','B9','B10_dark','B11_habit','B12_habit','B13_habitDark'};
+graph_name.day2 = {'Baseline','Baseline (D)','Early','Day 1 (D)','Day 2','Day 2 (D)','Flip1 (F)','Flip2 (F)','Flip3 (FD)'};
 subj_name = {'subj1','subj3','subj4','subj5','subj6','subj7','subj8','subj9','subj10','subj11','subj12','subj13','subj14'};
 remove = 2;
 d = load_data(subj_name,block_name.day2,folder,time,remove);
@@ -48,7 +48,7 @@ graph_bode_simple(data, graph_name, gblocks,'cursor');
 % graph_MSE(data, block_name, graph_name); % mean squared error
 % graph_lag(data); % response lag
 % graph_complexError(data, graph_name, gblocks); % complex tracking error
-graph_coherence(data, block_name, graph_name) % coherence
+% graph_coherence(data, block_name, graph_name) % coherence
 % graph_xcorr(data,block_name,graph_name)
 % graph_gainMatrix(data,block_name,graph_name);
-% graph_phasors(data)
+graph_phasors(data)
