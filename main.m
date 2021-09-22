@@ -9,7 +9,7 @@ folder = 'Data/fb_ff/'; % set path to data
 % subj_rot = {'subj1'}; % rotation subjects
 % subj_mir = {''}; % mirror-reversal subjects
 
-block_name = {'B2'};
+block_name = {'B1','B2'};
 subj_rot = {'test2'};
 subj_mir = {''};
 

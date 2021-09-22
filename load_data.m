@@ -8,7 +8,7 @@ function output = load_data(subj_rot, subj_mir, block_name, folder)
 
 disp('Loading...');
 time = 40; % seconds of data to be analyzed per trial; can be 20 or 40 secs
-groups = {'rot','mit'};
+groups = {'rot','mir'};
 for p = 1
 % for p = 1:2 % iterate over groups of subjects
     if p == 1 % analyze rotation group
@@ -40,7 +40,6 @@ for p = 1
                 % discrete Fourier transforms
                 data.(name) = data.(name)(end-Nsamples+1:end,:);
                 full = cat(3,full,data.(name));
-                
                 
                 % open the file
                 fid=fopen([path '/' fnames(3+(k-1)).name]);
