@@ -198,13 +198,13 @@ for q = 1:Ngroup
         plot([0 1],[0 0],'k')
         plot([0 0],[0 1],'k')
         for i = 1:Nfreq
-            if k == 1
+%             if k == 1
                 plot([0 mean(thetaOpt_mu{q}(1,blk(k),i,:),4)],[0 mean(thetaOpt_mu{q}(2,blk(k),i,:),4)],'LineWidth',1.5,'Color',map1(i,:))
                 plot([0 mean(thetaOpt_mu{q}(3,blk(k),i,:),4)],[0 mean(thetaOpt_mu{q}(4,blk(k),i,:),4)],'LineWidth',1.5,'Color',map2(i,:))
-            else
-                plot([0 mean(thetaOpt_mu{q}(2,blk(k),i,:),4)],[0 mean(thetaOpt_mu{q}(1,blk(k),i,:),4)],'LineWidth',1.5,'Color',map1(i,:))
-                plot([0 mean(thetaOpt_mu{q}(4,blk(k),i,:),4)],[0 mean(thetaOpt_mu{q}(3,blk(k),i,:),4)],'LineWidth',1.5,'Color',map2(i,:))
-            end
+%             else
+%                 plot([0 mean(thetaOpt_mu{q}(2,blk(k),i,:),4)],[0 mean(thetaOpt_mu{q}(1,blk(k),i,:),4)],'LineWidth',1.5,'Color',map1(i,:))
+%                 plot([0 mean(thetaOpt_mu{q}(4,blk(k),i,:),4)],[0 mean(thetaOpt_mu{q}(3,blk(k),i,:),4)],'LineWidth',1.5,'Color',map2(i,:))
+%             end
         end
         axis([-0.45 1.2 -0.45 1.2])
         axis square
@@ -225,69 +225,50 @@ end
 col = copper;
 col = col(floor((size(col,1)/(Nfreq))*(1:Nfreq)),:);
 
-figure(2); clf
-for q = 1:Ngroup
-    mu = permute(thetaOpt_mu{q},[4 3 2 1]);
-    se = permute(thetaOpt_se{q},[4 3 2 1]);
-    Nblock = length(normal{q});
-    totalTrials = Nblock*Ntrial;
-    ticks = 1:5:totalTrials;
-    ticks = ticks([1 2 end]);
-    
-    subplot(2, 3, q); hold on
-    plot([1 totalTrials], [0 0], 'k')
-    for k = 1:Nblock
-        block = normal{q}(k);
-        plotIdx = Ntrial*(k-1)+(1:5);
-        if k > 2
-            plot([plotIdx(1)-0.5 plotIdx(1)-0.5],[-0.2 1],'Color',[0.8 0.8 0.8])
-        end
-        for i = 1:Nfreq
-            if k == 1
-                s = shadedErrorBar(plotIdx, mu(:,i,block,1), se(:,i,block,1));
-                editErrorBar(s,col(i,:),1);
-            else
-                s = shadedErrorBar(plotIdx, mu(:,i,block,4), se(:,i,block,4));
-                editErrorBar(s,col(i,:),1);
-            end
-        end
-    end
-    title(groupNames{q})
-    axis([1 totalTrials -0.2 1])
-    xticks(ticks)
-    xticklabels({'Baseline','Early','Late'})
-    set(gca,'TickDir','out')
-    if q == 1
-        ylabel('X --> X')
-    end
-    
-    subplot(2, 3, q+3); hold on
-    plot([1 totalTrials], [0 0], 'k')
-    for k = 1:Nblock
-        block = normal{q}(k);
+offset = [0 20 55];
+
+f = figure(2); clf
+set(f,'Position',[200 200 380 250]);
+
+for j = 1:2
+    subplot(2,1,j); hold on
+    for q = 1:Ngroup
+        mu = permute(thetaOpt_mu{q},[4 3 2 1]);
+        se = permute(thetaOpt_se{q},[4 3 2 1]);
+        Nblock = length(normal{q});
+        totalTrials = Nblock*Ntrial;
         
-        plotIdx = Ntrial*(k-1)+(1:5);
-        if k > 2
-            plot([plotIdx(1)-0.5 plotIdx(1)-0.5],[-0.2 1],'Color',[0.8 0.8 0.8])
+        plot([offset(q)+1 offset(q)+totalTrials], [0 0], 'k')
+        plot([offset(q)+1 offset(q)+totalTrials], [-.2 -.2], 'k')
+        if q > 1
+            plot([offset(q)+1 offset(q)+1], [-.2 1], 'k')
         end
-        for i = 1:Nfreq
-            if k == 1
-                s = shadedErrorBar(plotIdx, mu(:,i,block,4), se(:,i,block,4));
-                editErrorBar(s,col(i,:),1);
-            else
-                s = shadedErrorBar(plotIdx, mu(:,i,block,1), se(:,i,block,1));
+        for k = 1:Nblock
+            block = normal{q}(k);
+            plotIdx = Ntrial*(k-1)+(1:5) + offset(q);
+            if k > 2
+                plot([plotIdx(1)-0.5 plotIdx(1)-0.5],[-0.2 1],'Color',[0.8 0.8 0.8])
+            end
+            for i = 1:Nfreq
+                if j == 1
+                    s = shadedErrorBar(plotIdx, mu(:,i,block,1), se(:,i,block,1));
+                else
+                    s = shadedErrorBar(plotIdx, mu(:,i,block,4), se(:,i,block,4));
+                end
                 editErrorBar(s,col(i,:),1);
             end
         end
     end
-    axis([1 totalTrials -0.2 1])
-    xticks(ticks)
-    xticklabels({'Baseline','Early','Late'})
-    set(gca,'TickDir','out')
-    if q == 1
+    axis([1 offset(3)+totalTrials -0.2 1])
+    yticks(0:0.25:1)
+    set(gca,'TickDir','out','Xcolor','none')
+    if j == 1
+        ylabel('X --> X')
+    else
         ylabel('Y --> Y')
     end
 end
+print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/gains','-dpdf','-painters')
 
 %%
 labels = {'Late','Flip 1','Flip 2'};

@@ -1,5 +1,7 @@
 function graph_phasors(data)
 
+addpath ../shadedErrorBar
+
 group = {'day2','day5','day10'};
 names = {'2-day','5-day','10-day'};
 allSubj = [13 14 5];
@@ -18,10 +20,14 @@ col = col(floor((size(col,1)/(Nfreq))*(1:Nfreq)),:);
 
 Nblock = length(block{1});
 
+ax = {'x_x','x_y','y_x','y_y'};
+
 for i = 1:Ngroup
     for j = 1:allSubj(i)
         for k = 1:Nblock
-            phasor{i}(:,j,k) = mean(data.(group{i}){j}.(block{i}{k}).cursor.phasors.x_x.ratio,2);
+            for m = 1:4
+                phasor{i}(m,:,j,k) = mean(data.(group{i}){j}.(block{i}{k}).cursor.phasors.(ax{m}).ratio,2);
+            end
         end
     end
 end
@@ -82,65 +88,98 @@ end
 
 %%
 
-percent = NaN(Nfreq,max(allSubj),Ngroup,2);
-for m = 1:2
-    for k = 1:Ngroup
-        Nsubj = allSubj(k);
-        for j = 1:Nsubj
-            for i = 1:Nfreq
-                
-                mu = [real(phasor{k}(i,j,1)) imag(phasor{k}(i,j,1))];
-                mu2 = [real(phasor{k}(i,j,m+1)) imag(phasor{k}(i,j,m+1))];
-%                 if m == 1
-%                     mu2 = [real(phasor{k}(i,j,2)) imag(phasor{k}(i,j,2))];
-%                 else
-%                     mu2 = [real(phasor{k}(i,j,3)) imag(phasor{k}(i,j,3))];
-%                 end
-                
-                unitVec = mu/norm(mu);
-                len = dot(mu2,unitVec);
-                
-                project = len*[unitVec(1) unitVec(2)];
-                
-                if len < 0
-                    flip = -norm(project);
-                else
-                    flip = norm(project);
-                end
-                
-                late = norm(mu);
-                
-                percent(i,j,k,m) = flip/late;
-            end
-        end
-    end
-end
-
-percent_mu = squeeze(mean(percent,2,'omitnan'));
-percent_se = squeeze(std(percent,[],2,'omitnan'))./sqrt(repmat(allSubj,[6 1 2]));
-
-y = percent(~isnan(percent));
-
-groupNames([1:78 193:270],1) = "2-day";
-groupNames([79:162 271:354],1) = "5-day";
-groupNames([163:192 355:384],1) = "10-day";
-frequency = repmat((1:Nfreq)',[sum(allSubj)*2 1]);
-blockNames(1:192,1) = "Flip1";
-blockNames(193:384,1) = "Flip2";
-s1 = repmat(1:13,[Nfreq 1]);
-s2 = repmat(14:27,[Nfreq 1]);
-s3 = repmat(28:32,[Nfreq 1]);
-subject = [s1(:); s2(:); s3(:); s1(:); s2(:); s3(:)];
-T = table(groupNames, frequency, blockNames, subject, y, 'VariableNames', {'group','frequency','block', 'subject','gain'});
-writetable(T,'C:/Users/Chris/Documents/R/habit/data/habitGain.csv')
+% percent = NaN(Nfreq,max(allSubj),Ngroup,2);
+% for m = 1:2
+%     for k = 1:Ngroup
+%         Nsubj = allSubj(k);
+%         for j = 1:Nsubj
+%             for i = 1:Nfreq
+%                 
+%                 mu = [real(phasor{k}(i,j,1)) imag(phasor{k}(i,j,1))];
+%                 mu2 = [real(phasor{k}(i,j,m+1)) imag(phasor{k}(i,j,m+1))];
+%                 
+%                 unitVec = mu/norm(mu);
+%                 flip = dot(mu2,unitVec);
+%                 
+%                 late = norm(mu);
+%                 
+%                 percent(i,j,k,m) = flip/late;
+%             end
+%         end
+%     end
+% end
+% 
+% percent_mu = squeeze(mean(percent,2,'omitnan'));
+% percent_se = squeeze(std(percent,[],2,'omitnan'))./sqrt(repmat(allSubj,[6 1 2]));
+% 
+% y = percent(~isnan(percent));
+% 
+% groupNames([1:78 193:270],1) = "2-day";
+% groupNames([79:162 271:354],1) = "5-day";
+% groupNames([163:192 355:384],1) = "10-day";
+% frequency = repmat((1:Nfreq)',[sum(allSubj)*2 1]);
+% blockNames(1:192,1) = "Flip1";
+% blockNames(193:384,1) = "Flip2";
+% s1 = repmat(1:13,[Nfreq 1]);
+% s2 = repmat(14:27,[Nfreq 1]);
+% s3 = repmat(28:32,[Nfreq 1]);
+% subject = [s1(:); s2(:); s3(:); s1(:); s2(:); s3(:)];
+% T = table(groupNames, frequency, blockNames, subject, y, 'VariableNames', {'group','frequency','block', 'subject','gain'});
+% writetable(T,'C:/Users/Chris/Documents/R/habit/data/habitGain.csv')
 
 % col = [180 180 0
 %        0 191 255
 %        255 99 71]./255;
 
 %%
+
+percent2 = NaN(4,Nfreq,max(allSubj),Ngroup,2);
+for m = 1:2
+    for k = 1:Ngroup
+        Nsubj = allSubj(k);
+        for j = 1:Nsubj
+            for i = 1:Nfreq
+                for n = 1:4
+                
+                    mu = [real(phasor{k}(n,i,j,1)) imag(phasor{k}(n,i,j,1))];
+                    mu2 = [real(phasor{k}(n,i,j,m+1)) imag(phasor{k}(n,i,j,m+1))];
+                    
+                    unitVec = mu/norm(mu);
+                    flip = dot(mu2,unitVec);
+                    
+                    late = norm(mu);
+                    
+                    percent2(n,i,j,k,m) = flip/late;
+                end
+            end
+        end
+    end
+end
+
+percent2_mu = squeeze(mean(percent2,3,'omitnan'));
+percent2_se = squeeze(std(percent2,[],3,'omitnan'))./sqrt(repmat(permute(allSubj,[1 3 2]),[4 6 1 2]));
+
+col1 = [0 128 0]/255;
+col2 = [152 251 152]/255;
+map1 = [linspace(col1(1),col2(1),Nfreq)', linspace(col1(2),col2(2),Nfreq)', linspace(col1(3),col2(3),Nfreq)'];
+
+col1 = [128 0 128]/255;
+col2 = [230 230 250]/255;
+map2 = [linspace(col1(1),col2(1),Nfreq)', linspace(col1(2),col2(2),Nfreq)', linspace(col1(3),col2(3),Nfreq)'];
+
+figure(3); clf
+for j = 1:Ngroup
+    subplot(1,3,j); hold on
+    plot([0 1],[0 0],'k')
+    plot([0 0],[0 1],'k')
+    for i = 1:Nfreq
+        plot([0 percent2_mu(1,i,j,1)], [0 percent2_mu(2,i,j,1)], 'Color', map1(i,:))
+        plot([0 percent2_mu(3,i,j,1)], [0 percent2_mu(4,i,j,1)], 'Color', map2(i,:))
+    end
+end
+%%
 labels = {'Flip 1','Flip 2'};
-f = figure(3); clf
+f = figure(4); clf
 set(f,'Position',[200 200 250 120]);
 for j = 1:Ngroup
     subplot(1,3,j); hold on
