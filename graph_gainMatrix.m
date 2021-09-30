@@ -135,14 +135,12 @@ end
 
 % save flipSign flipSign
 
+blockNum = [3 5; 5 11; 11 21];
+
 y = [];
 for k = 1:Ngroup
-    for i = 1:2
-        if i == 1
-            t = mean(thetaOpt{k}(4,1,:,:,:),4,'omitnan');
-        else
-            t = mean(thetaOpt{k}(1,end-4,:,:,:),4,'omitnan');
-        end
+    for i = 1:2        
+        t = mean(thetaOpt{k}(1,blockNum(k,i),:,:,:),4,'omitnan');
         y = [y; t(:)];
     end
 end
@@ -150,8 +148,8 @@ end
 g(1:156,1) = "2-day";
 g(157:324,1) = "5-day";
 g(325:384,1) = "10-day";
-b([1:78 157:240 325:354],1) = "Baseline";
-b([79:156 241:324 355:384],1) = "Late";
+b([1:78 157:240 325:354],1) = "Before";
+b([79:156 241:324 355:384],1) = "After";
 frequency = repmat((1:Nfreq)',[64 1]);
 s1 = repmat(1:13,[Nfreq 2]);
 s2 = repmat(14:27,[Nfreq 2]);
@@ -195,8 +193,8 @@ for q = 1:Ngroup
     Nblock = length(blk);
     for k = 1:Nblock
         subplot(Ngroup,Nblock,(q-1)*Nblock + k); hold on
-        plot([0 1],[0 0],'k')
-        plot([0 0],[0 1],'k')
+        plot([0 0.5],[0 0],'k')
+        plot([0 0],[0 0.5],'k')
         for i = 1:Nfreq
 %             if k == 1
                 plot([0 mean(thetaOpt_mu{q}(1,blk(k),i,:),4)],[0 mean(thetaOpt_mu{q}(2,blk(k),i,:),4)],'LineWidth',1.5,'Color',map1(i,:))
@@ -206,7 +204,7 @@ for q = 1:Ngroup
 %                 plot([0 mean(thetaOpt_mu{q}(4,blk(k),i,:),4)],[0 mean(thetaOpt_mu{q}(3,blk(k),i,:),4)],'LineWidth',1.5,'Color',map2(i,:))
 %             end
         end
-        axis([-0.45 1.2 -0.45 1.2])
+        axis([-0.3 0.8 -0.3 0.8])
         axis square
         xticks([])
         yticks([])
@@ -219,7 +217,7 @@ for q = 1:Ngroup
     end
 end
 
-% print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/vectors','-dpdf','-painters')
+print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/vectors','-dpdf','-painters')
 
 %% plot matrices as lines (normal blocks)
 col = copper;
