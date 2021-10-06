@@ -30,6 +30,7 @@ rng(3);
 Nsubj = length(subj_name);
 Nblocks = length(block_name);
 Ntrials = size(d{1}.(block_name{1}).traj,3);
+Nfreq = length(d{1}.(block_name{1}).tFile)/3;
 % names = {'x_x','y_y','x_y','y_x'};
 % outputs = {'cursor','Rhand'};
 
@@ -106,6 +107,31 @@ for i = 1:Nsubj % iterate over subjects
         % perform FFTs
         [data{i}.(block_name{j}).phasors, data{i}.(block_name{j}).raw_fft, ...
             data{i}.(block_name{j}).processed_fft] = fourier(trajs2, trialType);
+
+        a = data{i}.(block_name{j}).phasors;
+        clear Hur Hud
+        for k = 1:Ntrials/4
+            m = (k-1)*4;
+            
+            Hur(1,1,:,k) = reshape(permute([a.xTarg_x{1+m}.ratio a.xTarg_x{2+m}.ratio a.xTarg_x{3+m}.ratio a.xTarg_x{4+m}.ratio], [2 1]), [12 1]);
+            Hur(2,1,:,k) = reshape(permute([a.xTarg_y{1+m}.ratio a.xTarg_y{2+m}.ratio a.xTarg_y{3+m}.ratio a.xTarg_y{4+m}.ratio], [2 1]), [12 1]);
+            Hur(1,2,:,k) = reshape(permute([a.yTarg_x{4+m}.ratio a.yTarg_x{4+m}.ratio a.yTarg_x{1+m}.ratio a.yTarg_x{2+m}.ratio], [2 1]), [12 1]);
+            Hur(2,2,:,k) = reshape(permute([a.yTarg_y{4+m}.ratio a.yTarg_y{4+m}.ratio a.yTarg_y{1+m}.ratio a.yTarg_y{2+m}.ratio], [2 1]), [12 1]);
+            
+            Hud(1,1,:,k) = reshape(permute([a.xCurs_x{3+m}.ratio a.xCurs_x{4+m}.ratio a.xCurs_x{1+m}.ratio a.xCurs_x{2+m}.ratio], [2 1]), [12 1]);
+            Hud(2,1,:,k) = reshape(permute([a.xCurs_y{3+m}.ratio a.xCurs_y{4+m}.ratio a.xCurs_y{1+m}.ratio a.xCurs_y{2+m}.ratio], [2 1]), [12 1]);
+            Hud(1,2,:,k) = reshape(permute([a.yCurs_x{2+m}.ratio a.yCurs_x{3+m}.ratio a.yCurs_x{4+m}.ratio a.yCurs_x{1+m}.ratio], [2 1]), [12 1]);
+            Hud(2,2,:,k) = reshape(permute([a.yCurs_y{2+m}.ratio a.yCurs_y{3+m}.ratio a.yCurs_y{4+m}.ratio a.yCurs_y{1+m}.ratio], [2 1]), [12 1]);
+        end
+
+        M = mirMat*rotMat;
+        
+        for k = 1:Ntrials/4
+            for n = 1:Nfreq
+                B(:,:,n,k) = -Hud(:,:,n,k)*inv(M*Hud(:,:,n,k) + eye(2));
+                F(:,:,n,k) = Hur(:,:,n,k) + B(:,:,n,k)*(M*Hur(:,:,n,k) - eye(2));
+            end
+        end
         
         fnames = fieldnames(Rhand);
         
@@ -121,12 +147,12 @@ for i = 1:Nsubj % iterate over subjects
             data{i}.(block_name{j}).cursorInput.(fnames{k}) = cursorInput ...
                 .(fnames{k});
         end
+        data{i}.(block_name{j}).Hur = Hur;
+        data{i}.(block_name{j}).Hud = Hud;
+        data{i}.(block_name{j}).F = F;
+        data{i}.(block_name{j}).B = B;        
         data{i}.(block_name{j}).time = time;
         data{i}.(block_name{j}).MSE = MSE;
-%         data{i}.(block_name{j}).freqX = freqX;
-%         data{i}.(block_name{j}).freqY = freqY;
-%         data{i}.(block_name{j}).ampX = ampX;
-%         data{i}.(block_name{j}).ampY = ampY;
         data{i}.(block_name{j}).x_axis = x_axis;
     end
 end

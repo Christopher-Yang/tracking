@@ -66,6 +66,7 @@ end
 % compute complex ratio, gain, and phase
 function output = evaluateFFT(in, out, flip)
 idx = abs(in) > 10;
+idx(length(idx)/2+1:end) = 0;
 
 if flip
     output.ratio = -(out(idx)./in(idx));
