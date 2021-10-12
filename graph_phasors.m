@@ -167,7 +167,7 @@ col = [180 180 0
        140 98 57]./255;
 
 f = figure(4); clf
-set(f,'Position',[200 200 250 150]);
+set(f,'Position',[200 200 250 140]);
 for i = 1:2
     subplot(1,2,i); hold on
     plot([0 2],[0 0],'k','HandleVisibility','off')
@@ -181,7 +181,7 @@ for i = 1:2
     axis([0 1.6 -1.2 1.2])
     xlabel('Frequency (Hz)')
     xticks(0:0.5:2)
-    yticks(-1:0.5:1)
+    yticks(-1:1)
     if i == 1
         title('Flip 1')
         ylabel('Gain relative to late learning')
