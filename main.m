@@ -10,8 +10,8 @@ folder = 'Data/fb_ff/'; % set path to data
 % subj_mir = {''}; % mirror-reversal subjects
 
 block_name = {'B1','B2','B3'};
-subj_rot = {'subj2','subj3'};
-subj_mir = {''};
+subj_rot = {'subj2','subj3','subj4','subj5'};
+subj_mir = {'subj6','subj7','subj8','subj9'};
 
 % NOTE: subj1 had extra data at end of data files for each trial; need to
 % go fix KineReach code
@@ -32,7 +32,7 @@ d = load_data(subj_rot,subj_mir,block_name,folder);
 % "data1.[group]{[subject number]}.[block]". For more information on the
 % contents of the data structure, see analyze_data().
 data.rot = analyze_data(d.rot,subj_rot,block_name);
-% data.mir = analyze_data(d.mir,subj_mir,block_name);
+data.mir = analyze_data(d.mir,subj_mir,block_name);
 
 % save data1 data1; % save data structure
 disp('Done')
@@ -71,4 +71,4 @@ graph_coherence(data1);
 graph_lag(data1);
 
 % Figure 5, Figure 5-supplements 1 & 2: gain matrix
-graph_gainMatrix(data1,experiment);
+graph_gainMatrix(data);

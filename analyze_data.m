@@ -29,7 +29,6 @@ rng(3);
 % set variables for analysis
 Nsubj = length(subj_name);
 Nblocks = length(block_name);
-Ntrials = size(d{1}.(block_name{1}).traj,3);
 Nfreq = length(d{1}.(block_name{1}).tFile)/3;
 % names = {'x_x','y_y','x_y','y_x'};
 % outputs = {'cursor','Rhand'};
@@ -42,11 +41,17 @@ for i = 1:Nsubj % iterate over subjects
         
         % frequencies, amplitudes, and phases of target sinusoids
         input = d{i}.(block_name{j}).tFile;
+        n = length(input)/3;
+        freq = input(1:n);
+        amp = input(n+1:2*n);
+        phase = input(2*n+1:end);
         
         trialType = d{i}.(block_name{j}).trialType;
         bimanual_mode = d{i}.(block_name{j}).bimanual_mode;
         rotation = d{i}.(block_name{j}).rotation;
-                
+        
+        Ntrials = size(d{i}.(block_name{j}).traj,3);
+        
         % Store hand, cursor, and target position from every trial into 
         % trajs.
         for k = 0:3
@@ -81,11 +86,11 @@ for i = 1:Nsubj % iterate over subjects
         for k = 1:size(Rhand_rot,3)
             Rhand_rot(:,:,k) = mirMat*rotMat*Rhand_rot(:,:,k);
         end
+        Rhand_rot = permute(Rhand_rot,[2 3 1]);
         
-        cursorHand = struct('x',squeeze(Rhand_rot(1,:,:)), ...
-            'y',squeeze(Rhand_rot(2,:,:)));
-        cursorInput = struct('x',cursor.x - cursorHand.x, ...
-            'y',cursor.y - cursorHand.y);
+        cursorHand = struct('x',Rhand.x,'y',Rhand.y);
+        cursorInput = struct('x',cursor.x - Rhand_rot(:,:,1), ...
+            'y',cursor.y - Rhand_rot(:,:,2));
         
         trajs2.target = target;
         trajs2.cursorHand = cursorHand;
@@ -154,6 +159,9 @@ for i = 1:Nsubj % iterate over subjects
         data{i}.(block_name{j}).time = time;
         data{i}.(block_name{j}).MSE = MSE;
         data{i}.(block_name{j}).x_axis = x_axis;
+        data{i}.(block_name{j}).freq = freq;
+        data{i}.(block_name{j}).amp = amp;
+        data{i}.(block_name{j}).phase = phase;        
     end
 end
 end

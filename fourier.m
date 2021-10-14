@@ -10,6 +10,7 @@ target.yFFT = fft(trajs.target.y - repmat(mean(trajs.target.y,1), [size(trajs.ta
 
 % set variables for analysis
 Ntrials = length(trialType); % number of trials
+Nfreq = 3;
 
 % determine how to analyze raw ffts based on trial type
 for i = 1:Ntrials
@@ -22,10 +23,10 @@ for i = 1:Ntrials
     flip = 0;
     
     % compute complex ratios
-    phasors.xTarg_x{i} = evaluateFFT(in.x, out.x, flip);
-    phasors.xTarg_y{i} = evaluateFFT(in.x, out.y, flip);
-    phasors.yTarg_x{i} = evaluateFFT(in.y, out.x, flip);
-    phasors.yTarg_y{i} = evaluateFFT(in.y, out.y, flip);
+    phasors.xTarg_x{i} = evaluateFFT(in.x, out.x, flip, Nfreq);
+    phasors.xTarg_y{i} = evaluateFFT(in.x, out.y, flip, Nfreq);
+    phasors.yTarg_x{i} = evaluateFFT(in.y, out.x, flip, Nfreq);
+    phasors.yTarg_y{i} = evaluateFFT(in.y, out.y, flip, Nfreq);
     
     % analysis for trials with cursor sines
     in.x = cursorInput.xFFT(:,i);
@@ -33,10 +34,10 @@ for i = 1:Ntrials
     flip = 1;
     
     % compute complex ratios
-    phasors.xCurs_x{i} = evaluateFFT(in.x, out.x, flip);
-    phasors.xCurs_y{i} = evaluateFFT(in.x, out.y, flip);
-    phasors.yCurs_x{i} = evaluateFFT(in.y, out.x, flip);
-    phasors.yCurs_y{i} = evaluateFFT(in.y, out.y, flip);
+    phasors.xCurs_x{i} = evaluateFFT(in.x, out.x, flip, Nfreq);
+    phasors.xCurs_y{i} = evaluateFFT(in.x, out.y, flip, Nfreq);
+    phasors.yCurs_x{i} = evaluateFFT(in.y, out.x, flip, Nfreq);
+    phasors.yCurs_y{i} = evaluateFFT(in.y, out.y, flip, Nfreq);
 
 end
 
@@ -64,17 +65,23 @@ end
 
 
 % compute complex ratio, gain, and phase
-function output = evaluateFFT(in, out, flip)
+function output = evaluateFFT(in, out, flip, Nfreq)
 idx = abs(in) > 10;
 idx(length(idx)/2+1:end) = 0;
 
-if flip
-    output.ratio = -(out(idx)./in(idx));
+if sum(idx) == Nfreq
+    if flip
+        output.ratio = -(out(idx)./in(idx));
+    else
+        output.ratio = out(idx)./in(idx);
+    end
+    output.gain = abs(output.ratio);
+    output.phase = angle(output.ratio);
 else
-    output.ratio = out(idx)./in(idx);
+    output.ratio = NaN(Nfreq,1);
+    output.gain = NaN(Nfreq,1);
+    output.phase = NaN(Nfreq,1);
 end
-output.gain = abs(output.ratio);
-output.phase = angle(output.ratio);
 end
 
 % compute amplitude spectra
