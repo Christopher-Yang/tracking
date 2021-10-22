@@ -1,25 +1,34 @@
 
 interval = pi/16;
-angle = pi/2:interval:2*pi-interval;
+
+angle = -pi:interval:pi-interval;
 realPart = cos(angle);
 imaginaryPart = sin(angle);
-comp = permute(realPart + imaginaryPart*1j,[2 1]);
-n = length(comp);
+comp1 = permute(realPart + imaginaryPart*1j,[2 1]);
+n = length(comp1);
 amp = linspace(0,0.7,n)';
-comp = amp.*comp;
+comp1 = 0.7.*comp1;
+
+angle = 0:interval:2*pi-interval;
+realPart = cos(angle);
+imaginaryPart = sin(angle);
+comp2 = permute(realPart + imaginaryPart*1j,[2 1]);
+n = length(comp2);
+amp = linspace(0,0.7,n)';
+comp2 = 0.7.*comp2;
 
 clear Hud Hur B F
-% Hud(1,1,:) = comp;
-% Hud(2,2,:) = comp;
-% Hur(1,1,:) = comp;
-% Hur(2,2,:) = comp;
-% M = eye(2);
+Hud(1,1,:) = comp1;
+Hud(2,2,:) = comp1;
+Hur(1,1,:) = 0.2*comp2;
+Hur(2,2,:) = 0.2*comp2;
+M = eye(2);
 
-Hud(1,2,:) = comp;
-Hud(2,1,:) = comp;
-Hur(1,2,:) = comp;
-Hur(2,1,:) = comp;
-M = [0 1; 1 0];
+% Hud(1,2,:) = comp1;
+% Hud(2,1,:) = comp1;
+% Hur(1,2,:) = comp2;
+% Hur(2,1,:) = comp2;
+% M = [0 1; 1 0];
 
 % Hud(1,2,:) = -comp;
 % Hud(2,1,:) = comp;
@@ -61,6 +70,20 @@ col4 = [1 1 0];
 
 map = [linspace(col4(1),col1(1),n)' linspace(col4(2),col1(2),n)' linspace(col4(3),col1(3),n)'];
 
+figure(6); clf
+for i = 1:2
+    for k = 1:2
+        subplot(2,2,2*(i-1)+k); hold on
+        plot([-1 1],[0 0],'k')
+        plot([0 0],[-1 1],'k')
+        for j = 1:n
+            plot(real(Hur(i,k,j)),imag(Hur(i,k,j)),'.','MarkerSize',20,'Color',map(j,:))
+        end
+        title('H_{ur}')
+        axis equal
+    end
+end
+
 figure(7); clf
 for i = 1:2
     for k = 1:2
@@ -70,7 +93,7 @@ for i = 1:2
         for j = 1:n
             plot(real(Hud(i,k,j)),imag(Hud(i,k,j)),'.','MarkerSize',20,'Color',map(j,:))
         end
-        title('H_{ur} and H_{ud}')
+        title('H_{ud}')
         axis equal
     end
 end

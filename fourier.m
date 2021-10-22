@@ -31,7 +31,7 @@ for i = 1:Ntrials
     % analysis for trials with cursor sines
     in.x = cursorInput.xFFT(:,i);
     in.y = cursorInput.yFFT(:,i);
-    flip = 1;
+    flip = 0;
     
     % compute complex ratios
     phasors.xCurs_x{i} = evaluateFFT(in.x, out.x, flip, Nfreq);

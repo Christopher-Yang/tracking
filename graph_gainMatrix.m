@@ -15,18 +15,23 @@ blocks = {'B1','B2','B3'};
 graph_name = {'Baseline','Early','Late'};
 names = {'Hur','Hud','B','F'};
 Nblock = length(blocks);
-Nsubj = length(data.rot);
+% Nsubj = length(data.rot);
 Nfreq = length(data.rot{1}.(blocks{1}).freq);
 Ngroup = length(groups);
 Ntrial = 4;
 
-cplx.Hur = NaN(4,Nfreq,Ntrial,Nblock,Nsubj,Ngroup);
-cplx.Hud = NaN(4,Nfreq,Ntrial,Nblock,Nsubj,Ngroup);
-cplx.B = NaN(4,Nfreq,Ntrial,Nblock,Nsubj,Ngroup);
-cplx.F = NaN(4,Nfreq,Ntrial,Nblock,Nsubj,Ngroup);
+for i = 1:Ngroup
+    for j = 1:length(names)
+        cplx.(groups{i}).(names{j}) = NaN(4,Nfreq,Ntrial,Nblock,length(data.(groups{i})));
+    end
+end
+% cplx.Hud = NaN(4,Nfreq,Ntrial,Nblock,Nsubj,Ngroup);
+% cplx.B = NaN(4,Nfreq,Ntrial,Nblock,Nsubj,Ngroup);
+% cplx.F = NaN(4,Nfreq,Ntrial,Nblock,Nsubj,Ngroup);
 
 % this loop computes the gain matrices
 for q = 1:Ngroup % loop over groups
+    Nsubj = length(data.(groups{q}));
     for p = 1:Nsubj % loop over subjects
         for k = 1:Nblock % loop over blocks
             % loop over combinations of target and hand axes
@@ -39,7 +44,7 @@ for q = 1:Ngroup % loop over groups
             n = size(a.B,4);
             
             for j = 1:4
-                cplx.(names{j})(:,:,1:n,k,p,q) = reshape(a.(names{j}),[4 Nfreq n]);
+                cplx.(groups{q}).(names{j})(:,:,1:n,k,p) = reshape(a.(names{j}),[4 Nfreq n]);
             end
 %             Hur(:,:,1:n,k,p,q) = reshape(a.Hur,[4 Nfreq n]);
 %             Hud(:,:,1:n,k,p,q) = reshape(a.Hud,[4 Nfreq n]);
@@ -51,7 +56,7 @@ for q = 1:Ngroup % loop over groups
             for i = 1:Nfreq
 
                 % compute average baseline phasor for a particular frequency
-                dat = mean(cplx.(names{j})([1 4],i,:,1,p,q),3,'omitnan');
+                dat = mean(cplx.(groups{q}).(names{j})([1 4],i,:,1,p),3,'omitnan');
 
                 % x-component of xx and yy baseline phasor
                 x = cos(angle(dat));
@@ -60,19 +65,19 @@ for q = 1:Ngroup % loop over groups
                 y = sin(angle(dat));
 
                 % project data onto baseline x phasor
-                phasor = cplx.(names{j})([1 2],i,:,:,p,q); % extract data for x-target to x-/y-hand 
+                phasor = cplx.(groups{q}).(names{j})([1 2],i,:,:,p); % extract data for x-target to x-/y-hand 
                 phasor = reshape(phasor,[1 numel(phasor)]);
                 num = [real(phasor); imag(phasor)]; % separate real and imaginary parts of phasors
                 unitVec = [x(1); y(1)]; % unit vector with phase equal to baseline vector
-                gainX.(names{j})(:,i,p,q) = dot(num, repmat(unitVec, [1 numel(phasor)])); % project num onto unitVec
+                gainX.(groups{q}).(names{j})(:,i,p) = dot(num, repmat(unitVec, [1 numel(phasor)])); % project num onto unitVec
     %             frac1(:,i,p,q) = abs(gainX(:,i,p,q))./abs(phasor)'; % calculate proportion of gain retained in projection
 
                 % project data onto baseline y phasor
-                phasor = cplx.(names{j})([3 4],i,:,:,p,q); % extract data for x-target to x-/y-hand 
+                phasor = cplx.(groups{q}).(names{j})([3 4],i,:,:,p); % extract data for x-target to x-/y-hand 
                 phasor = reshape(phasor,[1 numel(phasor)]);
                 num = [real(phasor); imag(phasor)]; % separate real and imaginary parts of phasors
                 unitVec = [x(2); y(2)]; % unit vector with phase equal to baseline vector
-                gainY.(names{j})(:,i,p,q) = dot(num, repmat(unitVec, [1 numel(phasor)])); % project num onto unitVec
+                gainY.(groups{q}).(names{j})(:,i,p) = dot(num, repmat(unitVec, [1 numel(phasor)])); % project num onto unitVec
     %             frac2(:,i,p,q) = abs(gainY(:,i,p,q))./abs(phasor)'; % calculate proportion of gain retained in projection
             end
         end
@@ -85,31 +90,36 @@ R = R(1:2,1:2);
 perpAxis = R*[1 0]';
 
 % combine opt1 and opt2
-for j = 1:4
-    thetaOpt.(names{j}) = [reshape(gainX.(names{j}),[2 4 Nblock Nfreq Nsubj Ngroup]); ...
-        reshape(gainY.(names{j}),[2 4 Nblock Nfreq Nsubj Ngroup])]; 
-    thetaOpt.(names{j}) = permute(thetaOpt.(names{j}), [1 3 4 2 5 6]);
+for z = 1:Ngroup
+    Nsubj = length(data.(groups{z}));
+    for j = 1:4
+        thetaOpt.(groups{z}).(names{j}) = [reshape(gainX.(groups{z}).(names{j}),[2 4 Nblock Nfreq Nsubj]); ...
+            reshape(gainY.(groups{z}).(names{j}),[2 4 Nblock Nfreq Nsubj])];
+        thetaOpt.(groups{z}).(names{j}) = permute(thetaOpt.(groups{z}).(names{j}), [1 3 4 2 5]);
+        
+        % if desired, weight estimated gains by the amount of gain lost in the
+        % projection
+        % fracOpt = [reshape(frac1,[Ntrials 2 Nblock Nfreq Nsubj Ngroup]) ...
+        %     reshape(frac2,[Ntrials 2 Nblock Nfreq Nsubj Ngroup])];
+        % fracOpt = permute(fracOpt, [2 3 4 1 5 6]);
+        % thetaOpt = thetaOpt .* (1./fracOpt);
+        
+        % shape thetaOpt into gain matrix format: the first and second dimensions
+        % of gainMat correspond to the gain matrix for a given frequency (third
+        % dimension), block (fourth dimension), subject (fifth dimension), and
+        % group (sixth dimension)
+        gainMat.(groups{z}).(names{j}) = reshape(thetaOpt.(groups{z}).(names{j}),[2 2 Nblock Nfreq Ntrial Nsubj]);
+        gainMat.(groups{z}).(names{j}) = permute(gainMat.(groups{z}).(names{j}),[1 2 4 3 5 6]);
+    end
+end
 
-    % if desired, weight estimated gains by the amount of gain lost in the
-    % projection
-    % fracOpt = [reshape(frac1,[Ntrials 2 Nblock Nfreq Nsubj Ngroup]) ...
-    %     reshape(frac2,[Ntrials 2 Nblock Nfreq Nsubj Ngroup])];
-    % fracOpt = permute(fracOpt, [2 3 4 1 5 6]);
-    % thetaOpt = thetaOpt .* (1./fracOpt);
-    
-    % shape thetaOpt into gain matrix format: the first and second dimensions
-    % of gainMat correspond to the gain matrix for a given frequency (third
-    % dimension), block (fourth dimension), subject (fifth dimension), and
-    % group (sixth dimension)
-    gainMat.(names{j}) = reshape(thetaOpt.(names{j}),[2 2 Nblock Nfreq Ntrial Nsubj Ngroup]);
-    gainMat.(names{j}) = permute(gainMat.(names{j}),[1 2 4 3 5 6 7]);
-
+for j = 1:4        
     % fit theta to rotation matrices
     for p = 1:Nsubj
         for m = 1:Ntrial
             for k = 1:Nblock
                 for i = 1:Nfreq
-                    H = gainMat.(names{j})(:,:,i,k,m,p,1)';
+                    H = gainMat.rot.(names{j})(:,:,i,k,m,p)';
                     if sum(isnan(H),'all') == 0
                         [U,S,V] = svd(H);
                         if det(H') >= 0 % if determinant >= 0, rotation matrix can be computed
@@ -130,8 +140,7 @@ for j = 1:4
         for m = 1:Ntrial
             for k = 1:Nblock
                 for i = 1:Nfreq
-                    gainOrth.(names{j})(i,k,m,p) = perpAxis'*gainMat.(names{j})(:,:,i,k,m,p,2)*...
-                        perpAxis;
+                    gainOrth.(names{j})(i,k,m,p) = perpAxis'*gainMat.(groups{z}).(names{j})(:,:,i,k,m,p)*perpAxis;
                 end
             end
         end
@@ -156,39 +165,45 @@ map2 = [linspace(col1(1),col2(1),Nfreq)', linspace(col1(2),col2(2)...
 trial = 1; % trial to plot
 
 for j = 1:4
-    mat = squeeze(mean(thetaOpt.(names{j})(:,:,:,trial,:,:),5));
-
     figure(j); clf
-    for i = 1:Nblock % iterate over the blocks to plot
-        subplot(2,Nblock,i); hold on
-        plot([0 1],[0 0],'k') % unit x vector
-        plot([0 0],[0 1],'k') % unit y vector
-        for k = 1:2:Nfreq
-            plot([0 mat(1,i,k,1)],[0 mat(2,i,k,1)]...
-                ,'LineWidth',1,'Color',map1(k,:)) % plot green vectors
-            plot([0 mat(3,i,k,1)],[0 mat(4,i,k,1)]...
-                ,'LineWidth',1,'Color',map2(k,:)) % plot purple vectors
-        end
-        axis([-0.95 1.5 -0.95 1.5])
-        axis square
-        title(graph_name(i))
-        if i == 1
-            ylabel('Rotation')
-        end
-
-        subplot(2,Nblock,Nblock+i); hold on
-        plot([0 1],[0 0],'k') % unit x vector
-        plot([0 0],[0 1],'k') % unit y vector
-        for k = 1:Nfreq
-            plot([0 mat(1,i,k,2)],[0 mat(2,i,k,2)]...
-                ,'LineWidth',1,'Color',map1(k,:)) % plot green vectors
-            plot([0 mat(3,i,k,2)],[0 mat(4,i,k,2)]...
-                ,'LineWidth',1,'Color',map2(k,:)) % plot purple vectors
-        end
-        axis([-0.95 1.5 -0.95 1.5])
-        axis square
-        if i == 1
-            ylabel('Mirror-Reversal')
+    for q = 1:Ngroup
+        mat = squeeze(mean(thetaOpt.(groups{q}).(names{j})(:,:,:,trial,:),5));
+        
+        for i = 1:Nblock % iterate over the blocks to plot
+            subplot(2,Nblock,(q-1)*Nblock+i); hold on
+            plot([0 1],[0 0],'k') % unit x vector
+            plot([0 0],[0 1],'k') % unit y vector
+            for k = 1:2:Nfreq
+                plot([0 mat(1,i,k)],[0 mat(2,i,k)]...
+                    ,'LineWidth',1,'Color',map1(k,:)) % plot green vectors
+                plot([0 mat(3,i,k)],[0 mat(4,i,k)]...
+                    ,'LineWidth',1,'Color',map2(k,:)) % plot purple vectors
+            end
+            axis([-0.95 1.5 -0.95 1.5])
+            axis square
+            title(graph_name(i))
+            if i == 1
+                if q == 1
+                    ylabel('Rotation')
+                else
+                    ylabel('Mirror')
+                end
+            end
+            
+%             subplot(2,Nblock,Nblock+i); hold on
+%             plot([0 1],[0 0],'k') % unit x vector
+%             plot([0 0],[0 1],'k') % unit y vector
+%             for k = 1:Nfreq
+%                 plot([0 mat(1,i,k)],[0 mat(2,i,k)]...
+%                     ,'LineWidth',1,'Color',map1(k,:)) % plot green vectors
+%                 plot([0 mat(3,i,k)],[0 mat(4,i,k)]...
+%                     ,'LineWidth',1,'Color',map2(k,:)) % plot purple vectors
+%             end
+%             axis([-0.95 1.5 -0.95 1.5])
+%             axis square
+%             if i == 1
+%                 ylabel('Mirror-Reversal')
+%             end
         end
     end
 end

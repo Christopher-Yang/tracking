@@ -10,7 +10,7 @@ folder = 'Data/fb_ff/'; % set path to data
 % subj_mir = {''}; % mirror-reversal subjects
 
 block_name = {'B1','B2','B3'};
-subj_rot = {'subj2','subj3','subj4','subj5'};
+subj_rot = {'subj2','subj3','subj4','subj5','subj10','subj11','subj12','subj13','subj14'};
 subj_mir = {'subj6','subj7','subj8','subj9'};
 
 % NOTE: subj1 had extra data at end of data files for each trial; need to

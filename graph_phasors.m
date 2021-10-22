@@ -3,7 +3,7 @@ Nfreq = 12;
 col = copper;
 col = col(floor((size(col,1)/(Nfreq))*(1:Nfreq)),:);
 
-block = 'B3';
+block = 'B1';
 names1 = {'xTarg_x','yTarg_x','xTarg_y','yTarg_y'};
 names2 = {'xCurs_x','yCurs_x','xCurs_y','yCurs_y'};
 subj = 2;
