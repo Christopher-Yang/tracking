@@ -9,19 +9,19 @@ n = length(comp1);
 amp = linspace(0,0.7,n)';
 comp1 = 0.7.*comp1;
 
-angle = 0:interval:2*pi-interval;
+angle = 0:interval:3*pi/2-interval;
 realPart = cos(angle);
 imaginaryPart = sin(angle);
 comp2 = permute(realPart + imaginaryPart*1j,[2 1]);
 n = length(comp2);
 amp = linspace(0,0.7,n)';
-comp2 = 0.7.*comp2;
+comp2 = amp.*comp2;
 
 clear Hud Hur B F
 Hud(1,1,:) = comp1;
 Hud(2,2,:) = comp1;
-Hur(1,1,:) = 0.2*comp2;
-Hur(2,2,:) = 0.2*comp2;
+Hur(1,1,:) = comp2;
+Hur(2,2,:) = comp2;
 M = eye(2);
 
 % Hud(1,2,:) = comp1;
