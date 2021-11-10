@@ -1,4 +1,11 @@
-function graph_gainMatrix(data, block_name, graph_name)
+% graph_gainMatrix plots the direction and amplitude of cursor movements in
+% response to target movement at different frequencies
+% 
+%   data: structure containing all data
+%   block_name: name of blocks
+%   graph_name: name of blocks for 
+
+function graph_gainMatrix(data, block_name, blockType)
 
 output = 'cursor';
 groups = {'day2','day5','day10'};
@@ -6,50 +13,15 @@ groupNames = {'2-day','5-day','10-day'};
 names = {'x_x','x_y','y_x','y_y'};
 
 Ngroup = length(groups);
-maxNormal = 0;
-counterbalance{1} = 8:13;
-counterbalance{2} = 8:14;
-counterbalance{3} = 4:5;
-
-if strcmp(output,'cursor')
-    labels = {'X_{T}X_{O} (response)','X_{T}Y_{O}','Y_{T}X_{O}','Y_{T}Y_{O} (response)'};
-    workspace = 1:4;
-elseif strcmp(output,'Rhand')
-    labels = {'X_{T}X_{O}','X_{T}Y_{O}','Y_{T}X_{O} (response)','Y_{T}Y_{O}'};
-    workspace = [1 3];
-    nullspace = [2 4];
-    response = 3;
-elseif strcmp(output,'Lhand')
-    labels = {'X_{T}X_{O}','X_{T}Y_{O} (response)','Y_{T}X_{O}','Y_{T}Y_{O}'};
-    workspace = [2 4];
-    nullspace = [1 3];
-    response = 2;
-end
 
 for q = 1:Ngroup % loop over groups
-    clear opt1 opt2 template
     Nsubj = length(data.(groups{q}));
     blk = block_name.(groups{q});
     Nblock = length(blk);
     Nfreq = length(data.(groups{q}){1}.(blk{1}).freqX);
     Ntrial = 5;
-    paramsInit = zeros([2 Nblock]);
     
-    dark{q} = find(contains(graph_name.(groups{q}),'(D)'));
-    flip{q} = find(contains(graph_name.(groups{q}),'(F)'));
-    special{q} = find(contains(graph_name.(groups{q}),'('));
-    normal{q} = 1:Nblock;
-    normal{q}(special{q}) = [];
-    
-    if maxNormal < length(normal{q})
-        maxNormal = length(normal{q});
-    end
-    
-%     set remove = 1 to remove special blocks
-%     remove = 0;
-%     if remove
-%         index = normal;
-%     end
+    normal{q} = find(blockType.(groups{q}) == 1);
     
     for p = 1:Nsubj % loop over subjects
         for k = 1:Nblock % loop over block
@@ -94,18 +66,14 @@ for q = 1:Ngroup % loop over groups
         end
     end
     
-    % combine opt1 and opt2
+    % combine gainX and gainY
     thetaOpt{q} = [reshape(gainX{q},[Ntrial 2 Nblock Nfreq Nsubj]) ...
         reshape(gainY{q},[Ntrial 2 Nblock Nfreq Nsubj])];
     thetaOpt{q} = permute(thetaOpt{q}, [2 3 4 1 5]);
     
     % convert gain matrices from cursor to hand configuration
 %     thetaOpt{q}(:,3:end,:,:,:) = thetaOpt{q}([2 1 4 3],3:end,:,:,:);
-    
-    % need to swap signs to properly counterbalance if not looking at
-    % cursor
-%     thetaOpt{q}(workspace,2:end,:,:,counterbalance{q}) = -thetaOpt{q}(workspace,2:end,:,:,counterbalance{q});
-    
+        
     thetaOpt_mu{q} = mean(thetaOpt{q},5,'omitnan');
     thetaOpt_se{q} = std(thetaOpt{q},[],5,'omitnan')./sqrt(Nsubj);
     
@@ -123,17 +91,7 @@ for q = 1:Ngroup % loop over groups
     % group (sixth dimension)
     gainMat{q} = reshape(thetaOpt{q},[2 2 Nblock Nfreq Ntrial Nsubj]);
     gainMat{q} = permute(gainMat{q},[1 2 4 3 5 6]);
-    
-    habitGains = thetaOpt{q}(1,end-2,:,:,:);
-    habitGains = squeeze(habitGains);
-    baselineGains = thetaOpt{q}(1,1,:,:,:);
-    baselineGains = squeeze(baselineGains);
-    percent = habitGains./baselineGains;
-    
-    flipSign.(groups{q}) = percent(:,:,:,1) < -0.2;
 end
-
-% save flipSign flipSign
 
 blockNum = [3 5; 5 11; 11 21];
 
@@ -158,23 +116,6 @@ subject = [s1(:); s2(:); s3(:)];
 T = table(g, b, frequency, subject, y, 'VariableNames', {'group','block','frequency','subject','gain'});
 writetable(T,'C:/Users/Chris/Documents/R/habit/data/gain_skill.csv')
 
-% for plotting lines
-col = lines;
-col = col(1:7,:);
-
-% for plotting heatmaps
-col1 = [1 0 0];
-col2 = [1 1 1];
-Nstep = 100;
-map1 = [linspace(col1(1),col2(1),Nstep)', linspace(col1(2),col2(2),Nstep)', linspace(col1(3),col2(3),Nstep)'];
-
-col1 = [1 1 1];
-col2 = [0 0 1];
-map2 = [linspace(col1(1),col2(1),Nstep)', linspace(col1(2),col2(2),Nstep)', linspace(col1(3),col2(3),Nstep)'];
-
-map = [map1; map2];
-clims = [-1 1];
-
 % for plotting vectors
 col1 = [0 128 0]/255;
 col2 = [152 251 152]/255;
@@ -196,13 +137,8 @@ for q = 1:Ngroup
         plot([0 0.5],[0 0],'k')
         plot([0 0],[0 0.5],'k')
         for i = 1:Nfreq
-%             if k == 1
-                plot([0 mean(thetaOpt_mu{q}(1,blk(k),i,:),4)],[0 mean(thetaOpt_mu{q}(2,blk(k),i,:),4)],'LineWidth',1.5,'Color',map1(i,:))
-                plot([0 mean(thetaOpt_mu{q}(3,blk(k),i,:),4)],[0 mean(thetaOpt_mu{q}(4,blk(k),i,:),4)],'LineWidth',1.5,'Color',map2(i,:))
-%             else
-%                 plot([0 mean(thetaOpt_mu{q}(2,blk(k),i,:),4)],[0 mean(thetaOpt_mu{q}(1,blk(k),i,:),4)],'LineWidth',1.5,'Color',map1(i,:))
-%                 plot([0 mean(thetaOpt_mu{q}(4,blk(k),i,:),4)],[0 mean(thetaOpt_mu{q}(3,blk(k),i,:),4)],'LineWidth',1.5,'Color',map2(i,:))
-%             end
+            plot([0 mean(thetaOpt_mu{q}(1,blk(k),i,:),4)],[0 mean(thetaOpt_mu{q}(2,blk(k),i,:),4)],'LineWidth',1.5,'Color',map1(i,:))
+            plot([0 mean(thetaOpt_mu{q}(3,blk(k),i,:),4)],[0 mean(thetaOpt_mu{q}(4,blk(k),i,:),4)],'LineWidth',1.5,'Color',map2(i,:))
         end
         axis([-0.3 0.8 -0.3 0.8])
         axis square
@@ -217,216 +153,58 @@ for q = 1:Ngroup
     end
 end
 
-print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/vectors','-dpdf','-painters')
+% save figure for Illustrator
+% print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/vectors','-dpdf','-painters')
 
 %% plot matrices as lines (normal blocks)
-col = copper;
-col = col(floor((size(col,1)/(Nfreq))*(1:Nfreq)),:);
+% col = copper;
+% col = col(floor((size(col,1)/(Nfreq))*(1:Nfreq)),:);
+% 
+% offset = [0 20 55];
+% 
+% f = figure(2); clf
+% set(f,'Position',[200 200 380 250]);
+% 
+% for j = 1:2
+%     subplot(2,1,j); hold on
+%     for q = 1:Ngroup
+%         mu = permute(thetaOpt_mu{q},[4 3 2 1]);
+%         se = permute(thetaOpt_se{q},[4 3 2 1]);
+%         Nblock = length(normal{q});
+%         totalTrials = Nblock*Ntrial;
+%         
+%         plot([offset(q)+1 offset(q)+totalTrials], [0 0], 'k')
+%         plot([offset(q)+1 offset(q)+totalTrials], [-.2 -.2], 'k')
+%         if q > 1
+%             plot([offset(q)+1 offset(q)+1], [-.2 1], 'k')
+%         end
+%         for k = 1:Nblock
+%             block = normal{q}(k);
+%             plotIdx = Ntrial*(k-1)+(1:5) + offset(q);
+%             if k > 2
+%                 plot([plotIdx(1)-0.5 plotIdx(1)-0.5],[-0.2 1],'Color',[0.8 0.8 0.8])
+%             end
+%             for i = 1:Nfreq
+%                 if j == 1
+%                     s = shadedErrorBar(plotIdx, mu(:,i,block,1), se(:,i,block,1));
+%                 else
+%                     s = shadedErrorBar(plotIdx, mu(:,i,block,4), se(:,i,block,4));
+%                 end
+%                 editErrorBar(s,col(i,:),1);
+%             end
+%         end
+%     end
+%     axis([1 offset(3)+totalTrials -0.2 1])
+%     yticks(0:0.25:1)
+%     set(gca,'TickDir','out','Xcolor','none')
+%     if j == 1
+%         ylabel('X --> X')
+%     else
+%         ylabel('Y --> Y')
+%     end
+% end
 
-offset = [0 20 55];
-
-f = figure(2); clf
-set(f,'Position',[200 200 380 250]);
-
-for j = 1:2
-    subplot(2,1,j); hold on
-    for q = 1:Ngroup
-        mu = permute(thetaOpt_mu{q},[4 3 2 1]);
-        se = permute(thetaOpt_se{q},[4 3 2 1]);
-        Nblock = length(normal{q});
-        totalTrials = Nblock*Ntrial;
-        
-        plot([offset(q)+1 offset(q)+totalTrials], [0 0], 'k')
-        plot([offset(q)+1 offset(q)+totalTrials], [-.2 -.2], 'k')
-        if q > 1
-            plot([offset(q)+1 offset(q)+1], [-.2 1], 'k')
-        end
-        for k = 1:Nblock
-            block = normal{q}(k);
-            plotIdx = Ntrial*(k-1)+(1:5) + offset(q);
-            if k > 2
-                plot([plotIdx(1)-0.5 plotIdx(1)-0.5],[-0.2 1],'Color',[0.8 0.8 0.8])
-            end
-            for i = 1:Nfreq
-                if j == 1
-                    s = shadedErrorBar(plotIdx, mu(:,i,block,1), se(:,i,block,1));
-                else
-                    s = shadedErrorBar(plotIdx, mu(:,i,block,4), se(:,i,block,4));
-                end
-                editErrorBar(s,col(i,:),1);
-            end
-        end
-    end
-    axis([1 offset(3)+totalTrials -0.2 1])
-    yticks(0:0.25:1)
-    set(gca,'TickDir','out','Xcolor','none')
-    if j == 1
-        ylabel('X --> X')
-    else
-        ylabel('Y --> Y')
-    end
-end
-print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/gains','-dpdf','-painters')
-
-%%
-labels = {'Late','Flip 1','Flip 2'};
-figure(3); clf; 
-for q = 1:Ngroup
-    mu = permute(thetaOpt_mu{q},[4 3 2 1]);
-    se = permute(thetaOpt_se{q},[4 3 2 1]);
-    Nblock = length(flip{q})+1;
-    totalTrials = Nblock*Ntrial;
-    ticks = 1:5:totalTrials;
-    
-    subplot(2, 3, q); hold on
-    plot([1 totalTrials], [0 0], 'k')
-    for k = 1:Nblock
-        if k == 1
-            block = normal{q}(end);
-        else
-            block = flip{q}(k-1);
-        end
-        
-        plotIdx = Ntrial*(k-1)+(1:5);
-        for i = 1:Nfreq
-            if k == 1
-                s = shadedErrorBar(plotIdx, mu(:,i,block,1), se(:,i,block,1));
-                editErrorBar(s,col(i,:),1);
-            else
-                s = shadedErrorBar(plotIdx, mu(:,i,block,4), se(:,i,block,4));
-                editErrorBar(s,col(i,:),1);
-            end
-        end
-    end
-    title(groupNames{q})
-    axis([1 totalTrials -0.5 1])
-    xticks(ticks)
-    xticklabels(labels)
-    set(gca,'TickDir','out')
-    if q == 1
-        ylabel('X --> X')
-    end
-    
-    subplot(2, 3, q+3); hold on
-    plot([1 totalTrials], [0 0], 'k')
-    for k = 1:Nblock
-        if k == 1
-            block = normal{q}(end);
-        else
-            block = flip{q}(k-1);
-        end
-        
-        plotIdx = Ntrial*(k-1)+(1:5);
-        for i = 1:Nfreq
-            if k == 1
-                s = shadedErrorBar(plotIdx, mu(:,i,block,4), se(:,i,block,4));
-                editErrorBar(s,col(i,:),1);
-            else
-                s = shadedErrorBar(plotIdx, mu(:,i,block,1), se(:,i,block,1));
-                editErrorBar(s,col(i,:),1);
-            end
-        end
-    end
-    axis([1 totalTrials -0.5 1])
-    xticks(ticks)
-    xticklabels(labels)
-    set(gca,'TickDir','out')
-    if q == 1
-        ylabel('Y --> Y')
-    end
-end
-
-%% plot matrices as lines (dark blocks)
-col = copper;
-col = col(floor((size(col,1)/(Nfreq))*(1:Nfreq)),:);
-
-figure(4); clf
-for q = 1:Ngroup
-    mu = permute(thetaOpt_mu{q},[4 3 2 1]);
-    se = permute(thetaOpt_se{q},[4 3 2 1]);
-    Nblock = length(dark{q});
-    totalTrials = Nblock*Ntrial;
-    ticks = 1:5:totalTrials;
-    ticks = ticks([1 2 end]);
-    
-    subplot(2, 3, q); hold on
-    plot([1 totalTrials], [0 0], 'k')
-    for k = 1:Nblock
-        for i = 1:Nfreq
-            if k == 1
-                s = shadedErrorBar(Ntrial*(k-1)+(1:5), mu(:,i,dark{q}(k),1), se(:,i,dark{q}(k),1));
-                editErrorBar(s,col(i,:),1);
-            else
-                s = shadedErrorBar(Ntrial*(k-1)+(1:5), mu(:,i,dark{q}(k),4), se(:,i,dark{q}(k),4));
-                editErrorBar(s,col(i,:),1);
-            end
-        end
-    end
-    title(groupNames{q})
-    axis([1 totalTrials -0.5 1])
-    xticks(ticks)
-    xticklabels({'Baseline','Early','Late','Flip'})
-    if q == 1
-        ylabel('X --> X')
-    end
-    
-    subplot(2, 3, q+3); hold on
-    plot([1 totalTrials], [0 0], 'k')
-    Nblock = length(dark{q});
-    for k = 1:Nblock
-        for i = 1:Nfreq
-            if k == 1
-                s = shadedErrorBar(Ntrial*(k-1)+(1:5), mu(:,i,dark{q}(k),4), se(:,i,dark{q}(k),4));
-                editErrorBar(s,col(i,:),1);
-            else
-                s = shadedErrorBar(Ntrial*(k-1)+(1:5), mu(:,i,dark{q}(k),1), se(:,i,dark{q}(k),1));
-                editErrorBar(s,col(i,:),1);
-            end
-        end
-    end
-    axis([1 totalTrials -0.5 1])
-    xticks(ticks)
-    xticklabels({'Baseline','Early','Late','Flip'})
-    if q == 1
-        ylabel('Y --> Y')
-    end
-end
-
-%% plot habit
-col = [180 180 0
-        0 191 255
-        255 99 71]./255;
-names = {'Early','Flip 1','Flip 2','Flip (dark)'};
-    
-figure(5); clf
-for k = 1:4
-    subplot(1,4,k); hold on
-    plot([0.5 6.5], [0 0], 'k', 'HandleVisibility', 'off')
-    for q = 1:Ngroup
-        if k == 1
-            block = 3;
-        elseif k == 2
-            block = size(thetaOpt{q},2)-2;
-        elseif k == 3
-            block = size(thetaOpt{q},2)-1;
-        elseif k == 4
-            block = size(thetaOpt{q},2);
-        end
-        
-        h = squeeze(mean(thetaOpt{q}(1,block,:,:,:),4));
-        mu = mean(h,2);
-        se = std(h,[],2)./sqrt(size(h,2));
-        
-        s = shadedErrorBar(1:Nfreq,mu,se);
-        editErrorBar(s,col(q,:),1);
-    end
-    axis([0.5 6.5 -0.5 0.4])
-    xticks(1:6)
-    xlabel('Frequency')
-    ylabel('Gain')
-    title(names{k})
-    set(gca, 'TickDir', 'out')
-end
-legend(groupNames)
+% save figure for Illustrator
+% print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/gains','-dpdf','-painters')
 
 end

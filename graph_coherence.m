@@ -1,5 +1,6 @@
+% plots the coherence between target and cursor movement
+
 function graph_coherence(data, block_name, graph_name)
-% plots the coherence between target and hand movement
 
 % set variables for plotting
 groups = {'day2', 'day5', 'day10'}; % group names
