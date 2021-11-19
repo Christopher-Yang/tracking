@@ -1,21 +1,23 @@
 
 interval = pi/16;
 
-angle = -pi:interval:pi-interval;
+% angle = -pi:interval:pi-interval;
+angle = 0:interval:pi-interval;
 realPart = cos(angle);
 imaginaryPart = sin(angle);
 comp1 = permute(realPart + imaginaryPart*1j,[2 1]);
 n = length(comp1);
 amp = linspace(0,0.7,n)';
-comp1 = 0.7.*comp1;
+comp1 = amp.*comp1;
 
-angle = 0:interval:2*pi-interval;
+% angle = 0:interval:2*pi-interval;
+angle = pi:interval:2*pi-interval;
 realPart = cos(angle);
 imaginaryPart = sin(angle);
 comp2 = permute(realPart + imaginaryPart*1j,[2 1]);
 n = length(comp2);
 amp = linspace(0,0.7,n)';
-comp2 = 0.7*comp2;
+comp2 = amp.*comp2;
 
 clear Hud Hur B F
 Hud(1,1,:) = comp1;
