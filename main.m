@@ -65,10 +65,13 @@ disp('Done')
 %% PART 2: FOLLOW-UP DATA ANALYSIS AND PLOTTING FIGURES
 
 % Figure 3A
-graph_coherence(data, block_name, graph_name)
+graph_cursor(data)
 
-% Figures 3B and 5A
-graph_gainMatrix(data,block_name,blockType);
+% Figure 3B
+graph_coherence(data, block_name, blockType)
+
+% Figures 3C and 5A
+graph_gainMatrix(data, block_name, blockType);
 
 % Figure 5B
-graph_phasors(data)
+graph_flipGain(data)

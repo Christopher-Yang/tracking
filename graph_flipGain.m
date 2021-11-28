@@ -1,4 +1,4 @@
-function graph_phasors(data)
+function graph_flipGain(data)
 
 addpath ../shadedErrorBar
 

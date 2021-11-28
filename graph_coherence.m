@@ -1,6 +1,6 @@
 % plots the coherence between target and cursor movement
 
-function graph_coherence(data, block_name, graph_name)
+function graph_coherence(data, block_name, blockType)
 
 % set variables for plotting
 groups = {'day2', 'day5', 'day10'}; % group names
@@ -9,7 +9,7 @@ Ngroup = length(groups); % number of groups
 allSubj = [13 14 5]; % number of subjects
 
 a = data.(groups{1}){1}.B1_baseline;
-Ntrials = length(a.MSE); % number of trials
+Ntrials = size(a.cursor.x_pos,2); % number of trials
 Nfreq = length(a.freqX); % number of frequencies
 f_x = a.freqX; % x frequencies
 f_y = a.freqY; % y frequencies
@@ -28,12 +28,17 @@ for p = 1:Ngroup
     
     Nblock = length(block_name.(groups{p})); % number of blocks
 
-    dark{p} = find(contains(graph_name.(groups{p}),'(D)'));
-    darkFlip{p} = find(contains(graph_name.(groups{p}),'(FD)'));
-    flip{p} = find(contains(graph_name.(groups{p}),'(F)'));
-    special{p} = find(contains(graph_name.(groups{p}),'('));
-    normal{p} = 1:Nblock;
-    normal{p}(special{p}) = [];
+%     dark{p} = find(contains(graph_name.(groups{p}),'(D)'));
+%     darkFlip{p} = find(contains(graph_name.(groups{p}),'(FD)'));
+%     flip{p} = find(contains(graph_name.(groups{p}),'(F)'));
+%     special{p} = find(contains(graph_name.(groups{p}),'('));
+%     normal{p} = 1:Nblock;
+%     normal{p}(special{p}) = [];
+    
+    normal{p} = find(blockType.(groups{p}) == 1);
+    dark{p} = find(blockType.(groups{p}) == 2);
+    flip{p} = find(blockType.(groups{p}) == 3);
+    
     
     % preallocate variables to store coherence
     SR{p}.x_all = NaN(Ntrials,Nfreq,Nblock,allSubj(p));
