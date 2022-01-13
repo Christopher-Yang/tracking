@@ -14,8 +14,9 @@ function data = analyze_data(d, block_name)
         disp(['   Subject ' num2str(i)]);
         
         for j = 1:Nblocks % loop over blocks
-            Ntrials = size(d{i}.(block_name{j}).traj,3); % number of trials
             output = d{i}.(block_name{j}).traj; % recorded position data
+            Nsamples = size(output,1); % number of samples per trial
+            output(:,1:8,:) = output(:,1:8,:) - repmat(mean(output(:,1:8,:),1), [Nsamples 1 1]); % baseline subtraction
             input = d{i}.(block_name{j}).tFile; % input freqs, amps, and phases
             Nsines = length(input)/6; % number of sines
             
@@ -29,11 +30,13 @@ function data = analyze_data(d, block_name)
             Lhand = struct('x_pos',squeeze(output(:,3,:)),'y_pos',squeeze(output(:,4,:))); 
             Rhand = struct('x_pos',squeeze(output(:,5,:)),'y_pos',squeeze(output(:,6,:)));
             cursor = struct('x_pos',squeeze(output(:,7,:)),'y_pos',squeeze(output(:,8,:)));
-                        
+            
             % perform Fourier analysis
             data{i}.(block_name{j}).Lhand.phasors = fourier2(Lhand,target,freqX,freqY);
             data{i}.(block_name{j}).Rhand.phasors = fourier2(Rhand,target,freqX,freqY);
             data{i}.(block_name{j}).cursor.phasors = fourier2(cursor,target,freqX,freqY);
+            
+            MSE = mean((100*(cursor.x_pos-target.x_pos)).^2 + (100*(cursor.y_pos-target.y_pos)).^2,1);
             
             % store everything in data
             fnames = fieldnames(Rhand);
@@ -47,6 +50,7 @@ function data = analyze_data(d, block_name)
             data{i}.(block_name{j}).freqY = freqY;
             data{i}.(block_name{j}).ampX = ampX;
             data{i}.(block_name{j}).ampY = ampY;
+            data{i}.(block_name{j}).MSE = MSE;
         end
     end
 end

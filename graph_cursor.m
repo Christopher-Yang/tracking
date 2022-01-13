@@ -1,3 +1,5 @@
+
+
 function graph_cursor(data)
 
 time = 1:650; % 5 seconds of data to plot
@@ -24,14 +26,16 @@ for i = 1:5
     plot(a.target.x_pos(time,1), a.target.y_pos(time,1),'r');
     plot(a.cursor.x_pos(time,1), a.cursor.y_pos(time,1),'k');
     if i == 1
-        plot([0.6 0.7],[0.15 0.15],'k','LineWidth',2)
+        plot([0 0.1],[-0.15 -0.15],'k','LineWidth',2)
     end
-    axis([0.5 0.8 0.05 0.35])
+    axis([-0.15 0.15 -0.2 0.11])
     axis square
     title(names{i})
     xticks([])
     yticks([])
 end
-print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/cursor','-dpdf','-painters')
+
+% save figure for Illustrator
+% print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/cursor','-dpdf','-painters')
 
 end

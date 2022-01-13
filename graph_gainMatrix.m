@@ -3,7 +3,8 @@
 % 
 %   data: structure containing all data
 %   block_name: name of blocks
-%   graph_name: name of blocks for 
+%   blockType: identifies whether the block has visual feedback (=1), no 
+%       visual feedback (=2), or the flipped mapping (=3)
 
 function graph_gainMatrix(data, block_name, blockType)
 
@@ -157,54 +158,106 @@ end
 % print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/vectors','-dpdf','-painters')
 
 %% plot matrices as lines (normal blocks)
-% col = copper;
-% col = col(floor((size(col,1)/(Nfreq))*(1:Nfreq)),:);
-% 
-% offset = [0 20 55];
-% 
-% f = figure(2); clf
-% set(f,'Position',[200 200 380 250]);
-% 
-% for j = 1:2
-%     subplot(2,1,j); hold on
-%     for q = 1:Ngroup
-%         mu = permute(thetaOpt_mu{q},[4 3 2 1]);
-%         se = permute(thetaOpt_se{q},[4 3 2 1]);
-%         Nblock = length(normal{q});
-%         totalTrials = Nblock*Ntrial;
-%         
-%         plot([offset(q)+1 offset(q)+totalTrials], [0 0], 'k')
-%         plot([offset(q)+1 offset(q)+totalTrials], [-.2 -.2], 'k')
-%         if q > 1
-%             plot([offset(q)+1 offset(q)+1], [-.2 1], 'k')
-%         end
-%         for k = 1:Nblock
-%             block = normal{q}(k);
-%             plotIdx = Ntrial*(k-1)+(1:5) + offset(q);
-%             if k > 2
-%                 plot([plotIdx(1)-0.5 plotIdx(1)-0.5],[-0.2 1],'Color',[0.8 0.8 0.8])
-%             end
-%             for i = 1:Nfreq
-%                 if j == 1
-%                     s = shadedErrorBar(plotIdx, mu(:,i,block,1), se(:,i,block,1));
-%                 else
-%                     s = shadedErrorBar(plotIdx, mu(:,i,block,4), se(:,i,block,4));
-%                 end
-%                 editErrorBar(s,col(i,:),1);
-%             end
-%         end
-%     end
-%     axis([1 offset(3)+totalTrials -0.2 1])
-%     yticks(0:0.25:1)
-%     set(gca,'TickDir','out','Xcolor','none')
-%     if j == 1
-%         ylabel('X --> X')
-%     else
-%         ylabel('Y --> Y')
-%     end
-% end
+col = copper;
+col = col(floor((size(col,1)/(Nfreq))*(1:Nfreq)),:);
+
+offset = [0 20 55];
+
+f = figure(2); clf
+set(f,'Position',[200 200 380 250]);
+
+for j = 1:2
+    subplot(2,1,j); hold on
+    for q = 1:Ngroup
+        mu = permute(thetaOpt_mu{q},[4 3 2 1]);
+        se = permute(thetaOpt_se{q},[4 3 2 1]);
+        Nblock = length(normal{q});
+        totalTrials = Nblock*Ntrial;
+        
+        plot([offset(q)+1 offset(q)+totalTrials], [0 0], 'k')
+        plot([offset(q)+1 offset(q)+totalTrials], [-.2 -.2], 'k')
+        if q > 1
+            plot([offset(q)+1 offset(q)+1], [-.2 1], 'k')
+        end
+        for k = 1:Nblock
+            block = normal{q}(k);
+            plotIdx = Ntrial*(k-1)+(1:5) + offset(q);
+            if k > 2
+                plot([plotIdx(1)-0.5 plotIdx(1)-0.5],[-0.2 1],'Color',[0.8 0.8 0.8])
+            end
+            for i = 1:Nfreq
+                if j == 1
+                    s = shadedErrorBar(plotIdx, mu(:,i,block,1), se(:,i,block,1));
+                else
+                    s = shadedErrorBar(plotIdx, mu(:,i,block,4), se(:,i,block,4));
+                end
+                editErrorBar(s,col(i,:),1);
+            end
+        end
+    end
+    axis([1 offset(3)+totalTrials -0.2 1])
+    yticks(0:0.25:1)
+    set(gca,'TickDir','out','Xcolor','none')
+    if j == 1
+        ylabel('X --> X')
+    else
+        ylabel('Y --> Y')
+    end
+end
 
 % save figure for Illustrator
 % print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/gains','-dpdf','-painters')
+
+%% magnitude of vectors
+
+col = copper;
+col = col(floor((size(col,1)/(Nfreq))*(1:Nfreq)),:);
+
+offset = [0 20 55];
+
+for q = 1:Ngroup
+    mag{q} = [sqrt(thetaOpt{q}(1,:,:,:,:).^2 + thetaOpt{q}(2,:,:,:,:).^2);
+        sqrt(thetaOpt{q}(3,:,:,:,:).^2 + thetaOpt{q}(4,:,:,:,:).^2)];
+    mag{q} = permute(mag{q},[4 3 2 5 1]);
+end
+
+f = figure(3); clf
+set(f,'Position',[200 200 380 250]);
+for j = 1:2
+    subplot(2,1,j); hold on
+    for q = 1:Ngroup
+        mu = mean(mag{q}(:,:,:,:,j),4);
+        se = std(mag{q}(:,:,:,:,j),[],4)./sqrt(size(mag{q}(:,:,:,:,j),4));
+        Nblock = length(normal{q});
+        totalTrials = Nblock*Ntrial;
+
+        plot([offset(q)+1 offset(q)+totalTrials], [0 0], 'k')
+        plot([offset(q)+1 offset(q)+totalTrials], [-.2 -.2], 'k')
+        if q > 1
+            plot([offset(q)+1 offset(q)+1], [-.2 1], 'k')
+        end
+        for k = 1:Nblock
+            block = normal{q}(k);
+            plotIdx = Ntrial*(k-1)+(1:5) + offset(q);
+            if k > 2
+                plot([plotIdx(1)-0.5 plotIdx(1)-0.5],[-0.2 1],'Color',[0.8 0.8 0.8])
+            end
+            for i = 1:Nfreq
+                s = shadedErrorBar(plotIdx, mu(:,i,block), se(:,i,block));
+                editErrorBar(s,col(i,:),1);
+            end
+        end
+    end
+    axis([1 offset(3)+totalTrials -0.2 1])
+    yticks(0:0.25:1)
+    set(gca,'TickDir','out','Xcolor','none')
+    if j == 1
+        ylabel('X gain')
+    else
+        ylabel('Y gain')
+    end
+end
+
+print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/gains','-dpdf','-painters')
 
 end
