@@ -59,13 +59,11 @@ disp('Done')
 % Figure 3A
 graph_cursor(data)
 
-% Figure 3B and Supplementary Figure 2
-graph_coherence(data, block_name, blockType)
-
+% Figure 3B
 graph_MSE(data, block_name, blockType)
 
-% Figures 3C and 5A
+% Figures 3C-D, 5A and Supplementary Figure 2
 graph_gainMatrix(data, block_name, blockType)
 
-% Figure 5B
+% Figure 5B-C and Supplementary Figure 5
 graph_flipGain(data)

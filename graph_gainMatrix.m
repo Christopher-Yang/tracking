@@ -23,6 +23,7 @@ for q = 1:Ngroup % loop over groups
     Ntrial = 5;
     
     normal{q} = find(blockType.(groups{q}) == 1);
+    dark{q} = find(blockType.(groups{q}) == 2);
     
     for p = 1:Nsubj % loop over subjects
         for k = 1:Nblock % loop over block
@@ -38,32 +39,41 @@ for q = 1:Ngroup % loop over groups
         end
         
         for i = 1:Nfreq
+            for j = 1:2
             
-            % compute average baseline phasor for a particular frequency
-            dat = mean(cplx{q}(i,:,[1 4],1,p),2,'omitnan');
-
-            % x-component of xx and yy baseline phasor
-            x = cos(angle(dat));
-            
-            % y-component of xx and yy baseline phasor
-            y = sin(angle(dat));
-            
-            % project data onto baseline x phasor
-            dat = cplx{q}(i,:,[1 2],:,p); % extract data for x-target to x-/y-hand 
-            phasor = reshape(dat, [1 numel(dat)]);
-            num = [real(phasor); imag(phasor)]; % separate real and imaginary parts of phasors
-            unitVec = [x(1); y(1)]; % unit vector with phase equal to baseline vector
-            gainX{q}(:,i,p) = dot(num, repmat(unitVec, [1 numel(dat)])); % project num onto unitVec
-            frac1{q}(:,i,p) = abs(gainX{q}(:,i,p))./abs(phasor)'; % calculate proportion of gain retained in projection
-            
-            % project data onto baseline y phasor
-            dat = cplx{q}(i,:,[3 4],:,p); % extract data for x-target to x-/y-hand 
-            phasor = reshape(dat, [1 numel(dat)]);
-            num = [real(phasor); imag(phasor)]; % separate real and imaginary parts of phasors
-            unitVec = [x(2); y(2)]; % unit vector with phase equal to baseline vector
-            gainY{q}(:,i,p) = dot(num, repmat(unitVec, [1 numel(dat)])); % project num onto unitVec
-            frac2{q}(:,i,p) = abs(gainY{q}(:,i,p))./abs(phasor)'; % calculate proportion of gain retained in projection
-            
+                if j == 1 % average baseline phasor
+                    comparison = mean(cplx{q}(i,:,[1 4],1,p),2,'omitnan');
+                    blocks = 1:normal{q}(end);
+                    idx = 1:normal{q}(end)*2*Ntrial;
+                else % average late learning phasor
+                    comparison = mean(cplx{q}(i,:,[1 4],normal{q}(end),p),2,'omitnan');
+                    blocks = (normal{q}(end)+1):(normal{q}(end)+4);
+                    idx = (normal{q}(end)*2*Ntrial + 1):((normal{q}(end)+4)*2*Ntrial);
+                end
+                
+                % x-component of xx and yy phasor
+                x = cos(angle(comparison));
+                
+                % y-component of xx and yy phasor
+                y = sin(angle(comparison));
+                
+                % project data onto baseline x phasor
+                dat = cplx{q}(i,:,[1 2],blocks,p); % extract data for x-target to x-/y-hand
+                phasor = reshape(dat, [1 numel(dat)]);
+                num = [real(phasor); imag(phasor)]; % separate real and imaginary parts of phasors
+                unitVec = [x(1); y(1)]; % unit vector with phase equal to baseline vector
+                gainX{q}(idx,i,p) = dot(num, repmat(unitVec, [1 numel(dat)])); % project num onto unitVec
+%                 frac1{q}(1:Nsamples,i,p) = abs(gainX{q}(1:Nsamples,i,p))./abs(phasor)'; % calculate proportion of gain retained in projection
+                
+                % project data onto baseline y phasor
+                dat = cplx{q}(i,:,[3 4],blocks,p); % extract data for x-target to x-/y-hand
+                phasor = reshape(dat, [1 numel(dat)]);
+                num = [real(phasor); imag(phasor)]; % separate real and imaginary parts of phasors
+                unitVec = [x(2); y(2)]; % unit vector with phase equal to baseline vector
+                gainY{q}(idx,i,p) = dot(num, repmat(unitVec, [1 numel(dat)])); % project num onto unitVec
+%                 frac2{q}(1:Nsamples,i,p) = abs(gainY{q}(1:Nsamples,i,p))./abs(phasor)'; % calculate proportion of gain retained in projection
+                
+            end
         end
     end
     
@@ -74,14 +84,21 @@ for q = 1:Ngroup % loop over groups
     
     % convert gain matrices from cursor to hand configuration
 %     thetaOpt{q}(:,3:end,:,:,:) = thetaOpt{q}([2 1 4 3],3:end,:,:,:);
-        
-    thetaOpt_mu{q} = mean(thetaOpt{q},5,'omitnan');
-    thetaOpt_se{q} = std(thetaOpt{q},[],5,'omitnan')./sqrt(Nsubj);
+    
+%     if q == 3
+%         thetaOpt{q}(:,23:24,:,:,2:5) = NaN;
+%         
+%         thetaOpt_mu{q} = mean(thetaOpt{q},5,'omitnan');
+%         thetaOpt_se{q} = std(thetaOpt{q},[],5,'omitnan')./sqrt(Nsubj);
+%     else
+        thetaOpt_mu{q} = mean(thetaOpt{q},5,'omitnan');
+        thetaOpt_se{q} = std(thetaOpt{q},[],5,'omitnan')./sqrt(Nsubj);
+%     end
     
     % combine frac1 and frac2
-    fracOpt{q} = [reshape(frac1{q},[Ntrial 2 Nblock Nfreq Nsubj]) ...
-        reshape(frac2{q},[Ntrial 2 Nblock Nfreq Nsubj])];
-    fracOpt{q} = permute(fracOpt{q}, [2 3 4 1 5]);
+%     fracOpt{q} = [reshape(frac1{q},[Ntrial 2 Nblock Nfreq Nsubj]) ...
+%         reshape(frac2{q},[Ntrial 2 Nblock Nfreq Nsubj])];
+%     fracOpt{q} = permute(fracOpt{q}, [2 3 4 1 5]);
     
     % weight thetaOpt by fraction of gain lost during projection
 %     thetaOpt{q} = thetaOpt{q} .* (1./fracOpt{q});
@@ -141,7 +158,7 @@ for q = 1:Ngroup
             plot([0 mean(thetaOpt_mu{q}(1,blk(k),i,:),4)],[0 mean(thetaOpt_mu{q}(2,blk(k),i,:),4)],'LineWidth',1.5,'Color',map1(i,:))
             plot([0 mean(thetaOpt_mu{q}(3,blk(k),i,:),4)],[0 mean(thetaOpt_mu{q}(4,blk(k),i,:),4)],'LineWidth',1.5,'Color',map2(i,:))
         end
-        axis([-0.3 0.8 -0.3 0.8])
+        axis([-0.35 0.8 -0.35 0.8])
         axis square
         xticks([])
         yticks([])
@@ -155,12 +172,9 @@ for q = 1:Ngroup
 end
 
 % save figure for Illustrator
-% print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/vectors','-dpdf','-painters')
+print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/vectors','-dpdf','-painters')
 
 %% plot matrices as lines (normal blocks)
-col = copper;
-col = col(floor((size(col,1)/(Nfreq))*(1:Nfreq)),:);
-
 offset = [0 20 55];
 
 f = figure(2); clf
@@ -191,7 +205,7 @@ for j = 1:2
                 else
                     s = shadedErrorBar(plotIdx, mu(:,i,block,4), se(:,i,block,4));
                 end
-                editErrorBar(s,col(i,:),1);
+                editErrorBar(s,map1(i,:),1);
             end
         end
     end
@@ -206,58 +220,53 @@ for j = 1:2
 end
 
 % save figure for Illustrator
-% print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/gains','-dpdf','-painters')
+print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/gains','-dpdf','-painters')
 
-%% magnitude of vectors
-
-col = copper;
-col = col(floor((size(col,1)/(Nfreq))*(1:Nfreq)),:);
-
-offset = [0 20 55];
-
-for q = 1:Ngroup
-    mag{q} = [sqrt(thetaOpt{q}(1,:,:,:,:).^2 + thetaOpt{q}(2,:,:,:,:).^2);
-        sqrt(thetaOpt{q}(3,:,:,:,:).^2 + thetaOpt{q}(4,:,:,:,:).^2)];
-    mag{q} = permute(mag{q},[4 3 2 5 1]);
-end
+%%
 
 f = figure(3); clf
 set(f,'Position',[200 200 380 250]);
+
 for j = 1:2
     subplot(2,1,j); hold on
     for q = 1:Ngroup
-        mu = mean(mag{q}(:,:,:,:,j),4);
-        se = std(mag{q}(:,:,:,:,j),[],4)./sqrt(size(mag{q}(:,:,:,:,j),4));
-        Nblock = length(normal{q});
+        mu = permute(thetaOpt_mu{q},[4 3 2 1]);
+        se = permute(thetaOpt_se{q},[4 3 2 1]);
+        Nblock = length(dark{q})-1;
         totalTrials = Nblock*Ntrial;
-
+        
         plot([offset(q)+1 offset(q)+totalTrials], [0 0], 'k')
-        plot([offset(q)+1 offset(q)+totalTrials], [-.2 -.2], 'k')
+        plot([offset(q)+1 offset(q)+totalTrials], [-.3 -.3], 'k')
         if q > 1
-            plot([offset(q)+1 offset(q)+1], [-.2 1], 'k')
+            plot([offset(q)+1 offset(q)+1], [-.4 1.25], 'k')
         end
         for k = 1:Nblock
-            block = normal{q}(k);
+            block = dark{q}(k);
             plotIdx = Ntrial*(k-1)+(1:5) + offset(q);
             if k > 2
-                plot([plotIdx(1)-0.5 plotIdx(1)-0.5],[-0.2 1],'Color',[0.8 0.8 0.8])
+                plot([plotIdx(1)-0.5 plotIdx(1)-0.5],[-0.4 1.25],'Color',[0.8 0.8 0.8])
             end
             for i = 1:Nfreq
-                s = shadedErrorBar(plotIdx, mu(:,i,block), se(:,i,block));
-                editErrorBar(s,col(i,:),1);
+                if j == 1
+                    s = shadedErrorBar(plotIdx, mu(:,i,block,1), se(:,i,block,1));
+                else
+                    s = shadedErrorBar(plotIdx, mu(:,i,block,4), se(:,i,block,4));
+                end
+                editErrorBar(s,map1(i,:),1);
             end
         end
     end
-    axis([1 offset(3)+totalTrials -0.2 1])
-    yticks(0:0.25:1)
+    axis([1 offset(3)+totalTrials -0.3 1.25])
+    yticks(-0.5:0.5:1)
     set(gca,'TickDir','out','Xcolor','none')
     if j == 1
-        ylabel('X gain')
+        ylabel('X --> X')
     else
-        ylabel('Y gain')
+        ylabel('Y --> Y')
     end
 end
 
-print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/gains','-dpdf','-painters')
+% save figure for Illustrator
+print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/gains_dark','-dpdf','-painters')
 
 end

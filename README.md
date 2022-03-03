@@ -52,9 +52,9 @@ following:
       analyze_data.m: primary data anlysis
       editErrorBar.m: changes appearance of shadedErrorBar object
       fourier.m: performs Fourier analysis of data
-      graph_coherence.m: plots spectral coherence between cursor and target
       graph_flipGain.m: plots gain of movements from flip block
       graph_gainMatrix.m: plots cursor direction by frequency
+      graph_MSE.m: plots mean-squared error b/w target and cursor
       shadedErrorBar.m: plots shaded error bars
 
 The script shadedErrorBar.m was created by another person, and the
