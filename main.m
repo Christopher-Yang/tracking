@@ -1,6 +1,7 @@
 % This file is associated with the article "Emergence of habitual control
 % in a novel motor skill over multiple days of practice". Running
-% main.m generates plots for Figures 3, 5, and S1.
+% main.m generates plots for Figures 3 and 5 as well as Supplementary
+% Figures 2 and 5
 % 
 % Part 1 loads raw data from the tracking task and performs initial data 
 % analysis, storing the data in a structure called "data". This
@@ -65,5 +66,6 @@ graph_MSE(data, block_name, blockType)
 % Figures 3C-D, 5A and Supplementary Figure 2B
 graph_gainMatrix(data, block_name, blockType)
 
-% Figure 5B-C and Supplementary Figure 5
+% Figure 5B-C and Supplementary Figure 5; also performs some statistical
+% analyses that will be displayed in Command Window
 graph_flipGain(data)
