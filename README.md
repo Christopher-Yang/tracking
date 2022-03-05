@@ -57,6 +57,13 @@ following:
       graph_MSE.m: plots mean-squared error b/w target and cursor
       shadedErrorBar.m: plots shaded error bars
 
+The "Variables" folder contains weight2_opt.mat, a matrix containing
+fitted weights from the mixture model used to assess habitual 
+behavior in the point-to-point task. This is used to run 
+graph_flipGain.m. If you would like to generate this .mat file 
+yourself, uncomment line 134 in plot_flip.m from the point-to-point
+analysis code and run main.m.
+
 The script shadedErrorBar.m was created by another person, and the
 associated license for this script can be found in the "Licenses"
 folder.

@@ -113,6 +113,7 @@ end
 
 blockNum = [3 5; 5 11; 11 21];
 
+% store data for analysis in R
 y = [];
 for k = 1:Ngroup
     for i = 1:2        
@@ -120,7 +121,6 @@ for k = 1:Ngroup
         y = [y; t(:)];
     end
 end
-
 g(1:156,1) = "2-day";
 g(157:324,1) = "5-day";
 g(325:384,1) = "10-day";
@@ -132,7 +132,7 @@ s2 = repmat(14:27,[Nfreq 2]);
 s3 = repmat(28:32,[Nfreq 2]);
 subject = [s1(:); s2(:); s3(:)];
 T = table(g, b, frequency, subject, y, 'VariableNames', {'group','block','frequency','subject','gain'});
-writetable(T,'C:/Users/Chris/Documents/R/habit/data/gain_skill.csv')
+% writetable(T,'C:/Users/Chris/Documents/R/habit/data/gain_skill.csv')
 
 % for plotting vectors
 col1 = [0 128 0]/255;
@@ -146,7 +146,7 @@ map2 = [linspace(col1(1),col2(1),Nfreq)', linspace(col1(2),col2(2),Nfreq)', lins
 %% plot vectors
 
 labels = {'Baseline','Early','Late',"Flip 1","Flip 2"};
-figure(1); clf
+figure(4); clf
 for q = 1:Ngroup
     blk = [1 3 normal{q}(end) normal{q}(end)+2 normal{q}(end)+3];
     Nblock = length(blk);
@@ -172,12 +172,12 @@ for q = 1:Ngroup
 end
 
 % save figure for Illustrator
-print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/vectors','-dpdf','-painters')
+% print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/vectors','-dpdf','-painters')
 
 %% plot matrices as lines (normal blocks)
 offset = [0 20 55];
 
-f = figure(2); clf
+f = figure(5); clf
 set(f,'Position',[200 200 380 250]);
 
 for j = 1:2
@@ -220,11 +220,11 @@ for j = 1:2
 end
 
 % save figure for Illustrator
-print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/gains','-dpdf','-painters')
+% print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/gains','-dpdf','-painters')
 
 %%
 
-f = figure(3); clf
+f = figure(6); clf
 set(f,'Position',[200 200 380 250]);
 
 for j = 1:2
@@ -267,6 +267,6 @@ for j = 1:2
 end
 
 % save figure for Illustrator
-print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/gains_dark','-dpdf','-painters')
+% print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/gains_dark','-dpdf','-painters')
 
 end

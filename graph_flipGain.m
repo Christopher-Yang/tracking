@@ -33,7 +33,7 @@ for i = 1:Ngroup
     end
 end
 
-%% individual subject analysis
+% compute normalized gain for individual subjects
 percent = NaN(Nfreq,Ntrial,max(allSubj),Ngroup,2);
 for m = 1:2 % loop over two flip blocks
     
@@ -58,13 +58,26 @@ for m = 1:2 % loop over two flip blocks
     end
 end
 
+% average data from highest three frequencies
+highFreq = percent(4:6,:,:,:,:);
+flip = {'flip1','flip2'};
+for k = 1:Ngroup
+    for j = 1:2
+        gain.(group{k}).(flip{j}) = squeeze(mean(mean(highFreq(:,:,1:allSubj(k),k,j),1),2));
+    end
+end
+
+% load habit weights from mixture model for point-to-point task
+load Variables/weight2_opt
+
+%% Supplementary Fig 5
+
 % index of subjects to be plotted
 idx{1} = [2 6 7 10 11];
 idx{2} = [5 7 12 13 14];
 idx{3} = 1:5;
 
-% Supplementary Fig 5
-f = figure(1); clf
+f = figure(7); clf
 set(f,'Position',[200 200 500 600]);
 for k = 1:Ngroup
     for j = 1:5
@@ -87,27 +100,23 @@ end
 % save figure for Illustrator
 % print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/gain_single_subj','-dpdf','-painters')
 
-% average data from highest three frequencies
-highFreq = percent(4:6,:,:,:,:);
-flip = {'flip1','flip2'};
-for k = 1:Ngroup
-    for j = 1:2
-        gain.(group{k}).(flip{j}) = squeeze(mean(mean(highFreq(:,:,1:allSubj(k),k,j),1),2));
-    end
-end
-
-% load habit weights from mixture model for point-to-point task
-load weight2_opt
-
-% linear regression excluding subject 1 from 10-day group
+%% Figure 5C
+% compute linear regression between tracking and p2p tasks, excluding 1
+% subject from the 10-day group
 x = [gain.day2.flip1; gain.day5.flip1; gain.day10.flip1(2:5)];
 y = [weight2_opt{1}(:,4); weight2_opt{2}(:,4); weight2_opt{3}(2:5,4)];
 p = polyfit(x,y,1);
 yfit = polyval(p,[-1.3; x]);
 lm = fitlm(x,y);
 
-% Figure 5C
-f = figure(2); clf; hold on
+% display results of regression
+disp('Stats for Fig 5C: linear regression between tracking and p2p tasks')
+disp(['   slope = ' num2str(lm.Coefficients.Estimate(2))])
+disp(['   p = ' num2str(lm.Coefficients.pValue(2))])
+disp(['   r = ' num2str(sqrt(lm.Rsquared.Ordinary)) ])
+
+% plot figure
+f = figure(8); clf; hold on
 set(f,'Position',[200 200 160 120]);
 plot([-1.3; x],yfit,'k','LineWidth',1,'HandleVisibility','off')
 plot(gain.day2.flip1,weight2_opt{1}(:,4),'.','Color',col(1,:),'MarkerSize',10)
@@ -123,7 +132,7 @@ axis([-2 0.5 0 0.75])
 % save figure for Illustrator
 % print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/scatter','-dpdf','-painters')
 
-% statistical analysis for single subjects
+%% statistical analysis for single subjects
 % variables ending in 1 correspond to first flip block
 % variables ending in 2 correspond to second flip block
 pvalues1 = NaN(6,1);
@@ -173,7 +182,8 @@ habit2(1,3) = NaN;
 Nhabit1 = sum(habit1,'omitnan');
 Nhabit2 = sum(habit2,'omitnan');
 
-disp('# subjects with significantly negative gains: one-sample t-test with Holm-Bonferroni correction')
+disp('Stats for Fig 5B: # subjects with significantly negative gains')
+disp('(one-sample t-test with Holm-Bonferroni correction)')
 disp('   Flip 1')
 disp(['      2-day: ' num2str(Nhabit1(1)) ' of 13'])
 disp(['      5-day: ' num2str(Nhabit1(2)) ' of 14'])
@@ -210,6 +220,10 @@ end
 % remove subject 1 from 10-day group
 percent(:,1,3,:) = NaN;
 
+% mean and standard error of gains
+percent_mu = squeeze(mean(percent,2,'omitnan'));
+percent_se = squeeze(std(percent,[],2,'omitnan'))./sqrt(repmat([13 14 4],[6 1 2]));
+
 % save data for analysis in R
 y = percent(~isnan(percent(:,:,:,1)));
 groupNames(1:78,1) = "2-day";
@@ -221,11 +235,7 @@ s2 = repmat(14:27,[Nfreq 1]);
 s3 = repmat(28:31,[Nfreq 1]);
 subject = [s1(:); s2(:); s3(:)];
 T = table(groupNames, frequency, subject, y, 'VariableNames', {'group','frequency','subject','gain'});
-writetable(T,'C:/Users/Chris/Documents/R/habit/data/habitGain.csv')
-
-% mean and standard error of gains
-percent_mu = squeeze(mean(percent,2,'omitnan'));
-percent_se = squeeze(std(percent,[],2,'omitnan'))./sqrt(repmat([13 14 4],[6 1 2]));
+% writetable(T,'C:/Users/Chris/Documents/R/habit/data/habitGain.csv')
 
 % statistical analysis for group-level data
 pvalues1 = NaN(6,1);
@@ -262,7 +272,8 @@ end
 Nhabit1 = sum(habit1);
 Nhabit2 = sum(habit2);
 
-disp('# frequencies with significantly negative gains: one-sample t-test with Holm-Bonferroni correction')
+disp('Stats for Fig 5B: # frequencies with significantly negative gains')
+disp('(one-sample t-test with Holm-Bonferroni correction)')
 disp('   Flip 1')
 disp(['      2-day: ' num2str(Nhabit1(1)) ' of 6'])
 disp(['      5-day: ' num2str(Nhabit1(2)) ' of 6'])
@@ -272,8 +283,8 @@ disp(['      2-day: ' num2str(Nhabit2(1)) ' of 6'])
 disp(['      5-day: ' num2str(Nhabit2(2)) ' of 6'])
 disp(['      10-day: ' num2str(Nhabit2(3)) ' of 6'])
 
-% Figure 5B
-f = figure(3); clf
+%% Figure 5B
+f = figure(9); clf
 set(f,'Position',[200 200 250 140]);
 for i = 1:2
     subplot(1,2,i); hold on
