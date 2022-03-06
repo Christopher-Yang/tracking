@@ -1,5 +1,12 @@
+% graph_MSE plots the mean-squared error between the target and cursor
+% positions for each trial. 
+% 
+%   data: structure containing all data
+%   block_name: name of blocks
+%   blockType: identifies whether the block has visual feedback (=1), no 
+%       visual feedback (=2), or the flipped mapping (=3)
+
 function graph_MSE(data, block_name, blockType)
-% plots the mean-squared error of every tracking trial
 
 % set variables for plotting
 groups = {'day2','day5','day10'};

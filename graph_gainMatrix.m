@@ -63,7 +63,6 @@ for q = 1:Ngroup % loop over groups
                 num = [real(phasor); imag(phasor)]; % separate real and imaginary parts of phasors
                 unitVec = [x(1); y(1)]; % unit vector with phase equal to baseline vector
                 gainX{q}(idx,i,p) = dot(num, repmat(unitVec, [1 numel(dat)])); % project num onto unitVec
-%                 frac1{q}(1:Nsamples,i,p) = abs(gainX{q}(1:Nsamples,i,p))./abs(phasor)'; % calculate proportion of gain retained in projection
                 
                 % project data onto baseline y phasor
                 dat = cplx{q}(i,:,[3 4],blocks,p); % extract data for x-target to x-/y-hand
@@ -71,7 +70,6 @@ for q = 1:Ngroup % loop over groups
                 num = [real(phasor); imag(phasor)]; % separate real and imaginary parts of phasors
                 unitVec = [x(2); y(2)]; % unit vector with phase equal to baseline vector
                 gainY{q}(idx,i,p) = dot(num, repmat(unitVec, [1 numel(dat)])); % project num onto unitVec
-%                 frac2{q}(1:Nsamples,i,p) = abs(gainY{q}(1:Nsamples,i,p))./abs(phasor)'; % calculate proportion of gain retained in projection
                 
             end
         end
@@ -82,38 +80,13 @@ for q = 1:Ngroup % loop over groups
         reshape(gainY{q},[Ntrial 2 Nblock Nfreq Nsubj])];
     thetaOpt{q} = permute(thetaOpt{q}, [2 3 4 1 5]);
     
-    % convert gain matrices from cursor to hand configuration
-%     thetaOpt{q}(:,3:end,:,:,:) = thetaOpt{q}([2 1 4 3],3:end,:,:,:);
-    
-%     if q == 3
-%         thetaOpt{q}(:,23:24,:,:,2:5) = NaN;
-%         
-%         thetaOpt_mu{q} = mean(thetaOpt{q},5,'omitnan');
-%         thetaOpt_se{q} = std(thetaOpt{q},[],5,'omitnan')./sqrt(Nsubj);
-%     else
-        thetaOpt_mu{q} = mean(thetaOpt{q},5,'omitnan');
-        thetaOpt_se{q} = std(thetaOpt{q},[],5,'omitnan')./sqrt(Nsubj);
-%     end
-    
-    % combine frac1 and frac2
-%     fracOpt{q} = [reshape(frac1{q},[Ntrial 2 Nblock Nfreq Nsubj]) ...
-%         reshape(frac2{q},[Ntrial 2 Nblock Nfreq Nsubj])];
-%     fracOpt{q} = permute(fracOpt{q}, [2 3 4 1 5]);
-    
-    % weight thetaOpt by fraction of gain lost during projection
-%     thetaOpt{q} = thetaOpt{q} .* (1./fracOpt{q});
-    
-    % shape thetaOpt into gain matrix format: the first and second dimensions
-    % of gainMat correspond to the gain matrix for a given frequency (third
-    % dimension), block (fourth dimension), subject (fifth dimension), and
-    % group (sixth dimension)
-    gainMat{q} = reshape(thetaOpt{q},[2 2 Nblock Nfreq Ntrial Nsubj]);
-    gainMat{q} = permute(gainMat{q},[1 2 4 3 5 6]);
+    % average and standard error
+    thetaOpt_mu{q} = mean(thetaOpt{q},5,'omitnan');
+    thetaOpt_se{q} = std(thetaOpt{q},[],5,'omitnan')./sqrt(Nsubj);
 end
 
-blockNum = [3 5; 5 11; 11 21];
-
 % store data for analysis in R
+blockNum = [3 5; 5 11; 11 21];
 y = [];
 for k = 1:Ngroup
     for i = 1:2        

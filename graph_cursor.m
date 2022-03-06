@@ -1,4 +1,5 @@
-
+% graph_cursor plots example cursor and target trajectories from different
+% blocks of the experiment
 
 function graph_cursor(data)
 
