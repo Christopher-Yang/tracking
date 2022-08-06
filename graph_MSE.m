@@ -22,6 +22,7 @@ for i = 1:length(groups) % iterate over groups of subjects
     Nsubj = length(data.(groups{i}));
     normal{i} = find(blockType.(groups{i}) == 1); % with visual feedback
     dark{i} = find(blockType.(groups{i}) == 2); % without visual feedback
+    habit{i} = find(blockType.(groups{i}) == 3); % flip blocks
     
     Nblocks = length(fieldnames(data.(groups{i}){1}));
     
@@ -45,13 +46,13 @@ for i = 1:length(groups) % iterate over groups of subjects
     MSE.(groups{i}) = permute(MSE_full, [1 3 2]);
 end
 
-offset = [0 20 55];
+offset = [0 25 65];
 
 %% Figure 3B
 f = figure(2); clf; hold on
 set(f,'Position',[200 200 380 100]);
 for i = 1:length(groups)
-    Nblocks = length(normal{i});
+    Nblocks = length(normal{i}) + 1;
     
     plot([offset(i) offset(i)]+1,[0 110],'k','LineWidth',0.5)
     plot([offset(i)+1 offset(i)+Ntrials*Nblocks],[10 10],'k','LineWidth',0.5)
@@ -59,12 +60,17 @@ for i = 1:length(groups)
     for j = 1:Nblocks
         plotIdx = ((j-1)*Ntrials+1:(j-1)*Ntrials+Ntrials) + offset(i);
         
-        if j > 2
+        if j > 2 && j < Nblocks
             plot([plotIdx(1)-0.5 plotIdx(1)-0.5],[0 110],'Color',[0.8 0.8 0.8])
         end
         
-        plot(plotIdx,MSE.(groups{i})(:,:,normal{i}(j)),'Color',[col(i,:) 0.5],'LineWidth',0.3)
-        plot(plotIdx,mean(MSE.(groups{i})(:,:,normal{i}(j)),2),'Color',col(i,:),'LineWidth',2)
+        if j == Nblocks
+            plot(plotIdx,MSE.(groups{i})(:,:,habit{i}(1)),'Color',[col(i,:) 0.5],'LineWidth',0.3)
+            plot(plotIdx,mean(MSE.(groups{i})(:,:,habit{i}(1)),2),'Color',col(i,:),'LineWidth',2)
+        else
+            plot(plotIdx,MSE.(groups{i})(:,:,normal{i}(j)),'Color',[col(i,:) 0.5],'LineWidth',0.3)
+            plot(plotIdx,mean(MSE.(groups{i})(:,:,normal{i}(j)),2),'Color',col(i,:),'LineWidth',2)
+        end
     end
 end
 set(gca,'TickDir','out','Xcolor','none')
@@ -75,11 +81,11 @@ ylabel('Mean squared error (cm)')
 % save figure for Illustrator
 % print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/MSE','-dpdf','-painters')
 
-%% Supplementary Figure 2A
+%% Supplementary Figure 4A
 f = figure(3); clf; hold on
 set(f,'Position',[200 200 380 100]);
 for i = 1:length(groups)
-    Nblocks = length(dark{i})-1;
+    Nblocks = length(dark{i});
     
     plot([offset(i) offset(i)]+1,[0 170],'k','LineWidth',0.5)
     plot([offset(i)+1 offset(i)+Ntrials*Nblocks],[20 20],'k','LineWidth',0.5)
@@ -87,7 +93,7 @@ for i = 1:length(groups)
     for j = 1:Nblocks
         plotIdx = ((j-1)*Ntrials+1:(j-1)*Ntrials+Ntrials) + offset(i);
         
-        if j > 2
+        if j > 2 && j < Nblocks
             plot([plotIdx(1)-0.5 plotIdx(1)-0.5],[0 170],'Color',[0.8 0.8 0.8])
         end
         

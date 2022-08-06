@@ -24,6 +24,7 @@ for q = 1:Ngroup % loop over groups
     
     normal{q} = find(blockType.(groups{q}) == 1);
     dark{q} = find(blockType.(groups{q}) == 2);
+    flip{q} = find(blockType.(groups{q}) == 3);
     
     for p = 1:Nsubj % loop over subjects
         for k = 1:Nblock % loop over block
@@ -51,6 +52,8 @@ for q = 1:Ngroup % loop over groups
                     idx = (normal{q}(end)*2*Ntrial + 1):((normal{q}(end)+4)*2*Ntrial);
                 end
                 
+                phase{q}(:,i,p,j) = angle(comparison);
+                
                 % x-component of xx and yy phasor
                 x = cos(angle(comparison));
                 
@@ -63,6 +66,7 @@ for q = 1:Ngroup % loop over groups
                 num = [real(phasor); imag(phasor)]; % separate real and imaginary parts of phasors
                 unitVec = [x(1); y(1)]; % unit vector with phase equal to baseline vector
                 gainX{q}(idx,i,p) = dot(num, repmat(unitVec, [1 numel(dat)])); % project num onto unitVec
+                frac1{q}(idx,i,p) = abs(gainX{q}(idx,i,p))./abs(phasor)'; % calculate proportion of gain retained in projection
                 
                 % project data onto baseline y phasor
                 dat = cplx{q}(i,:,[3 4],blocks,p); % extract data for x-target to x-/y-hand
@@ -70,20 +74,72 @@ for q = 1:Ngroup % loop over groups
                 num = [real(phasor); imag(phasor)]; % separate real and imaginary parts of phasors
                 unitVec = [x(2); y(2)]; % unit vector with phase equal to baseline vector
                 gainY{q}(idx,i,p) = dot(num, repmat(unitVec, [1 numel(dat)])); % project num onto unitVec
+                frac2{q}(idx,i,p) = abs(gainY{q}(idx,i,p))./abs(phasor)'; % calculate proportion of gain retained in projection
                 
             end
         end
     end
+    
+    phase{q} = reshape(unwrap(phase{q}, [], 2) * 180/pi, [Nfreq*2 Nsubj 2]);
     
     % combine gainX and gainY
     thetaOpt{q} = [reshape(gainX{q},[Ntrial 2 Nblock Nfreq Nsubj]) ...
         reshape(gainY{q},[Ntrial 2 Nblock Nfreq Nsubj])];
     thetaOpt{q} = permute(thetaOpt{q}, [2 3 4 1 5]);
     
+    % combine frac1 and frac2
+    fracOpt{q} = [reshape(frac1{q},[Ntrial 2 Nblock Nfreq Nsubj]) ...
+        reshape(frac2{q},[Ntrial 2 Nblock Nfreq Nsubj])];
+    fracOpt{q} = permute(fracOpt{q}, [2 3 4 1 5]);
+    
     % average and standard error
     thetaOpt_mu{q} = mean(thetaOpt{q},5,'omitnan');
     thetaOpt_se{q} = std(thetaOpt{q},[],5,'omitnan')./sqrt(Nsubj);
 end
+
+late = [];
+habit = [];
+for i = 1:Ngroup
+    z = fracOpt{i}([1 4],normal{i}(end),:,:,:);
+    late = [late; z(:)];
+    
+    z = fracOpt{i}([1 4],flip{i}(1),:,:,:);
+    habit = [habit; z(:)];
+end
+
+disp(['Amount of gain lost in late learning: ' num2str((1-mean(late, 'all', 'omitnan')) * 100) '%'])
+disp(['Amount of gain lost in flip 1: ' num2str((1-mean(habit, 'all', 'omitnan')) * 100) '%'])
+
+col = [180 180 0
+       0 191 255
+       255 99 71]./255;
+
+freq = sort([data.day2{1}.B1_baseline.freqX data.day2{1}.B1_baseline.freqY]);
+fig_names = {'Baseline (2-day)','Baseline (5-day)','Baseline (10-day)','Late (2-day)','Late (5-day)','Late (10-day)'};
+
+figure(11); clf
+for j = 1:2
+    for i = 1:3
+        idx = (j-1)*3 + i;
+        subplot(2, 3, idx); hold on
+        Nsubj = size(phase{i}, 2);
+        
+        plot(freq, phase{i}(:,:,j), '.', 'Color', col(i,:))
+        plot(freq, mean(phase{i}(:,:,j), 2, 'omitnan'), '-ok', 'MarkerFaceColor', col(i,:), 'MarkerSize', 4)
+        
+        if j == 2 && i == 2
+            xlabel('Frequency (Hz)')
+        end
+        
+        if i == 1
+            ylabel(['Phase (' char(176) ')'])
+        end
+        axis([0 2 -400 0])
+        title(fig_names{idx})
+    end
+end
+
+%%
 
 % store data for analysis in R
 blockNum = [3 5; 5 11; 11 21];
@@ -116,7 +172,7 @@ col1 = [128 0 128]/255;
 col2 = [230 230 250]/255;
 map2 = [linspace(col1(1),col2(1),Nfreq)', linspace(col1(2),col2(2),Nfreq)', linspace(col1(3),col2(3),Nfreq)'];
 
-%% plot vectors
+%% Figure 3C
 
 labels = {'Baseline','Early','Late',"Flip 1","Flip 2"};
 figure(4); clf
@@ -147,8 +203,8 @@ end
 % save figure for Illustrator
 % print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/vectors','-dpdf','-painters')
 
-%% plot matrices as lines (normal blocks)
-offset = [0 20 55];
+%% Figure 3D
+offset = [0 25 65];
 
 f = figure(5); clf
 set(f,'Position',[200 200 380 250]);
@@ -158,7 +214,7 @@ for j = 1:2
     for q = 1:Ngroup
         mu = permute(thetaOpt_mu{q},[4 3 2 1]);
         se = permute(thetaOpt_se{q},[4 3 2 1]);
-        Nblock = length(normal{q});
+        Nblock = length(normal{q}) + 1;
         totalTrials = Nblock*Ntrial;
         
         plot([offset(q)+1 offset(q)+totalTrials], [0 0], 'k')
@@ -167,9 +223,13 @@ for j = 1:2
             plot([offset(q)+1 offset(q)+1], [-.2 1], 'k')
         end
         for k = 1:Nblock
-            block = normal{q}(k);
+            if k == Nblock
+                block = flip{q}(1);
+            else
+                block = normal{q}(k);
+            end
             plotIdx = Ntrial*(k-1)+(1:5) + offset(q);
-            if k > 2
+            if k > 2 && k < Nblock
                 plot([plotIdx(1)-0.5 plotIdx(1)-0.5],[-0.2 1],'Color',[0.8 0.8 0.8])
             end
             for i = 1:Nfreq
@@ -195,7 +255,7 @@ end
 % save figure for Illustrator
 % print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/gains','-dpdf','-painters')
 
-%%
+%% Supplementary Figure 4B
 
 f = figure(6); clf
 set(f,'Position',[200 200 380 250]);
@@ -205,7 +265,7 @@ for j = 1:2
     for q = 1:Ngroup
         mu = permute(thetaOpt_mu{q},[4 3 2 1]);
         se = permute(thetaOpt_se{q},[4 3 2 1]);
-        Nblock = length(dark{q})-1;
+        Nblock = length(dark{q});
         totalTrials = Nblock*Ntrial;
         
         plot([offset(q)+1 offset(q)+totalTrials], [0 0], 'k')
@@ -216,7 +276,7 @@ for j = 1:2
         for k = 1:Nblock
             block = dark{q}(k);
             plotIdx = Ntrial*(k-1)+(1:5) + offset(q);
-            if k > 2
+            if k > 2 && k < Nblock
                 plot([plotIdx(1)-0.5 plotIdx(1)-0.5],[-0.4 1.25],'Color',[0.8 0.8 0.8])
             end
             for i = 1:Nfreq

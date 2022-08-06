@@ -70,7 +70,7 @@ end
 % load habit weights from mixture model for point-to-point task
 load Variables/weight2_opt
 
-%% Supplementary Fig 5
+%% Supplementary Fig 3A
 
 % index of subjects to be plotted
 idx{1} = [2 6 7 10 11];
@@ -100,20 +100,32 @@ end
 % save figure for Illustrator
 % print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/gain_single_subj','-dpdf','-painters')
 
-%% Figure 5C
-% compute linear regression between tracking and p2p tasks, excluding 1
-% subject from the 10-day group
+%% Figure 5B
+% linear regression between tracking and p2p tasks, excluding 1 subject 
+% from the 10-day group
 x = [gain.day2.flip1; gain.day5.flip1; gain.day10.flip1(2:5)];
 y = [weight2_opt{1}(:,4); weight2_opt{2}(:,4); weight2_opt{3}(2:5,4)];
 p = polyfit(x,y,1);
 yfit = polyval(p,[-1.3; x]);
 lm = fitlm(x,y);
 
+% linear regression between tracking and p2p tasks with all subjects
+x2 = [gain.day2.flip1; gain.day5.flip1; gain.day10.flip1];
+y2 = [weight2_opt{1}(:,4); weight2_opt{2}(:,4); weight2_opt{3}(:,4)];
+p2 = polyfit(x2,y2,1);
+yfit2 = polyval(p2,[-1.3; x2]);
+lm2 = fitlm(x2,y2);
+
 % display results of regression
 disp('Stats for Fig 5C: linear regression between tracking and p2p tasks')
 disp(['   slope = ' num2str(lm.Coefficients.Estimate(2))])
 disp(['   p = ' num2str(lm.Coefficients.pValue(2))])
 disp(['   r = ' num2str(sqrt(lm.Rsquared.Ordinary)) ])
+
+disp('Stats for linear regression between tracking and p2p tasks no outliers excluded')
+disp(['   slope = ' num2str(lm2.Coefficients.Estimate(2))])
+disp(['   p = ' num2str(lm2.Coefficients.pValue(2))])
+disp(['   r = ' num2str(sqrt(lm2.Rsquared.Ordinary))])
 
 % plot figure
 f = figure(8); clf; hold on
@@ -123,8 +135,8 @@ plot(gain.day2.flip1,weight2_opt{1}(:,4),'.','Color',col(1,:),'MarkerSize',10)
 plot(gain.day5.flip1,weight2_opt{2}(:,4),'.','Color',col(2,:),'MarkerSize',10)
 plot(gain.day10.flip1,weight2_opt{3}(:,4),'.','Color',col(3,:),'MarkerSize',10)
 plot(gain.day10.flip1(1),weight2_opt{3}(1,4),'xk','LineWidth',0.5,'MarkerSize',10)
-xlabel('Gain (tracking)')
-ylabel('Habit weight (point-to-point)')
+xlabel('Habitual gain (tracking)')
+ylabel('Probability of habitual reach (point-to-point)')
 xticks(-2:0)
 yticks(0:0.25:0.75)
 axis([-2 0.5 0 0.75])
@@ -217,7 +229,10 @@ for m = 1:2 % loop over two flip blocks
     end
 end
 
-% remove subject 1 from 10-day group
+% store data from outlier subject
+outlier = squeeze(percent(:,1,3,:));
+
+% remove outlier (subject 1 from 10-day group)
 percent(:,1,3,:) = NaN;
 
 % mean and standard error of gains
@@ -283,7 +298,39 @@ disp(['      2-day: ' num2str(Nhabit2(1)) ' of 6'])
 disp(['      5-day: ' num2str(Nhabit2(2)) ' of 6'])
 disp(['      10-day: ' num2str(Nhabit2(3)) ' of 6'])
 
-%% Figure 5B
+%% Supplementary Figure 3B
+
+f = figure(10); clf
+set(f,'Position',[200 200 350 170]);
+for i = 1:2
+    subplot(1,2,i); hold on
+    plot([0 2],[0 0],'k','HandleVisibility','off')
+    plot([0 2],[1 1],'--','Color',col(4,:),'HandleVisibility','off')
+    plot([0 2],[-1 -1],'--','Color',col(5,:),'HandleVisibility','off')
+    
+    for j = 1:Ngroup
+        plot(freq, percent(:,:,j,i), 'Color', [col(j,:) 0.5])
+        plot(freq, percent_mu(:,j,i), '-o', 'Color', col(j,:), 'MarkerFaceColor', col(j,:), 'LineWidth', 1.5, 'MarkerSize', 5)
+    end
+    
+    plot(freq, outlier(:,i), '--', 'Color', col(j,:))
+    
+    set(gca,'TickDir','out')
+    axis([0 1.6 -2.1 1.2])
+    xlabel('Frequency (Hz)')
+    xticks(0:0.5:2)
+    yticks(-2:1)
+    if i == 1
+        title('Flip 1')
+        ylabel('Gain')
+    else
+        title('Flip 2')
+    end
+end
+% save figure for Illustrator
+% print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/gain_habit3','-dpdf','-painters')
+
+%% Figure 5A
 f = figure(9); clf
 set(f,'Position',[200 200 250 140]);
 for i = 1:2

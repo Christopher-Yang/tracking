@@ -60,12 +60,12 @@ disp('Done')
 % Figure 3A
 graph_cursor(data)
 
-% Figure 3B and Supplementary Figure 2A
+% Figure 3B and Supplementary Figure 4A
 graph_MSE(data, block_name, blockType)
 
-% Figures 3C-D, 5A and Supplementary Figure 2B
+% Figures 3C-D and Supplementary Figure 4B
 graph_gainMatrix(data, block_name, blockType)
 
-% Figure 5B-C and Supplementary Figure 5; also performs some statistical
+% Figure 5A-B and Supplementary Figure 3; also performs some statistical
 % analyses that will be displayed in Command Window
 graph_flipGain(data)
