@@ -157,7 +157,7 @@ s1 = repmat(1:13,[Nfreq 2]);
 s2 = repmat(14:27,[Nfreq 2]);
 subject = [s1(:); s2(:)];
 T = table(g, b, frequency, subject, y, 'VariableNames', {'group','block','frequency','subject','gain'});
-writetable(T,'C:/Users/Chris/Documents/R/habit/data/gain_skill.csv')
+% writetable(T,'C:/Users/Chris/Documents/R/habit/data/gain_skill.csv')
 
 % for plotting vectors
 col1 = [0 128 0]/255;

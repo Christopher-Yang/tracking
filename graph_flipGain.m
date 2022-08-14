@@ -248,7 +248,7 @@ s1 = repmat(1:13,[Nfreq 1]);
 s2 = repmat(14:27,[Nfreq 1]);
 subject = [s1(:); s2(:)];
 T = table(groupNames, frequency, subject, y, 'VariableNames', {'group','frequency','subject','gain'});
-writetable(T,'C:/Users/Chris/Documents/R/habit/data/habitGain.csv')
+% writetable(T,'C:/Users/Chris/Documents/R/habit/data/habitGain.csv')
 
 % statistical analysis for group-level data
 pvalues1 = NaN(6,1);
