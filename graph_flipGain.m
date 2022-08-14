@@ -100,7 +100,7 @@ end
 % save figure for Illustrator
 % print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/gain_single_subj','-dpdf','-painters')
 
-%% Figure 5B
+%% Figure 5C
 % linear regression between tracking and p2p tasks, excluding 1 subject 
 % from the 10-day group
 x = [gain.day2.flip1; gain.day5.flip1; gain.day10.flip1(2:5)];
@@ -199,11 +199,11 @@ disp('(one-sample t-test with Holm-Bonferroni correction)')
 disp('   Flip 1')
 disp(['      2-day: ' num2str(Nhabit1(1)) ' of 13'])
 disp(['      5-day: ' num2str(Nhabit1(2)) ' of 14'])
-disp(['      10-day: ' num2str(Nhabit1(3)) ' of 4'])
+% disp(['      10-day: ' num2str(Nhabit1(3)) ' of 4'])
 disp('   Flip 2')
 disp(['      2-day: ' num2str(Nhabit2(1)) ' of 13'])
 disp(['      5-day: ' num2str(Nhabit2(2)) ' of 14'])
-disp(['      10-day: ' num2str(Nhabit2(3)) ' of 4'])
+% disp(['      10-day: ' num2str(Nhabit2(3)) ' of 4'])
 
 %% group level analysis
 % compute gain of flip block normalized to late learning gain
@@ -240,17 +240,15 @@ percent_mu = squeeze(mean(percent,2,'omitnan'));
 percent_se = squeeze(std(percent,[],2,'omitnan'))./sqrt(repmat([13 14 4],[6 1 2]));
 
 % save data for analysis in R
-y = percent(~isnan(percent(:,:,:,1)));
+y = percent(~isnan(percent(:,:,1:2,1)));
 groupNames(1:78,1) = "2-day";
 groupNames(79:162,1) = "5-day";
-groupNames(163:186,1) = "10-day";
-frequency = repmat((1:Nfreq)',[sum([13 14 4]) 1]);
+frequency = repmat((1:Nfreq)',[sum([13 14]) 1]);
 s1 = repmat(1:13,[Nfreq 1]);
 s2 = repmat(14:27,[Nfreq 1]);
-s3 = repmat(28:31,[Nfreq 1]);
-subject = [s1(:); s2(:); s3(:)];
+subject = [s1(:); s2(:)];
 T = table(groupNames, frequency, subject, y, 'VariableNames', {'group','frequency','subject','gain'});
-% writetable(T,'C:/Users/Chris/Documents/R/habit/data/habitGain.csv')
+writetable(T,'C:/Users/Chris/Documents/R/habit/data/habitGain.csv')
 
 % statistical analysis for group-level data
 pvalues1 = NaN(6,1);
@@ -292,11 +290,11 @@ disp('(one-sample t-test with Holm-Bonferroni correction)')
 disp('   Flip 1')
 disp(['      2-day: ' num2str(Nhabit1(1)) ' of 6'])
 disp(['      5-day: ' num2str(Nhabit1(2)) ' of 6'])
-disp(['      10-day: ' num2str(Nhabit1(3)) ' of 6'])
+% disp(['      10-day: ' num2str(Nhabit1(3)) ' of 6'])
 disp('   Flip 2')
 disp(['      2-day: ' num2str(Nhabit2(1)) ' of 6'])
 disp(['      5-day: ' num2str(Nhabit2(2)) ' of 6'])
-disp(['      10-day: ' num2str(Nhabit2(3)) ' of 6'])
+% disp(['      10-day: ' num2str(Nhabit2(3)) ' of 6'])
 
 %% Supplementary Figure 3B
 
@@ -330,7 +328,7 @@ end
 % save figure for Illustrator
 % print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/gain_habit3','-dpdf','-painters')
 
-%% Figure 5A
+%% Figure 5B
 f = figure(9); clf
 set(f,'Position',[200 200 250 140]);
 for i = 1:2

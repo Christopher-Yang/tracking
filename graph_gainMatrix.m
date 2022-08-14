@@ -139,29 +139,25 @@ for j = 1:2
     end
 end
 
-%%
-
 % store data for analysis in R
-blockNum = [3 5; 5 11; 11 21];
+blockNum = [3 5; 5 11];
 y = [];
-for k = 1:Ngroup
-    for i = 1:2        
+for k = 1:Ngroup-1
+    for i = 1:2
         t = mean(thetaOpt{k}(1,blockNum(k,i),:,:,:),4,'omitnan');
         y = [y; t(:)];
     end
 end
 g(1:156,1) = "2-day";
 g(157:324,1) = "5-day";
-g(325:384,1) = "10-day";
-b([1:78 157:240 325:354],1) = "before";
-b([79:156 241:324 355:384],1) = "after";
-frequency = repmat((1:Nfreq)',[64 1]);
+b([1:78 157:240],1) = "before";
+b([79:156 241:324],1) = "after";
+frequency = repmat((1:Nfreq)',[54 1]);
 s1 = repmat(1:13,[Nfreq 2]);
 s2 = repmat(14:27,[Nfreq 2]);
-s3 = repmat(28:32,[Nfreq 2]);
-subject = [s1(:); s2(:); s3(:)];
+subject = [s1(:); s2(:)];
 T = table(g, b, frequency, subject, y, 'VariableNames', {'group','block','frequency','subject','gain'});
-% writetable(T,'C:/Users/Chris/Documents/R/habit/data/gain_skill.csv')
+writetable(T,'C:/Users/Chris/Documents/R/habit/data/gain_skill.csv')
 
 % for plotting vectors
 col1 = [0 128 0]/255;
@@ -172,7 +168,7 @@ col1 = [128 0 128]/255;
 col2 = [230 230 250]/255;
 map2 = [linspace(col1(1),col2(1),Nfreq)', linspace(col1(2),col2(2),Nfreq)', linspace(col1(3),col2(3),Nfreq)'];
 
-%% Figure 3C
+%% Figure 3C and 5A
 
 labels = {'Baseline','Early','Late',"Flip 1","Flip 2"};
 figure(4); clf
@@ -204,7 +200,7 @@ end
 % print('C:/Users/Chris/Documents/Papers/habit/figure_drafts/vectors','-dpdf','-painters')
 
 %% Figure 3D
-offset = [0 25 65];
+offset = [0 20 55];
 
 f = figure(5); clf
 set(f,'Position',[200 200 380 250]);
@@ -214,7 +210,7 @@ for j = 1:2
     for q = 1:Ngroup
         mu = permute(thetaOpt_mu{q},[4 3 2 1]);
         se = permute(thetaOpt_se{q},[4 3 2 1]);
-        Nblock = length(normal{q}) + 1;
+        Nblock = length(normal{q});
         totalTrials = Nblock*Ntrial;
         
         plot([offset(q)+1 offset(q)+totalTrials], [0 0], 'k')
@@ -223,13 +219,9 @@ for j = 1:2
             plot([offset(q)+1 offset(q)+1], [-.2 1], 'k')
         end
         for k = 1:Nblock
-            if k == Nblock
-                block = flip{q}(1);
-            else
-                block = normal{q}(k);
-            end
+            block = normal{q}(k);
             plotIdx = Ntrial*(k-1)+(1:5) + offset(q);
-            if k > 2 && k < Nblock
+            if k > 2
                 plot([plotIdx(1)-0.5 plotIdx(1)-0.5],[-0.2 1],'Color',[0.8 0.8 0.8])
             end
             for i = 1:Nfreq
@@ -265,7 +257,7 @@ for j = 1:2
     for q = 1:Ngroup
         mu = permute(thetaOpt_mu{q},[4 3 2 1]);
         se = permute(thetaOpt_se{q},[4 3 2 1]);
-        Nblock = length(dark{q});
+        Nblock = length(dark{q})-1;
         totalTrials = Nblock*Ntrial;
         
         plot([offset(q)+1 offset(q)+totalTrials], [0 0], 'k')
@@ -276,7 +268,7 @@ for j = 1:2
         for k = 1:Nblock
             block = dark{q}(k);
             plotIdx = Ntrial*(k-1)+(1:5) + offset(q);
-            if k > 2 && k < Nblock
+            if k > 2
                 plot([plotIdx(1)-0.5 plotIdx(1)-0.5],[-0.4 1.25],'Color',[0.8 0.8 0.8])
             end
             for i = 1:Nfreq
