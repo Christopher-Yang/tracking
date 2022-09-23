@@ -1,6 +1,6 @@
-This collection is associated with the article "Emergence of habitual
-control in a novel motor skill over multiple days of practice". This
-code generates all figures related to the tracking task. Raw data is
+This collection is associated with the article "Control becomes
+habitual early on when learning a novel motor skill". This code
+generates all figures related to the tracking task. Raw data is
 contained in the folder "Data". The data is further subdivided into
 folders for the 2-day, 5-day, and 10-day training groups, participants
 in each group, and blocks for each participant.
